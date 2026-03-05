@@ -1,0 +1,31 @@
+<fieldset class="menu">
+  <legend>Game options</legend>
+
+  <label for="mode">Mode:</label>
+  <select id="mode" [(ngModel)]="gameStateService.gameState().settings.mode">
+  @for (entry of modes; track entry[0]) {
+    <option [ngValue]="+entry[0]">{{ entry[1] }}</option>
+  }
+  </select>
+
+  <label for="whoFirst">First player:</label>
+  <select id="whoFirst" [(ngModel)]="gameStateService.gameState().settings.whoFirst">
+  @for (entry of playerTypes; track entry[0]) {
+    <option [ngValue]="+entry[0]">{{ entry[1] }}</option>
+  }
+  </select>
+
+  <label for="difficulty">Difficulty:</label>
+  <select id="difficulty" [(ngModel)]="gameStateService.gameState().settings.difficulty">
+  @for (entry of difficulties; track entry[0]) {
+    <option [ngValue]="+entry[0]">{{ entry[1] }}</option>
+  }
+  </select>
+
+  <label for="boardSize">Board size:</label>
+  <select id="boardSize" [(ngModel)]="gameStateService.gameState().settings.boardSize">
+  @for (boardSize of gameConfig.boardSizes; track boardSize) {
+    <option [ngValue]="+boardSize">{{ boardSize }}</option>
+  }
+  </select>
+</fieldset>

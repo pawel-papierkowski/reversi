@@ -1,0 +1,45 @@
+/********************************
+ * Styles specific to this app. *
+ ********************************/
+
+/* Settings for globally used elements. */
+
+body {
+  /* Game centers in middle its content in browser window. */
+  display: flex;
+  justify-content: center; /* Horizontal */
+  align-items: start;      /* Vertical */
+  /* Other stuff. */
+  color-scheme: light;
+
+  color: var(--color-text);
+  background-color: var(--color-background);
+}
+
+/*** Common elements used on multiple pages. ***/
+
+/* Menu. */
+
+.menu {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10px;
+
+  width: 100%;
+
+  margin: 6px 0px;
+  padding: 5px;
+}
+
+.menu label {
+  text-align: right;
+}
+
+.menu select {
+  text-align: center;
+}
+
+.menu button {
+  grid-column: span 2;
+  width: 100%;
+}

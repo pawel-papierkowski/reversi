@@ -1,0 +1,12 @@
+h1 {
+  color: #484848;
+  font-size: 54px;
+  text-align: center;
+  text-shadow: 0 0 5px currentColor;
+}
+
+footer {
+  font-size: 11px;
+  text-align: center;
+  margin: 4px;
+}
