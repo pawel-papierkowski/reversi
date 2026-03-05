@@ -1,0 +1,25 @@
+/********************************
+ * Variables.                   *
+ ********************************/
+
+/* Note it is overkill for such simple app, but I want to use accepted convention for web projects from the start. */
+:root {
+  /* Colors */
+  --color-primary: #3498db;
+  --color-text: #000000;
+  --color-background: #ffffff;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  /*** Typography ***/
+  /* UI elements. */
+  --font-family-ui: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Long-form reading. */
+  --font-family-general: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand,
+         Comfortaa, Manjari, 'Arial Rounded MT Bold', Calibri, sans-serif;
+  --font-size-base: 16px;
+}
