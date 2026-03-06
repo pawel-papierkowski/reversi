@@ -1,5 +1,10 @@
 <header>
-  <h1>{{ projectProp.title }}</h1>
+  <h1>{{ 'app.title' | translate }}</h1>
+  <div class="menu">
+    <label for="language">{{'app.language' | translate}}:</label>
+    <combo-box id="language" langPrefix="app.language" [options]="languages"
+      [(selectedOption)]="selLang" />
+  </div>
 </header>
 
 <main class="main">
@@ -7,6 +12,6 @@
 </main>
 
 <footer>
-    <p>Repository: <a href="https://github.com/pawel-papierkowski/reversi" target="_blank">https://github.com/pawel-papierkowski/reversi</a></p>
+    <p>{{ 'app.repository' | translate }}: <a href="https://github.com/pawel-papierkowski/reversi" target="_blank">https://github.com/pawel-papierkowski/reversi</a></p>
     <p>&copy; {{ projectProp.dateRange }} {{ projectProp.author }} | v. {{ projectProp.version }} {{ projectProp.build }}</p>
 </footer>
