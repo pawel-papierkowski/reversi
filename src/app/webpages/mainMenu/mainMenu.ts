@@ -1,4 +1,6 @@
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import {TranslatePipe} from '@ngx-translate/core';
 
 import { GameStateService } from '../../../code/services/gameState.service';
 
@@ -6,16 +8,17 @@ import { MainMenuOptions } from '../../components/mainMenuOptions/mainMenuOption
 
 @Component({
   selector: 'app-main-menu',
-  imports: [MainMenuOptions],
+  imports: [MainMenuOptions, TranslatePipe],
   templateUrl: './mainMenu.html',
   styleUrl: './mainMenu.css'
 })
 export class MainMenu {
+  readonly router = inject(Router);
   readonly gameStateService = inject(GameStateService);
 
   startGame() {
-    console.info(this.gameStateService.gameState().settings);
-    this.gameStateService.deployBoard();
-    // route to /board page
+    this.gameStateService.initializeBoard();
+    console.info(this.gameStateService.gameState());
+    this.router.navigate(['/board']);
   }
 }

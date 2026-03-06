@@ -1,15 +1,62 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal, effect } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { projectProp } from "../code/data/const";
+import {TranslateService} from "@ngx-translate/core";
+import {TranslatePipe} from '@ngx-translate/core';
+
+import { projectProp, languages, fallbackLang } from "../code/data/const";
+
+import { ComboBox } from './components/common/comboBox/comboBox';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, TranslatePipe, ComboBox],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('reversi-angular');
   projectProp = projectProp;
+  languages = languages;
+  selLang = signal(fallbackLang);
+
+  constructor(private translateService: TranslateService) {
+    effect(() => { // react on language change
+      localStorage.setItem('app.language', this.selLang());
+      this.translateService.use(this.selLang());
+    });
+  }
+
+  async ngOnInit() {
+    this.setupLang();
+  }
+
+  //
+
+  /** Setup language-related stuff. */
+  private setupLang() {
+    this.translateService.setFallbackLang(fallbackLang);
+    const storedLang = localStorage.getItem('app.language'); // get current language from storage
+    if (storedLang) { // stored language exists: just use it
+      this.translateService.use(storedLang);
+      this.selLang.set(storedLang);
+    } else { // stored language does not exist: resolve current language, save to storage and use it
+      const browserLang = this.translateService.getBrowserLang() || fallbackLang;
+       // if unknown language, fall back to english
+      const currLang = this.verifyLang(browserLang) ? browserLang : fallbackLang;
+      localStorage.setItem('app.language', currLang);
+      this.translateService.use(currLang);
+      this.selLang.set(currLang);
+    }
+  }
+
+  /**
+   * Check if we know language with given code.
+   * @param currLang Current language to check.
+   * @returns True if given language is known, otherwise false.
+   */
+  private verifyLang(currLang: string): boolean {
+    const index = languages.findIndex(lang => lang === currLang);
+    return index !== -1;
+  }
 }

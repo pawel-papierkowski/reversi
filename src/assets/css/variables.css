@@ -22,4 +22,16 @@
   --font-family-general: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand,
          Comfortaa, Manjari, 'Arial Rounded MT Bold', Calibri, sans-serif;
   --font-size-base: 16px;
+
+  /*** Default theme. ***/
+  --combobox-border: 1px solid #aaaaaa;
+  --combobox-background: #e8e8e8;
+  --combobox-text: #111827;
+  --combobox-background-hover: #d8d8d8;
+  --combobox-text-hover: #111827;
+
+  --combobox-option-border: 1px solid #aaaaaa;
+  --combobox-option-background: #f0f0f0;
+  --combobox-option-background-hover: #d8d8d8;
+  --combobox-option-text-hover: #111827;
 }

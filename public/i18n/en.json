@@ -1,0 +1,26 @@
+{
+  "app.title": "Reversi",
+  "app.language": "Language",
+  "app.language.pl": "🇵🇱 Polish",
+  "app.language.en": "🇬🇧 English",
+  "app.repository": "Repository",
+
+  "mainMenu.options": "Game options",
+  "mainMenu.start": "Start game",
+  "settings.modes": "Mode",
+  "settings.modes.0": "Human vs Human",
+  "settings.modes.1": "Human vs AI",
+  "settings.modes.2": "AI vs AI",
+  "settings.whoFirst": "First player",
+  "settings.whoFirst.0": "Human",
+  "settings.whoFirst.1": "AI",
+  "settings.difficulty": "Difficulty",
+  "settings.difficulty.0": "Easy",
+  "settings.difficulty.1": "Medium",
+  "settings.difficulty.2": "Hard",
+  "settings.boardSize": "Board size",
+  "settings.boardSize.4": "4x4",
+  "settings.boardSize.6": "6x6",
+  "settings.boardSize.8": "8x8",
+  "settings.boardSize.10": "10x10"
+}
