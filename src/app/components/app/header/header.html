@@ -1,5 +1,5 @@
 <header>
-  <div class="topHeader">
+  <div class="flagWrapper">
     <div class="flagContainer">
     @for (language of languages; track language) {
       <div class="flag" (click)="selectLang(language)"
@@ -9,5 +9,6 @@
     }
     </div>
   </div>
+  
   <h1>{{ 'app.title' | translate }}</h1>
 </header>
