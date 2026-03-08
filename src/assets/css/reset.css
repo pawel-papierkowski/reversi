@@ -11,11 +11,6 @@
 html {
   height: 100%;
 
-  line-height: 1.5; /* More readable than default (usually 1.2) */
-  font-family: var(--font-family-ui);
-  font-size: var(--font-size-base);
-  font-weight: 400;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased; /* Smoother text on macOS */
@@ -30,6 +25,11 @@ body {
   height: 100%;
   min-width: 100%;
   min-height: 100vh; /* Fill at least the full viewport */
+
+  line-height: 1.5; /* More readable than default (usually 1.2) */
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-base);
+  font-weight: 400;
 }
 
 /* Settings for specific elements. */

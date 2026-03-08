@@ -1,13 +1,13 @@
-import { Component, signal, effect } from '@angular/core';
+import { Component } from '@angular/core';
+import { MatTooltip } from '@angular/material/tooltip';
 
-import {TranslateService} from "@ngx-translate/core";
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslateService, TranslatePipe} from '@ngx-translate/core';
 
-import { languages, fallbackLang } from "@/code/data/const";
+import { languages } from "@/code/data/const";
 
 @Component({
   selector: 'app-header',
-  imports: [ TranslatePipe ],
+  imports: [ TranslatePipe, MatTooltip ],
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
