@@ -17,10 +17,10 @@
 
   /*** Typography ***/
   /* UI elements. */
-  --font-family-ui: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-ui: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
   /* Long-form reading. */
-  --font-family-general: ui-rounded, 'Hiragino Maru Gothic ProN', Quicksand,
-         Comfortaa, Manjari, 'Arial Rounded MT Bold', Calibri, sans-serif;
+  --font-family-general: ui-rounded, 'Hiragino Maru Gothic ProN', 'Quicksand',
+         'Comfortaa', 'Manjari', 'Arial Rounded MT Bold', 'Calibri', sans-serif;
   --font-size-base: 16px;
 
   /*** Default theme. ***/
