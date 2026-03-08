@@ -2,6 +2,9 @@
  * Central CSS file.            *
  ********************************/
 
+/** Import Angular Material stuff. Needed for features like tooltip to function. */
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+
 /* Here should be only imports.
  * It is fine performance-wise, as Vue pre-assembles all CSSs into one file anyway.
  * This file is loaded in main.ts, ensuring it is global CSS.
