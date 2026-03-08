@@ -40,7 +40,7 @@ jobs: # Define jobs to run. They will be executed in parallel by default unless 
       - name: Upload artifact # Packages dist/ as a secure artifact (temporary zip file) for the next job.
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./dist/reversi-angular/browser # Angular builds project to "./dist/NAME_OF_APP/browser".
+          path: ./dist/reversi-angular/browser # Angular builds project to "./dist/NAME_OF_APP_IN_ANGULAR/browser".
 
   deploy: # Second job to run.
     environment: # Targets Pages environment (protection rules + publishes the final URL).
