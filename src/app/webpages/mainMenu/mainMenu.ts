@@ -2,9 +2,9 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {TranslatePipe} from '@ngx-translate/core';
 
-import { GameStateService } from '../../../code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState.service';
 
-import { MainMenuOptions } from '../../components/mainMenuOptions/mainMenuOptions';
+import { MainMenuOptions } from '@/components/mainMenuOptions/mainMenuOptions';
 
 @Component({
   selector: 'app-main-menu',

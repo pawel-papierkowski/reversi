@@ -2,29 +2,22 @@ import { Component, OnInit, signal, effect } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import {TranslateService} from "@ngx-translate/core";
-import {TranslatePipe} from '@ngx-translate/core';
 
-import { projectProp, languages, fallbackLang } from "../code/data/const";
+import { languages, fallbackLang } from "@/code/data/const";
 
-import { ComboBox } from './components/common/comboBox/comboBox';
+import { Header } from '@/components/app/header/header';
+import { Footer } from '@/components/app/footer/footer';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TranslatePipe, ComboBox],
+  imports: [RouterOutlet, Header, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
   protected readonly title = signal('reversi-angular');
-  projectProp = projectProp;
-  languages = languages;
-  selLang = signal(fallbackLang);
 
   constructor(private translateService: TranslateService) {
-    effect(() => { // react on language change
-      localStorage.setItem('app.language', this.selLang());
-      this.translateService.use(this.selLang());
-    });
   }
 
   async ngOnInit() {
@@ -39,14 +32,12 @@ export class App implements OnInit {
     const storedLang = localStorage.getItem('app.language'); // get current language from storage
     if (storedLang) { // stored language exists: just use it
       this.translateService.use(storedLang);
-      this.selLang.set(storedLang);
     } else { // stored language does not exist: resolve current language, save to storage and use it
       const browserLang = this.translateService.getBrowserLang() || fallbackLang;
        // if unknown language, fall back to english
       const currLang = this.verifyLang(browserLang) ? browserLang : fallbackLang;
       localStorage.setItem('app.language', currLang);
       this.translateService.use(currLang);
-      this.selLang.set(currLang);
     }
   }
 

@@ -1,4 +1,4 @@
-import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState } from './enums';
+import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState } from '@/code/data/enums';
 
 // ////////////////////////////////////////////////////////////////////////////
 // FULL GAME STATE                                                           //

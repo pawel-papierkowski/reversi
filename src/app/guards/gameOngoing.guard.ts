@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
-import { GameStateService } from '../../code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState.service';
 
 /**
  * Makes sure you can enter page only when game is ongoing.
