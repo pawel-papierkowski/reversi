@@ -1,6 +1,7 @@
-import { environment } from '../../environments/environment';
-import { EnDifficulty, EnAiTactic, EnPlayerType } from './enums';
-import type { ProjectProp, DifficultyConfig, GameConfig } from './types';
+import { environment } from '../../../environments/environment';
+
+import { EnDifficulty, EnAiTactic, EnPlayerType } from '@/code/data/enums';
+import type { ProjectProp, DifficultyConfig, GameConfig } from '@/code/data/types';
 
 export const projectProp: ProjectProp = {
   title: "Reversi",

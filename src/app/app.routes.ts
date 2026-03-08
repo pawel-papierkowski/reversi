@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { gameOngoingGuard } from './guards/gameOngoing.guard';
 
 import { MainMenu } from './webpages/mainMenu/mainMenu';
-import { GameBoard } from './webpages/gameBoard/gameBoard';
+import { GameScreen } from './webpages/gameScreen/gameScreen';
 import { PageNotFound } from './webpages/pageNotFound/pageNotFound';
 
 export const routes: Routes = [
@@ -14,8 +14,8 @@ export const routes: Routes = [
   },
   {
     path: 'board',
-    title: 'Game Board',
-    component: GameBoard,
+    title: 'Game Screen',
+    component: GameScreen,
     canActivate: [ gameOngoingGuard ],
   },
   {

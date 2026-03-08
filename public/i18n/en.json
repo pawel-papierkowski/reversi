@@ -1,8 +1,10 @@
 {
   "app.title": "Reversi",
   "app.language": "Language",
-  "app.language.pl": "🇵🇱 Polish",
-  "app.language.en": "🇬🇧 English",
+  "app.language.pl": "Polish",
+  "app.language.en": "English",
+  "app.language.flag.pl": "🇵🇱",
+  "app.language.flag.en": "🇬🇧",
   "app.repository": "Repository",
 
   "mainMenu.options": "Game options",

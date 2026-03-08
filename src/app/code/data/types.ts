@@ -1,4 +1,4 @@
-import { EnDifficulty, EnAiTactic } from './enums';
+import { EnDifficulty, EnAiTactic } from '@/code/data/enums';
 
 /** Fundamental project properties. More or less constant. */
 export type ProjectProp = {

@@ -1,0 +1,12 @@
+<header>
+  <div class="topHeader">
+    <div class="flagContainer">
+    @for (language of languages; track language) {
+      <div class="flag" (click)="selectLang(language)">
+        {{ 'app.language.flag.'+language | translate }}
+      </div>
+    }
+    </div>
+  </div>
+  <h1>{{ 'app.title' | translate }}</h1>
+</header>

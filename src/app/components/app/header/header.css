@@ -1,0 +1,41 @@
+h1 {
+  color: #484848;
+  font-size: 54px;
+  text-align: center;
+  text-shadow: 0 0 5px currentColor;
+}
+
+/****/
+
+.topHeader {
+  position: fixed;
+  top: 0;
+  right: 0;
+
+  overflow-y: auto; /* Scrollable if content is long */
+  z-index: 100; /* Ensure it's above other content */
+}
+
+/* Non-desktops. */
+
+@media (max-width: 700px) {
+  .topHeader {
+    position: static;
+    margin: auto;
+  }
+}
+
+.flagContainer {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+
+  grid-template-columns: 1fr 1fr;
+}
+
+.flag {
+  display: inline;
+  cursor: pointer;
+
+  padding: 0px 5px;
+}

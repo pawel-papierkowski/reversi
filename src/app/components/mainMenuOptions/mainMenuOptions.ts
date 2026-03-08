@@ -2,11 +2,11 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {TranslatePipe} from '@ngx-translate/core';
 
-import { modeDescr, playerTypeDescr, difficultyDescr } from '../../../code/data/enums';
-import { gameConfig } from '../../../code/data/const';
-import { GameStateService } from '../../../code/services/gameState.service';
+import { modeDescr, playerTypeDescr, difficultyDescr } from '@/code/data/enums';
+import { gameConfig } from '@/code/data/const';
+import { GameStateService } from '@/code/services/gameState.service';
 
-import { ComboBox } from '../common/comboBox/comboBox';
+import { ComboBox } from '@/components/common/comboBox/comboBox';
 
 @Component({
   selector: 'app-main-menu-options',

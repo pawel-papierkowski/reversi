@@ -1,8 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 
-import { GameState, createGameState, Cell, createCell, Player } from "../../code/data/gameState";
-import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '../data/enums';
-import { playerNames } from '../data/const';
+import { GameState, createGameState, Cell, createCell, Player } from "@/code/data/gameState";
+import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
+import { playerNames } from '@/code/data/const';
 
 /** Game state service. */
 @Injectable({providedIn: 'root'})
