@@ -31,11 +31,13 @@ export class App implements OnInit {
     this.translateService.setFallbackLang(fallbackLang);
     const storedLang = localStorage.getItem('app.language'); // get current language from storage
     if (storedLang) { // stored language exists: just use it
-      this.translateService.use(storedLang);
+      const currLang = this.verifyLang(storedLang) ? storedLang : fallbackLang;
+      this.translateService.use(currLang);
     } else { // stored language does not exist: resolve current language, save to storage and use it
       const browserLang = this.translateService.getBrowserLang() || fallbackLang;
        // if unknown language, fall back to english
       const currLang = this.verifyLang(browserLang) ? browserLang : fallbackLang;
+      console.info(currLang);
       localStorage.setItem('app.language', currLang);
       this.translateService.use(currLang);
     }
