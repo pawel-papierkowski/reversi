@@ -21,8 +21,7 @@ describe('Header', () => {
     component = fixture.componentInstance;
     translateService = TestBed.inject(TranslateService);
 
-    // Initial change detection to render the DOM template and @for loop.
-    fixture.detectChanges();
+    fixture.detectChanges(); // Initial DOM render.
   });
 
   //
