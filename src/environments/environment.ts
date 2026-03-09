@@ -1,7 +1,5 @@
-import { version } from '../../package.json';
-
-/** Environment variables for PROD environment. */
+/** Mockup. Will be replaced with other environment file as configured in angular.json. */
 export const environment = {
-  production: true,
-  version: version, // updates version automatically from package.json
+  production: false,
+  version: '0.0.0'
 };

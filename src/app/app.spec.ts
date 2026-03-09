@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { App } from './app';
 
 import { provideTranslateService, TranslateLoader } from "@ngx-translate/core";
@@ -17,31 +17,38 @@ class StaticTranslateLoader implements TranslateLoader {
 }
 
 describe('App', () => {
+  let fixture: ComponentFixture<App>;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [ // providers need to be specified explicitly, as unit tests do not use app.config.ts
-        provideTranslateService({
+      providers: [
+        // providers need to be specified explicitly, as unit tests do not use app.config.ts
+        provideTranslateService({ // use real translations
           lang: 'en',
           fallbackLang: 'en',
           loader: { provide: TranslateLoader, useClass: StaticTranslateLoader }
         }),
       ]
     }).compileComponents();
+
+    fixture = TestBed.createComponent(App);
   });
 
   //
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
+    // Sanity check: app actually exists.
     const app = fixture.componentInstance;
-    expect(app).toBeTruthy(); // sanity check
+    expect(app).toBeTruthy();
   });
 
   it('should render title', async () => {
-    const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
+    // Check title only when everything is rendered properly.
+    // Note we verify actual translated text.
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Reversi');
+    // Dummy translator would have 'app.title' intstead of 'Reversi'.
   });
 });

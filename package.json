@@ -1,10 +1,10 @@
 {
   "name": "reversi-angular",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --base-href /reversi/",
+    "build": "ng build --configuration production --base-href /reversi/",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -41,6 +41,7 @@
     "@angular/build": "^21.1.5",
     "@angular/cli": "^21.1.5",
     "@angular/compiler-cli": "^21.1.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "jsdom": "^27.4.0",
     "typescript": "~5.9.2",
     "vite-tsconfig-paths": "^6.1.1",
