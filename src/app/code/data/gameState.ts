@@ -25,7 +25,7 @@ export function createGameView(): GameView {
 // Game settings.
 // //////////////
 
-type GameSettings = {
+export type GameSettings = {
   mode: EnMode;
   whoFirst: EnPlayerType; // matters only in human vs AI mode
   difficulty: EnDifficulty;

@@ -7,14 +7,12 @@ import { GameStateService } from '@/code/services/gameState.service';
 
 // Create a mock service to safely observe the settings state
 class MockGameStateService {
-  // We recreate the signal structure your component expects
-  gameState = signal({
-    settings: {
-      mode: 1,       // EnMode.HumanVsAi
-      whoFirst: 0,   // EnPlayerType.Human
-      difficulty: 0, // EnDifficulty.Easy
-      boardSize: 8   // 8x8 board
-    }
+  // We recreate the signal structure (menuSettings) your component expects
+  menuSettings = signal({
+    mode: 1,       // EnMode.HumanVsAi
+    whoFirst: 0,   // EnPlayerType.Human
+    difficulty: 0, // EnDifficulty.Easy
+    boardSize: 8   // 8x8 board
   });
 }
 
@@ -82,7 +80,7 @@ describe('MainMenuOptions', () => {
     selectComboboxOption('boardSize', 3);
 
     // Assert: Verify the two-way binding correctly mutated our service state
-    const currentSettings = gameStateService.gameState().settings;
+    const currentSettings = gameStateService.menuSettings();
 
     expect(currentSettings.mode).toBe(0);
     expect(currentSettings.whoFirst).toBe(1);

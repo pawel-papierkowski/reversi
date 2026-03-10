@@ -8,7 +8,7 @@ import { MainMenuOptions } from '@/components/mainMenuOptions/mainMenuOptions';
 
 @Component({
   selector: 'app-main-menu',
-  imports: [MainMenuOptions, TranslatePipe],
+  imports: [TranslatePipe, MainMenuOptions],
   templateUrl: './mainMenu.html',
   styleUrl: './mainMenu.css'
 })
@@ -17,8 +17,13 @@ export class MainMenu {
   readonly gameStateService = inject(GameStateService);
 
   startGame() {
+    // replace settings from main menu options form
+    this.gameStateService.applySettings();
     this.gameStateService.initializeBoard();
-    console.info(this.gameStateService.gameState());
+    this.router.navigate(['/board']);
+  }
+
+  continueGame() {
     this.router.navigate(['/board']);
   }
 }

@@ -8,7 +8,8 @@
   "app.repository": "Repository",
 
   "mainMenu.options": "Game options",
-  "mainMenu.start": "Start game",
+  "mainMenu.btn.start": "Start new game",
+  "mainMenu.btn.continue": "Continue game",
   "settings.modes": "Mode",
   "settings.modes.0": "Human vs Human",
   "settings.modes.1": "Human vs AI",
@@ -24,5 +25,7 @@
   "settings.boardSize.4": "4x4",
   "settings.boardSize.6": "6x6",
   "settings.boardSize.8": "8x8",
-  "settings.boardSize.10": "10x10"
+  "settings.boardSize.10": "10x10",
+
+  "game.quit": "Quit"
 }

@@ -8,7 +8,8 @@
   "app.repository": "Repozytorium",
 
   "mainMenu.options": "Opcje rozgrywki",
-  "mainMenu.start": "Rozpocznij grę",
+  "mainMenu.btn.start": "Rozpocznij nową grę",
+  "mainMenu.btn.continue": "Kontynuuj grę",
   "settings.modes": "Tryb",
   "settings.modes.0": "Człowiek kontra człowiek",
   "settings.modes.1": "Człowiek kontra SI",
@@ -24,5 +25,7 @@
   "settings.boardSize.4": "4x4",
   "settings.boardSize.6": "6x6",
   "settings.boardSize.8": "8x8",
-  "settings.boardSize.10": "10x10"
+  "settings.boardSize.10": "10x10",
+
+  "game.quit": "Wyjdź"
 }

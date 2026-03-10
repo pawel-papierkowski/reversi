@@ -3,8 +3,8 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-game-board',
   imports: [],
-  templateUrl: './gameBoard.html',
-  styleUrl: './gameBoard.css'
+  templateUrl: './board.html',
+  styleUrl: './board.css'
 })
-export class GameBoard {
+export class Board {
 }
