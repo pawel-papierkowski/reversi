@@ -17,8 +17,7 @@ import { Footer } from '@/components/layout/footer/footer';
 export class App implements OnInit {
   protected readonly title = signal('reversi-angular');
 
-  constructor(private translateService: TranslateService) {
-  }
+  constructor(private translateService: TranslateService) {}
 
   async ngOnInit() {
     this.setupLang();

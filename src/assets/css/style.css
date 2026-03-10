@@ -16,6 +16,22 @@ body {
   background-color: var(--color-background);
 }
 
+/* General. */
+
+h1 {
+  color: #484848;
+  font-size: 54px;
+  text-align: center;
+  text-shadow: 0 0 5px currentColor;
+}
+
+h2 {
+  color: #484848;
+  font-size: 20px;
+  text-align: center;
+  text-shadow: 0 0 2px currentColor;
+}
+
 /*** Common elements used on multiple pages. ***/
 
 /* Menu. */
@@ -42,4 +58,41 @@ body {
 .menu button {
   grid-column: span 2;
   width: 100%;
+}
+
+/* Sidepanel. */
+
+.sidepanel-left {
+  position: fixed;
+  top: 50px;
+  left: 0;
+
+  overflow-y: auto; /* Scrollable if content is long */
+  z-index: 100; /* Ensure it's above other content */
+
+  min-width: 200px;
+  max-width: 350px;
+}
+
+.sidepanel-right {
+  position: fixed;
+  top: 50px;
+  right: 0;
+
+  overflow-y: auto; /* Scrollable if content is long */
+  z-index: 100; /* Ensure it's above other content */
+
+  min-width: 200px;
+  max-width: 350px;
+}
+
+@media (max-width: 1200px) {
+  .sidepanel-left {
+    position: static;
+    margin: auto;
+  }
+  .sidepanel-right {
+    position: static;
+    margin: auto;
+  }
 }

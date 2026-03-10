@@ -1,3 +1,27 @@
 <div class="status">
-  GAME STATUS PLACEHOLDER
+  <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(0), name:getPlayerName(0)}"></div>
+  <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(1), name:getPlayerName(1)}"></div>
+  <div class="doubleColumn" [innerHTML]="'game.status.currentPlayer' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayer)}"></div>
+
+  <!-- Game state. -->
+  <div class="doubleColumn">
+  @switch (gameStateService.gameState().board.status) {
+    @case (0) { <!-- Stop -->
+      <div [innerHTML]="'game.status.currStatus.stop' | translate"></div>
+    }
+    @case (1) { <!-- Pending, you should not be able to see it, but whatever -->
+      <div [innerHTML]="'game.status.currStatus.pending' | translate"></div>
+    }
+    @case (2) { <!-- InProgress -->
+      <!-- TODO more details, especially if it is human vs AI. -->
+      <div [innerHTML]="'game.status.currStatus.inProgress' | translate"></div>
+    }
+    @case (3) { <!-- PlayerWon -->
+      <div [innerHTML]="'game.status.currStatus.playerWon' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayer)}"></div>
+    }
+    @case (4) { <!-- Tie -->
+      <div [innerHTML]="'game.status.currStatus.tie' | translate"></div>
+    }
+  }
+  </div>
 </div>

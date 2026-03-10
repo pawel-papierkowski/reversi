@@ -1,5 +1,5 @@
-<div class="combobox" tabindex="0" (blur)="isOpen.set(false)">
-  <div class="selected" (click)="isOpen.set(!isOpen())">
+<div [class]="resolveMainClass()" tabindex="0" (blur)="isOpen.set(false)">
+  <div class="selected" (click)="openList()">
     <span class="selected-text">
       {{ selectedOption() === null ? (placeholder() | translate) : (langPrefix()+'.'+selectedOption() | translate) }}
     </span>

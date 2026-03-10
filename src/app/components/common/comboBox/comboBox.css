@@ -18,6 +18,17 @@
   background-color: var(--combobox-background-hover);
 }
 
+.combobox.disabled {
+  color: var(--combobox-disabled-text);
+  background: var(--combobox-disabled-background);
+  border: var(--combobox-disabled-border);
+}
+
+.combobox.disabled:hover {
+  color: var(--combobox-disabled-text);
+  background: var(--combobox-disabled-background);
+}
+
 /**/
 
 .selected {
@@ -44,6 +55,10 @@
 
 .arrow.open {
   transform: rotate(180deg);
+}
+
+.combobox.disabled .arrow {
+  border-top: 6px solid var(--combobox-disabled-text);
 }
 
 /**/
