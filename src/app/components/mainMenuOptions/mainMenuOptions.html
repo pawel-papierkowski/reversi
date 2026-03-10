@@ -1,19 +1,20 @@
 <fieldset class="menu">
-  <legend>{{ 'mainMenu.options' | translate}}</legend>
+  <legend>{{'mainMenu.options' | translate}}</legend>
 
-  <label for="mode">{{'settings.modes' | translate}}:</label>
-  <combo-box id="mode" langPrefix="settings.modes" [options]="modes"
+  <label for="mode">{{'mainMenu.settings.modes' | translate}}:</label>
+  <combo-box id="mode" langPrefix="enum.mode" [options]="modes"
     [(selectedOption)]="gameStateService.menuSettings().mode" />
 
-  <label for="whoFirst">{{'settings.whoFirst' | translate}}:</label>
-  <combo-box id="whoFirst" langPrefix="settings.whoFirst" [options]="playerTypes"
+  <label for="whoFirst">{{'mainMenu.settings.whoFirst' | translate}}:</label>
+  <combo-box id="whoFirst" langPrefix="enum.playerType" [options]="playerTypes"
+    [disabled]="isWhoFirstDisabled()"
     [(selectedOption)]="gameStateService.menuSettings().whoFirst" />
 
-  <label for="difficulty">{{'settings.difficulty' | translate}}:</label>
-  <combo-box id="difficulty" langPrefix="settings.difficulty" [options]="difficulties"
+  <label for="difficulty">{{'mainMenu.settings.difficulty' | translate}}:</label>
+  <combo-box id="difficulty" langPrefix="enum.difficulty" [options]="difficulties"
     [(selectedOption)]="gameStateService.menuSettings().difficulty" />
 
-  <label for="boardSize">{{'settings.boardSize' | translate}}:</label>
-  <combo-box id="boardSize" langPrefix="settings.boardSize" [options]="gameConfig.boardSizes"
+  <label for="boardSize">{{'mainMenu.settings.boardSize' | translate}}:</label>
+  <combo-box id="boardSize" langPrefix="mainMenu.settings.boardSize" [options]="gameConfig.boardSizes"
     [(selectedOption)]="gameStateService.menuSettings().boardSize" />
 </fieldset>

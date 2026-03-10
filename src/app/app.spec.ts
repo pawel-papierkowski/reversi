@@ -40,7 +40,7 @@ describe('App', () => {
     translateService = TestBed.inject(TranslateService);
   });
 
-  //
+  // Basic
 
   it('should create the app', () => {
     // Sanity check: app actually exists.
@@ -57,7 +57,17 @@ describe('App', () => {
     // Dummy translator would have 'app.title' intstead of 'Reversi'.
   });
 
-  //
+  // Start the game
+
+  it('should have valid state after starting game with default settings', async () => {
+    await fixture.whenStable();
+    // TODO: do it
+    // click on start game button
+    // check that it correctly routed to /board
+    // check that various components are present on screen and show correct values
+  });
+
+  // Language handling
 
   it('should use the language stored in localStorage if it exists', async () => {
     // Arrange: Pre-populate local storage with known language that is not fallback.

@@ -22,8 +22,11 @@
   --font-family-general: ui-rounded, 'Hiragino Maru Gothic ProN', 'Quicksand',
          'Comfortaa', 'Manjari', 'Arial Rounded MT Bold', 'Calibri', sans-serif;
   --font-size-base: 16px;
+}
 
-  /*** Default theme. ***/
+/*** Default theme. ***/
+:root {
+  /* Combobox. */
   --combobox-border: 1px solid #aaaaaa;
   --combobox-background: #e8e8e8;
   --combobox-text: #111827;
@@ -34,4 +37,8 @@
   --combobox-option-background: #f0f0f0;
   --combobox-option-background-hover: #d8d8d8;
   --combobox-option-text-hover: #111827;
+
+  --combobox-disabled-border: 1px solid #cccccc;
+  --combobox-disabled-background: #f8f8f8;
+  --combobox-disabled-text: #999999;
 }

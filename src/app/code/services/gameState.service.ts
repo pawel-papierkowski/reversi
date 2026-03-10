@@ -59,6 +59,8 @@ export class GameStateService {
 
   //
 
+  private usedName : string = '';
+
   /** Generate all players based on settings.
    * @returns Players.
    */
@@ -75,6 +77,7 @@ export class GameStateService {
    * @returns Generated player.
    */
   private generatePlayer(first : boolean) : Player {
+    if (first) this.usedName = '';
     return {
       type : this.generatePlayerType(first),
       name : this.generatePlayerName(first)
@@ -105,9 +108,7 @@ export class GameStateService {
   private generatePlayerName(first : boolean) : string {
     switch (this.gameState().settings.mode) {
       case EnMode.HumanVsHuman: {
-        const name1 = this.resolveName(EnPlayerType.Human, '');
-        const name2 = this.resolveName(EnPlayerType.Human, name1);
-        return first ? name1+' 1' : name2+' 2';
+        return this.resolveNameSameType(EnPlayerType.Human);
       }
       case EnMode.HumanVsAi: {
         const humanIsFirst = this.gameState().settings.whoFirst === EnPlayerType.Human;
@@ -116,11 +117,21 @@ export class GameStateService {
           this.resolveName(EnPlayerType.AI, '');
       }
       case EnMode.AiVsAi: {
-        const name1 = this.resolveName(EnPlayerType.AI, '');
-        const name2 = this.resolveName(EnPlayerType.AI, name1);
-        return first ? name1+' 1' : name2+' 2';
+        return this.resolveNameSameType(EnPlayerType.AI);
       }
     }
+  }
+
+  /**
+   * Resolves name of player for given type. Remembers used name.
+   * @param playerType Player type.
+   * @returns Name of player.
+   */
+  private resolveNameSameType(playerType: EnPlayerType) {
+    // usedName ensures there is no duplicate name for both players if they are same type.
+    const name = this.resolveName(playerType, this.usedName);
+    this.usedName = name;
+    return name;
   }
 
   /**
