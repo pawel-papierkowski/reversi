@@ -3,17 +3,17 @@
 
   <label for="mode">{{'settings.modes' | translate}}:</label>
   <combo-box id="mode" langPrefix="settings.modes" [options]="modes"
-    [(selectedOption)]="gameStateService.gameState().settings.mode" />
+    [(selectedOption)]="gameStateService.menuSettings().mode" />
 
   <label for="whoFirst">{{'settings.whoFirst' | translate}}:</label>
   <combo-box id="whoFirst" langPrefix="settings.whoFirst" [options]="playerTypes"
-    [(selectedOption)]="gameStateService.gameState().settings.whoFirst" />
+    [(selectedOption)]="gameStateService.menuSettings().whoFirst" />
 
   <label for="difficulty">{{'settings.difficulty' | translate}}:</label>
   <combo-box id="difficulty" langPrefix="settings.difficulty" [options]="difficulties"
-    [(selectedOption)]="gameStateService.gameState().settings.difficulty" />
+    [(selectedOption)]="gameStateService.menuSettings().difficulty" />
 
   <label for="boardSize">{{'settings.boardSize' | translate}}:</label>
   <combo-box id="boardSize" langPrefix="settings.boardSize" [options]="gameConfig.boardSizes"
-    [(selectedOption)]="gameStateService.gameState().settings.boardSize" />
+    [(selectedOption)]="gameStateService.menuSettings().boardSize" />
 </fieldset>

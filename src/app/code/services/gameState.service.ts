@@ -1,13 +1,17 @@
 import { Injectable, signal } from '@angular/core';
 
-import { GameState, createGameState, Cell, createCell, Player } from "@/code/data/gameState";
+import type { GameState, GameSettings, Cell, Player } from "@/code/data/gameState";
+import { createGameState, createGameSettings, createCell } from "@/code/data/gameState";
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
 import { playerNames } from '@/code/data/const';
 
 /** Game state service. */
 @Injectable({providedIn: 'root'})
 export class GameStateService {
+  /** Actual game state. */
   readonly gameState = signal<GameState>(createGameState());
+  /** Temporary settings used in main menu options. */
+  readonly menuSettings = signal<GameSettings>(createGameSettings());
 
   /**
    * Check if game is ongoing.
@@ -15,6 +19,14 @@ export class GameStateService {
    */
   public isGameOngoing() : boolean {
     return this.gameState().board.status !== EnGameStatus.Pending;
+  }
+
+  /** Use temporary settings as actual settings. */
+  public applySettings() {
+    this.gameState.update(state => ({
+      ...state, // duplicates rest of state
+      settings: structuredClone(this.menuSettings()) // make sure we use copy of settings
+    }));
   }
 
   // //////////////////////////////////////////////////////////////////////////

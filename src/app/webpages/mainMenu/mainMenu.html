@@ -1,6 +1,9 @@
 <div>
   <app-main-menu-options />
   <div class="menu">
-    <button (click)="startGame()">{{ 'mainMenu.start' | translate }}</button>
+    <button (click)="startGame()">{{ 'mainMenu.btn.start' | translate }}</button>
+    @if (gameStateService.isGameOngoing()) {
+      <button (click)="continueGame()">{{ 'mainMenu.btn.continue' | translate }}</button>
+    }
   </div>
 </div>
