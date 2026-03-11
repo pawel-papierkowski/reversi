@@ -1,3 +1,14 @@
 <div class="board">
-  {{ 'GAME BOARD PLACEHOLDER' | translate }}
+  <!-- Iterate over the rows in the 2D array -->
+  @for (row of gameStateService.gameState().view.cells; track $index) {
+    <div class="row">
+      <!-- Iterate over the individual cells in each row -->
+      @for (cell of row; track $index) {
+        <div class="cell">
+          {{ cell.state }}
+          <!-- TODO actual cell component here -->
+        </div>
+      }
+    </div>
+  }
 </div>

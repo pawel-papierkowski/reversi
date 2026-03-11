@@ -13,7 +13,7 @@ import { GameStateService } from '@/code/services/gameState.service';
 export class Statistics {
   readonly gameStateService = inject(GameStateService);
 
-  showWhoFirst() : boolean {
+  showWhenHumanVsAi() : boolean {
     return this.gameStateService.menuSettings().mode === EnMode.HumanVsAi;
   }
 }

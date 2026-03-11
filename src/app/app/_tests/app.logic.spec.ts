@@ -1,5 +1,4 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { TranslateService } from "@ngx-translate/core";
 import { Router } from '@angular/router';
 
 import { setupTestBedTranslate } from './app.test-setup';
@@ -14,7 +13,6 @@ import { GameStateService } from '@/code/services/gameState.service';
 describe('App (logic)', () => {
   let fixture: ComponentFixture<App>;
   let router: Router;
-  let translateService: TranslateService;
   let gameStateService: GameStateService;
 
   beforeEach(async () => {
@@ -22,7 +20,6 @@ describe('App (logic)', () => {
 
     fixture = await setupTestBedTranslate([]);
     router = TestBed.inject(Router);
-    translateService = TestBed.inject(TranslateService);
     gameStateService = TestBed.inject(GameStateService);
 
     // Trigger initial navigation to load the '' (MainMenu) route.
@@ -35,23 +32,28 @@ describe('App (logic)', () => {
 
   /** Generate game state after start of game.
    */
-  function genStartState(actualGameState: GameState): GameState {
+  function genStartState(actualGameState: GameState, boardSize: number): GameState {
     const startGameState = createGameState();
-
     // Mutate only the fields that change after "Start Game" is clicked.
+
+    startGameState.settings.boardSize = boardSize;
     startGameState.board.status = EnGameStatus.InProgress;
 
     // Game board should have four pieces in middle already.
-    startGameState.board.cells = genCells(8); // generate empty board
-    startGameState.board.cells[3][3] = createCellFill(EnCellState.W);
-    startGameState.board.cells[4][3] = createCellFill(EnCellState.B);
-    startGameState.board.cells[3][4] = createCellFill(EnCellState.B);
-    startGameState.board.cells[4][4] = createCellFill(EnCellState.W);
+    const ix = boardSize/2 - 1;
+    startGameState.board.cells = genCells(boardSize); // generate empty board
+    startGameState.board.cells[ix][ix] = createCellFill(EnCellState.W);
+    startGameState.board.cells[ix+1][ix] = createCellFill(EnCellState.B);
+    startGameState.board.cells[ix][ix+1] = createCellFill(EnCellState.B);
+    startGameState.board.cells[ix+1][ix+1] = createCellFill(EnCellState.W);
 
     // Should have first move (initial board state) already in history.
     const move = createGameHistoryEntry();
     move.cells = startGameState.board.cells;
     startGameState.board.history.moves.push(move);
+
+    // Game view should be set.
+    startGameState.view.cells = startGameState.board.cells;
 
     // Player names are random, so we test them separately.
     startGameState.players[0].name = actualGameState.players[0].name;
@@ -86,14 +88,15 @@ describe('App (logic)', () => {
 
     // Now we check game state.
     const actualGameState = gameStateService.gameState();
-    const expectedGameState = genStartState(actualGameState);
+    const expectedGameState = genStartState(actualGameState, 8);
     assertGameState(actualGameState, expectedGameState);
   });
 
   it('should have correct game state when game starts with changed settings', async () => {
-    // Change mode to Human vs AI and set AI as first.
+    // Change mode to Human vs AI, set AI as first and set 4x4 board.
     selectComboboxOption(fixture, 'cb-mainMenu-mode', 1);
     selectComboboxOption(fixture, 'cb-mainMenu-whoFirst', 1);
+    selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0);
 
     // Find the primary Start Game button inside the rendered MainMenu and click it.
     const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
@@ -103,7 +106,7 @@ describe('App (logic)', () => {
 
     // Now we check game state.
     const actualGameState = gameStateService.gameState();
-    const expectedGameState = genStartState(actualGameState);
+    const expectedGameState = genStartState(actualGameState, 4);
     expectedGameState.settings.mode = EnMode.HumanVsAi;
     expectedGameState.settings.whoFirst = EnPlayerType.AI;
     expectedGameState.players[0].type = EnPlayerType.AI;
@@ -123,7 +126,7 @@ describe('App (logic)', () => {
 
     // Now we check game state.
     const actualGameState = gameStateService.gameState();
-    const expectedGameState = genStartState(actualGameState);
+    const expectedGameState = genStartState(actualGameState, 8);
     expectedGameState.settings.mode = EnMode.AiVsAi;
     expectedGameState.players[0].type = EnPlayerType.AI;
     expectedGameState.players[1].type = EnPlayerType.AI;

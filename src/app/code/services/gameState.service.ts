@@ -61,16 +61,18 @@ export class GameStateService {
    * Initializes new round.
    */
   public initializeRound() {
+    const newCells = this.generateCells();
+
     this.gameState.update(state => ({
       ...state, // duplicates rest of state
       board: {
         status: EnGameStatus.InProgress,
-        cells: this.generateCells(),
+        cells: newCells,
         currPlayerIx: 0,
         history: this.generateHistory(),
       },
       view: {
-        cells: this.gameState().board.cells,
+        cells: newCells,
       },
     }));
   }
@@ -80,16 +82,26 @@ export class GameStateService {
    * @returns Initial board state.
    */
   private generateCells() : Cell[][] {
-    const size = this.gameState().settings.boardSize;
-    const cells : Cell[][] = Array.from({ length: size }, () =>
-      Array.from({ length: size }, () => createCell())
-    );
+    const boardSize = this.gameState().settings.boardSize;
+    const cells = this.generateCellsEmpty();
     // Now put starting pieces in middle of board, like in Othello.
-    const start = size/2-1;
-    cells[start][start].state = EnCellState.W;
-    cells[start+1][start].state = EnCellState.B;
-    cells[start][start+1].state = EnCellState.B;
-    cells[start+1][start+1].state = EnCellState.W;
+    const startIx = boardSize/2 - 1;
+    cells[startIx][startIx].state = EnCellState.W;
+    cells[startIx+1][startIx].state = EnCellState.B;
+    cells[startIx][startIx+1].state = EnCellState.B;
+    cells[startIx+1][startIx+1].state = EnCellState.W;
+    return cells;
+  }
+
+  /**
+   * Generate empty board of known size.
+   * @returns Empty board state.
+   */
+  private generateCellsEmpty() : Cell[][] {
+    const boardSize = this.gameState().settings.boardSize;
+    const cells : Cell[][] = Array.from({ length: boardSize }, () =>
+      Array.from({ length: boardSize }, () => createCell())
+    );
     return cells;
   }
 
