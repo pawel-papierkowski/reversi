@@ -25,7 +25,7 @@ export class GameMenu {
     // TODO: move on to next round.
   }
 
-  quitGame() {
+  backToMenu() {
     this.router.navigate(['/']);
   }
 }
