@@ -9,12 +9,12 @@ import { PageNotFound } from './webpages/pageNotFound/pageNotFound';
 export const routes: Routes = [
   {
     path: '',
-    title: 'Main Menu',
+    title: 'Reversi: Main Menu',
     component: MainMenu,
   },
   {
     path: 'board',
-    title: 'Game Screen',
+    title: 'Reversi: Board',
     component: GameScreen,
     canActivate: [ gameOngoingGuard ],
   },

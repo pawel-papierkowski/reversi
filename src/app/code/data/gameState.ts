@@ -5,19 +5,20 @@ import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState } from '@
 // ////////////////////////////////////////////////////////////////////////////
 
 // DEBUG CONSTANTS
-const defDebugMode: boolean = true;
+export const defDebugMode: boolean = true;
 
 // //////////
 // Game view.
 // //////////
 
 type GameView = {
-  activeScreen: 'mainMenu' | 'gameBoard';
+  // Separate from cells in board because we want to show also state of board from history.
+  cells: Cell[][];
 };
 
 export function createGameView(): GameView {
   return {
-    activeScreen: 'mainMenu',
+    cells: [],
   };
 }
 
@@ -45,7 +46,7 @@ export function createGameSettings(): GameSettings {
 // Debug settings.
 // ///////////////
 
-type DebugSettings = {
+export type DebugSettings = {
   debugMode: boolean;
 };
 
@@ -113,22 +114,39 @@ export function createPlayer(): Player {
 
 //
 
-type ReversiBoard = {
-  status: EnGameStatus;
-  cells: Cell[][];
-  players: Player[];
-  currPlayer: number; // index for players
+export type GameHistoryEntry = {
+  playerIx: number; // needed as player must skip move if no legal moves available at given moment for that player
+  move: string; // encoded move to show on screen
+  cells: Cell[][]; // board state as copy of main board at that moment
 };
 
-export function createReversiBoard(): ReversiBoard {
+export type GameHistory = {
+  moves: GameHistoryEntry[];
+};
+
+export function createGameHistory(): GameHistory {
   return {
-    status: EnGameStatus.Pending,
-    cells: [], // actually filled later, as we need to know settings like board size
-    players: [], // actually filled later, as we need to know settings like mode and who is first
-    currPlayer: 0,
+    moves: [],
   };
 }
 
+//
+
+type ReversiBoard = {
+  status: EnGameStatus;
+  cells: Cell[][]; // Current state of board.
+  currPlayerIx: number; // index for players
+  history: GameHistory; // tracks history of moves in current round
+};
+
+export function createGameBoard(): ReversiBoard {
+  return {
+    status: EnGameStatus.Pending,
+    cells: [], // actually filled later, as we need to know settings like board size
+    currPlayerIx: 0,
+    history: createGameHistory(),
+  };
+}
 
 // ///////////////////////
 // Complete state of game.
@@ -136,11 +154,12 @@ export function createReversiBoard(): ReversiBoard {
 // ///////////////////////
 
 export type GameState = {
-  view: GameView; // what should be shown on screen
-  settings: GameSettings; // determined in main menu
-  debugSettings: DebugSettings; // updated before and after every move
-  statistics: GameStatistics; // reset every game
-  board: ReversiBoard; // reset every round (and so also every game)
+  view: GameView; // what should be shown on screen, updated when needed
+  settings: GameSettings; // persists between games unless updated in main menu
+  statistics: GameStatistics; // statistics, reset for new game
+  players: Player[]; // players, reset for new game
+  board: ReversiBoard; // data about board state, reset for new game and every round
+  debugSettings: DebugSettings; // debug settings, reset for new game
 };
 
 /** Create default game state. */
@@ -148,8 +167,9 @@ export function createGameState(): GameState {
   return {
     view: createGameView(),
     settings: createGameSettings(),
-    debugSettings: createDebugSettings(),
     statistics: createGameStatistics(),
-    board: createReversiBoard(),
+    players: [], // actually filled later, as we need to know settings like mode and who is first
+    board: createGameBoard(),
+    debugSettings: createDebugSettings(),
   };
 }

@@ -1,9 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 
-import type { GameState, GameSettings, Cell, Player } from "@/code/data/gameState";
-import { createGameState, createGameSettings, createCell } from "@/code/data/gameState";
+import type { GameState, GameSettings, DebugSettings, Cell, Player, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
+import { createGameState, createGameSettings, createGameStatistics, createCell, defDebugMode } from "@/code/data/gameState";
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
-import { playerNames } from '@/code/data/const';
+import { playerNames, projectProp } from '@/code/data/const';
 
 /** Game state service. */
 @Injectable({providedIn: 'root'})
@@ -32,17 +32,53 @@ export class GameStateService {
   // //////////////////////////////////////////////////////////////////////////
 
   /**
-   * Initializes board. Must be called after modifyinh settings, but before
-   * actual game starts.
+   * Initializes new game. Must be called after modifying settings, but before actual game starts.
    */
-  public initializeBoard() {
-    this.gameState().board.cells = this.generateCells();
-    this.gameState().board.players = this.generatePlayers();
-    this.gameState().board.status = EnGameStatus.InProgress;
+  public initializeGame() {
+    // Reset game state that needs to be reset for new game.
+    // Note that means settings are untouched, as they are determined before initializing new game.
+    this.gameState.update(state => ({
+      ...state, // duplicates rest of state
+      statistics: createGameStatistics(),
+      players: this.generatePlayers(),
+      debugSettings: this.generateDebugSettings(),
+    }));
+
+    this.initializeRound();
+  }
+
+  /** Generate debug settings. Ensures production always has debug turn off. */
+  generateDebugSettings(): DebugSettings {
+    const debugMode = projectProp.build === "PROD" ? false : defDebugMode;
+    return {
+      debugMode: debugMode,
+    };
   }
 
   //
 
+  /**
+   * Initializes new round.
+   */
+  public initializeRound() {
+    this.gameState.update(state => ({
+      ...state, // duplicates rest of state
+      board: {
+        status: EnGameStatus.InProgress,
+        cells: this.generateCells(),
+        currPlayerIx: 0,
+        history: this.generateHistory(),
+      },
+      view: {
+        cells: this.gameState().board.cells,
+      },
+    }));
+  }
+
+  /**
+   * Create board for start of the game with correct size and four pieces already placed.
+   * @returns Initial board state.
+   */
   private generateCells() : Cell[][] {
     const size = this.gameState().settings.boardSize;
     const cells : Cell[][] = Array.from({ length: size }, () =>
@@ -55,6 +91,24 @@ export class GameStateService {
     cells[start][start+1].state = EnCellState.B;
     cells[start+1][start+1].state = EnCellState.W;
     return cells;
+  }
+
+  /**
+   * Generates starting history with one entry (initial state of board).
+   * @returns History.
+   */
+  public generateHistory(): GameHistory {
+    const moves: GameHistoryEntry[] = [];
+    // first entry in history is always initial state of board before making any moves
+    const moveEntry: GameHistoryEntry = {
+      playerIx: -1, // indicates no player made move
+      move: "",
+      cells: structuredClone(this.gameState().board.cells), // copy of array
+    };
+    moves.push(moveEntry);
+    return {
+      moves: moves,
+    };
   }
 
   //
@@ -81,7 +135,7 @@ export class GameStateService {
     return {
       type : this.generatePlayerType(first),
       name : this.generatePlayerName(first)
-    }
+    };
   }
 
   /**

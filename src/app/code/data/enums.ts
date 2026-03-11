@@ -50,7 +50,7 @@ export enum EnGameStatus {
   Stop, // game is halted due to error
   Pending, // default state
   InProgress,
-  PlayerWon, // we know which one via currPlayer
+  PlayerWon, // we know which one via currPlayerIx
   Tie,
 }
 
