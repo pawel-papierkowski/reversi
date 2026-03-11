@@ -36,7 +36,6 @@ export class App implements OnInit {
       const browserLang = this.translateService.getBrowserLang() || fallbackLang;
        // if unknown language, fall back to english
       const currLang = this.verifyLang(browserLang) ? browserLang : fallbackLang;
-      console.info(currLang);
       localStorage.setItem('app.language', currLang);
       this.translateService.use(currLang);
     }

@@ -48,7 +48,7 @@ export class GameStateService {
   }
 
   /** Generate debug settings. Ensures production always has debug turn off. */
-  generateDebugSettings(): DebugSettings {
+  private generateDebugSettings(): DebugSettings {
     const debugMode = projectProp.build === "PROD" ? false : defDebugMode;
     return {
       debugMode: debugMode,
@@ -97,13 +97,13 @@ export class GameStateService {
    * Generates starting history with one entry (initial state of board).
    * @returns History.
    */
-  public generateHistory(): GameHistory {
+  private generateHistory(): GameHistory {
     const moves: GameHistoryEntry[] = [];
     // first entry in history is always initial state of board before making any moves
     const moveEntry: GameHistoryEntry = {
       playerIx: -1, // indicates no player made move
       move: "",
-      cells: structuredClone(this.gameState().board.cells), // copy of array
+      cells: this.generateCells(),
     };
     moves.push(moveEntry);
     return {

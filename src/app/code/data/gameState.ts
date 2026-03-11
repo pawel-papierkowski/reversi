@@ -98,6 +98,12 @@ export function createCell(): Cell {
   };
 }
 
+export function createCellFill(state: EnCellState): Cell {
+  return {
+    state: state,
+  };
+}
+
 //
 
 export type Player = {
@@ -111,6 +117,9 @@ export function createPlayer(): Player {
     name: '',
   };
 }
+export function createPlayers(): Player[] {
+  return [createPlayer(), createPlayer()];
+}
 
 //
 
@@ -119,6 +128,14 @@ export type GameHistoryEntry = {
   move: string; // encoded move to show on screen
   cells: Cell[][]; // board state as copy of main board at that moment
 };
+
+export function createGameHistoryEntry(): GameHistoryEntry {
+  return {
+    playerIx: -1,
+    move: "",
+    cells: [],
+  };
+}
 
 export type GameHistory = {
   moves: GameHistoryEntry[];
@@ -168,7 +185,7 @@ export function createGameState(): GameState {
     view: createGameView(),
     settings: createGameSettings(),
     statistics: createGameStatistics(),
-    players: [], // actually filled later, as we need to know settings like mode and who is first
+    players: createPlayers(), // actually filled later, as we need to know settings like mode and who is first
     board: createGameBoard(),
     debugSettings: createDebugSettings(),
   };

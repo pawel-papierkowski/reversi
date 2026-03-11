@@ -17,7 +17,7 @@ export default defineConfig({
       include: ['src/**/*.ts'], // Analyze all TypeScript files in src/
       exclude: [
         'src/**/*.spec.ts',     // Don't calculate coverage for test files
-        'src/test-setup.ts',    // Don't calculate coverage for the setup file
+        '**/*.test-setup.ts',   // Exclude any file ending in .test-setup.ts
         'src/main.ts',          // Usually ignored as it just bootstraps the app
         'src/**/*.config.ts'    // Ignore config files
       ],

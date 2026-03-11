@@ -2,19 +2,23 @@
   <legend>{{'mainMenu.options' | translate}}</legend>
 
   <label for="mode">{{'mainMenu.settings.modes' | translate}}:</label>
-  <combo-box id="mode" langPrefix="enum.mode" [options]="modes"
+  <combo-box id="mode" data-testid="cb-mainMenu-mode"
+    langPrefix="enum.mode" [options]="modes"
     [(selectedOption)]="gameStateService.menuSettings().mode" />
 
   <label for="whoFirst">{{'mainMenu.settings.whoFirst' | translate}}:</label>
-  <combo-box id="whoFirst" langPrefix="enum.playerType" [options]="playerTypes"
+  <combo-box id="whoFirst" data-testid="cb-mainMenu-whoFirst"
+    langPrefix="enum.playerType" [options]="playerTypes"
     [disabled]="isWhoFirstDisabled()"
     [(selectedOption)]="gameStateService.menuSettings().whoFirst" />
 
   <label for="difficulty">{{'mainMenu.settings.difficulty' | translate}}:</label>
-  <combo-box id="difficulty" langPrefix="enum.difficulty" [options]="difficulties"
+  <combo-box id="difficulty" data-testid="cb-mainMenu-difficulty"
+    langPrefix="enum.difficulty" [options]="difficulties"
     [(selectedOption)]="gameStateService.menuSettings().difficulty" />
 
   <label for="boardSize">{{'mainMenu.settings.boardSize' | translate}}:</label>
-  <combo-box id="boardSize" langPrefix="mainMenu.settings.boardSize" [options]="gameConfig.boardSizes"
+  <combo-box id="boardSize" data-testid="cb-mainMenu-boardSize"
+    langPrefix="mainMenu.settings.boardSize" [options]="gameConfig.boardSizes"
     [(selectedOption)]="gameStateService.menuSettings().boardSize" />
 </fieldset>

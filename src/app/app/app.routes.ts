@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 
-import { gameOngoingGuard } from './guards/gameOngoing.guard';
+import { gameOngoingGuard } from '../guards/gameOngoing.guard';
 
-import { MainMenu } from './webpages/mainMenu/mainMenu';
-import { GameScreen } from './webpages/gameScreen/gameScreen';
-import { PageNotFound } from './webpages/pageNotFound/pageNotFound';
+import { MainMenu } from '../webpages/mainMenu/mainMenu';
+import { GameScreen } from '../webpages/gameScreen/gameScreen';
+import { PageNotFound } from '../webpages/pageNotFound/pageNotFound';
 
 export const routes: Routes = [
   {
