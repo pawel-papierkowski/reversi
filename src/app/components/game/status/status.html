@@ -1,7 +1,7 @@
 <div class="status">
   <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(0), name:getPlayerName(0)}"></div>
   <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(1), name:getPlayerName(1)}"></div>
-  <div class="doubleColumn" [innerHTML]="'game.status.currentPlayer' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayer)}"></div>
+  <div class="doubleColumn" [innerHTML]="'game.status.currentPlayer' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayerIx)}"></div>
 
   <!-- Game state. -->
   <div class="doubleColumn">
@@ -17,7 +17,7 @@
       <div [innerHTML]="'game.status.currStatus.inProgress' | translate"></div>
     }
     @case (3) { <!-- PlayerWon -->
-      <div [innerHTML]="'game.status.currStatus.playerWon' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayer)}"></div>
+      <div [innerHTML]="'game.status.currStatus.playerWon' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayerIx)}"></div>
     }
     @case (4) { <!-- Tie -->
       <div [innerHTML]="'game.status.currStatus.tie' | translate"></div>

@@ -17,9 +17,9 @@ export class MainMenu {
   readonly gameStateService = inject(GameStateService);
 
   startGame() {
-    // replace settings from main menu options form
+    // use settings from main menu options form
     this.gameStateService.applySettings();
-    this.gameStateService.initializeBoard();
+    this.gameStateService.initializeGame();
     this.router.navigate(['/board']);
   }
 

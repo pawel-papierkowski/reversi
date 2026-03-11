@@ -23,13 +23,13 @@
     <div>{{'game.statistics.tiesInRow' | translate}}:</div>
     <div>{{ gameStateService.gameState().statistics.tiesInRow }}</div>
 
-    <div>{{'game.statistics.playerWins' | translate:{name:gameStateService.gameState().board.players[0].name} }}:</div>
+    <div>{{'game.statistics.playerWins' | translate:{name:gameStateService.gameState().players[0].name} }}:</div>
     <div>{{ gameStateService.gameState().statistics.player1Score }}</div>
-    <div>{{'game.statistics.playerWinsInRow' | translate:{name:gameStateService.gameState().board.players[0].name} }}:</div>
+    <div>{{'game.statistics.playerWinsInRow' | translate:{name:gameStateService.gameState().players[0].name} }}:</div>
     <div>{{ gameStateService.gameState().statistics.player1WinInRow }}</div>
-    <div>{{'game.statistics.playerWins' | translate:{name:gameStateService.gameState().board.players[1].name} }}:</div>
+    <div>{{'game.statistics.playerWins' | translate:{name:gameStateService.gameState().players[1].name} }}:</div>
     <div>{{ gameStateService.gameState().statistics.player2Score }}</div>
-    <div>{{'game.statistics.playerWinsInRow' | translate:{name:gameStateService.gameState().board.players[1].name} }}:</div>
+    <div>{{'game.statistics.playerWinsInRow' | translate:{name:gameStateService.gameState().players[1].name} }}:</div>
     <div>{{ gameStateService.gameState().statistics.player2WinInRow }}</div>
   </div>
 </div>

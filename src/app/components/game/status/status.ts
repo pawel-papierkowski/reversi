@@ -21,7 +21,7 @@ export class Status {
    * @returns Text with player name.
    */
   getPlayerName(playerIx: number) : string {
-    const player = this.gameStateService.gameState().board.players[playerIx];
+    const player = this.gameStateService.gameState().players[playerIx];
     return player.name;
   }
 
@@ -31,7 +31,7 @@ export class Status {
    * @returns Text with player type.
    */
   getPlayerType(playerIx: number) : string {
-    const player = this.gameStateService.gameState().board.players[playerIx];
+    const player = this.gameStateService.gameState().players[playerIx];
     let typeStr = this.translateService.instant('enum.playerType.'+player.type);
     if (this.gameStateService.gameState().settings.mode !== EnMode.HumanVsAi) {
       typeStr = typeStr + ' ' + (playerIx+1);
