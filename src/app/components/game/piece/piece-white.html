@@ -1,5 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <g stroke="#000000" fill="#ffffff" stroke-width="0">
-    <circle cx="100" cy="100" r="90" />
+  <!-- Define the gradient in a <defs> block -->
+  <defs>
+    <!--
+      cx/cy: Center of the outer edge of the gradient
+      fx/fy: Focal point (where the 0% stop starts). Moving this to 30% puts the highlight top-left.
+    -->
+    <radialGradient id="whitePieceGradient" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+      <!-- Gradient for bright spot. -->
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="20%" stop-color="#fefefe" />
+      <stop offset="70%" stop-color="#f0f0f0" />
+      <stop offset="100%" stop-color="#dddddd" />
+    </radialGradient>
+  </defs>
+
+  <g stroke="#eeeeee" fill="url(#whitePieceGradient)" stroke-width="10">
+    <circle cx="100" cy="100" r="85" />
   </g>
 </svg>

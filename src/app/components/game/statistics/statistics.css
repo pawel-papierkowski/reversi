@@ -1,6 +1,7 @@
 .basic {
   display: grid;
   grid-template-columns: 2fr 3fr;
+  align-items: center;
   gap: 5px;
 
   margin: 10px;
@@ -12,7 +13,6 @@
 
   font-size: 14px;
   text-align: left;
-  align-items: center;
 }
 
 .basic h2 {
@@ -22,6 +22,7 @@
 .statistics {
   display: grid;
   grid-template-columns: 8fr 1fr;
+  align-items: center;
   gap: 5px;
 
   margin: 10px;
@@ -33,7 +34,6 @@
 
   font-size: 14px;
   text-align: left;
-  align-items: center;
 }
 
 .statistics h2 {

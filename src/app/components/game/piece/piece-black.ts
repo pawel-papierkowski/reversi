@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'reversi-piece-black',
   imports: [],
   templateUrl: './piece-black.html',
-  styleUrl: './piece.css'
+  styleUrl: './piece-any.css'
 })
 export class ReversiPieceBlack {
 }

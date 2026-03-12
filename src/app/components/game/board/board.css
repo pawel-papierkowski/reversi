@@ -38,6 +38,8 @@
   font-size: clamp(1rem, 2vw, 2rem); /* Responsive text size */
   font-weight: bold;
   color: white;
+
+  cursor: pointer;
 }
 
 /* Outer border for the TOP edge of the board */

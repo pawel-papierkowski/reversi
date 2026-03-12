@@ -1,7 +1,16 @@
 <div class="status">
-  <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(0), name:getPlayerName(0)}"></div>
-  <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(1), name:getPlayerName(1)}"></div>
-  <div class="doubleColumn" [innerHTML]="'game.status.currentPlayer' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayerIx)}"></div>
+  <div class="player">
+    <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(0), name:getPlayerName(0)}"></div>
+    <reversi-piece [state]="EnCellState.B" mode="inline" [anim]="false" />
+  </div>
+  <div class="player">
+    <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(1), name:getPlayerName(1)}"></div>
+    <reversi-piece [state]="EnCellState.W" mode="inline" [anim]="false" />
+  </div>
+  <div class="doubleColumn player">
+    <div [innerHTML]="'game.status.currentPlayer' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayerIx)}"></div>
+    <reversi-piece [state]="getPlayerCellState(gameStateService.gameState().board.currPlayerIx)" mode="inline"/>
+  </div>
 
   <!-- Game state. -->
   <div class="doubleColumn">

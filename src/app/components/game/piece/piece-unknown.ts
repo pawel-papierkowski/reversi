@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'reversi-piece-unknown',
   imports: [],
   templateUrl: './piece-unknown.html',
-  styleUrl: './piece.css'
+  styleUrl: './piece-any.css'
 })
 export class ReversiPieceUnknown {
 }

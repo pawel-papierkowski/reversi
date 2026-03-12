@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'reversi-piece-white',
   imports: [],
   templateUrl: './piece-white.html',
-  styleUrl: './piece.css'
+  styleUrl: './piece-any.css'
 })
 export class ReversiPieceWhite {
 }
