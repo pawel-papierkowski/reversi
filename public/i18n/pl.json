@@ -32,7 +32,7 @@
   "game.status.currentPlayer": "Aktualny gracz: <strong>{{name}}</strong>",
   "game.status.currStatus.stop": "Gra jest zatrzymana z powodu błędu.",
   "game.status.currStatus.pending": "Gra oczekuje na start...",
-  "game.status.currStatus.inProgress": "Game is in progress...",
+  "game.status.currStatus.inProgress": "W trakcie gry...",
   "game.status.currStatus.playerWon": "Gracz <strong>{{name}}</strong> wygrał!",
   "game.status.currStatus.tie": "Rozgrywka zakończyła się remisem.",
 
@@ -42,8 +42,9 @@
   "game.statistics.moveCount": "Ruchy",
   "game.statistics.ties": "Remisy",
   "game.statistics.tiesInRow": "Remisy pod rząd",
-  "game.statistics.playerWins": "Wygrane dla {{name}}",
-  "game.statistics.playerWinsInRow": "Wygrane dla {{name}} pod rząd",
+  "game.statistics.playerScore": "Punktacja",
+  "game.statistics.playerWins": "Wygrane",
+  "game.statistics.playerWinsInRow": "Wygrane pod rząd",
 
   "game.history.title": "Historia",
 

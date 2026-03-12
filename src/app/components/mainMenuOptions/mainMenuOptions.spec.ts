@@ -5,7 +5,7 @@ import { signal } from '@angular/core';
 import { selectComboboxOption } from '@/components/common/comboBox/_tests/comboBox.test-setup';
 
 import { MainMenuOptions } from './mainMenuOptions';
-import { GameStateService } from '@/code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
 
 // Create a mock service to safely observe the settings state
 class MockGameStateService {

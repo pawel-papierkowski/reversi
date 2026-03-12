@@ -9,12 +9,6 @@
   --color-text: #000000;
   --color-background: #ffffff;
 
-  /* Spacing */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-
   /*** Typography ***/
   /* UI elements. */
   --font-family-ui: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;

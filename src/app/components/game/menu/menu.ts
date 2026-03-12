@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {TranslatePipe} from '@ngx-translate/core';
 
-import { GameStateService } from '@/code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { EnGameStatus } from '@/code/data/enums';
 
 @Component({

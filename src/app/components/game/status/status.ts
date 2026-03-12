@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import {TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { GameStateService } from '@/code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { EnMode } from '@/code/data/enums';
 
 @Component({

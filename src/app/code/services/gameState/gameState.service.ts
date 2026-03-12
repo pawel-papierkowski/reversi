@@ -1,11 +1,13 @@
 import { Injectable, signal } from '@angular/core';
 
 import type { GameState, GameSettings, DebugSettings, Cell, Player, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
-import { createGameState, createGameSettings, createGameStatistics, createCell, defDebugMode } from "@/code/data/gameState";
+import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForDev, createDebugSettingsForProd } from "@/code/data/gameState";
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
 import { playerNames, projectProp } from '@/code/data/const';
 
-/** Game state service. */
+/** Game state service.
+ * Provides convenient functions to handle game state like initialization of game or round.
+ */
 @Injectable({providedIn: 'root'})
 export class GameStateService {
   /** Actual game state. */
@@ -49,10 +51,8 @@ export class GameStateService {
 
   /** Generate debug settings. Ensures production always has debug turn off. */
   private generateDebugSettings(): DebugSettings {
-    const debugMode = projectProp.build === "PROD" ? false : defDebugMode;
-    return {
-      debugMode: debugMode,
-    };
+    const debugMode = projectProp.build === "PROD" ? false : true;
+    return debugMode ? createDebugSettingsForDev() : createDebugSettingsForProd();
   }
 
   //
@@ -68,8 +68,15 @@ export class GameStateService {
       board: {
         status: EnGameStatus.InProgress,
         cells: newCells,
+        legalMoves: [],
         currPlayerIx: 0,
         history: this.generateHistory(),
+      },
+      statistics: {
+        ...state.statistics,
+        moveCount: 0, // reset stats for current state of board
+        player1Score: 2,
+        player2Score: 2,
       },
       view: {
         cells: newCells,
@@ -114,7 +121,7 @@ export class GameStateService {
     // first entry in history is always initial state of board before making any moves
     const moveEntry: GameHistoryEntry = {
       playerIx: -1, // indicates no player made move
-      move: "",
+      move: null,
       cells: this.generateCells(),
     };
     moves.push(moveEntry);

@@ -4,7 +4,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 
 import { modeDescr, playerTypeDescr, difficultyDescr, EnMode } from '@/code/data/enums';
 import { gameConfig } from '@/code/data/const';
-import { GameStateService } from '@/code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
 
 import { ComboBox } from '@/components/common/comboBox/comboBox';
 

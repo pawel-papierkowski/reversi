@@ -12,24 +12,33 @@
     <div>{{'mainMenu.settings.boardSize' | translate}}:</div>
     <div>{{'mainMenu.settings.boardSize.'+gameStateService.gameState().settings.boardSize | translate }}</div>
   </div>
+
   <div class="statistics">
     <h2>{{'game.statistics.stats' | translate}}</h2>
     <div>{{'game.statistics.round' | translate}}:</div>
     <div>{{ gameStateService.gameState().statistics.round }}</div>
     <div>{{'game.statistics.moveCount' | translate}}:</div>
     <div>{{ gameStateService.gameState().statistics.moveCount }}</div>
+
     <div>{{'game.statistics.ties' | translate}}:</div>
     <div>{{ gameStateService.gameState().statistics.ties }}</div>
     <div>{{'game.statistics.tiesInRow' | translate}}:</div>
     <div>{{ gameStateService.gameState().statistics.tiesInRow }}</div>
 
-    <div>{{'game.statistics.playerWins' | translate:{name:gameStateService.gameState().players[0].name} }}:</div>
+    <h3>{{gameStateService.gameState().players[0].name}}</h3>
+    <div>{{'game.statistics.playerScore' | translate }}:</div>
     <div>{{ gameStateService.gameState().statistics.player1Score }}</div>
-    <div>{{'game.statistics.playerWinsInRow' | translate:{name:gameStateService.gameState().players[0].name} }}:</div>
+    <div>{{'game.statistics.playerWins' | translate }}:</div>
+    <div>{{ gameStateService.gameState().statistics.player1Win }}</div>
+    <div>{{'game.statistics.playerWinsInRow' | translate }}:</div>
     <div>{{ gameStateService.gameState().statistics.player1WinInRow }}</div>
-    <div>{{'game.statistics.playerWins' | translate:{name:gameStateService.gameState().players[1].name} }}:</div>
+
+    <h3>{{gameStateService.gameState().players[1].name}}</h3>
+    <div>{{'game.statistics.playerScore' | translate }}:</div>
     <div>{{ gameStateService.gameState().statistics.player2Score }}</div>
-    <div>{{'game.statistics.playerWinsInRow' | translate:{name:gameStateService.gameState().players[1].name} }}:</div>
+    <div>{{'game.statistics.playerWins' | translate }}:</div>
+    <div>{{ gameStateService.gameState().statistics.player2Win }}</div>
+    <div>{{'game.statistics.playerWinsInRow' | translate }}:</div>
     <div>{{ gameStateService.gameState().statistics.player2WinInRow }}</div>
   </div>
 </div>

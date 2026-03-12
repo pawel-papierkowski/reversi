@@ -3,6 +3,12 @@ import { environment } from '../../../environments/environment';
 import { EnDifficulty, EnAiTactic, EnPlayerType } from '@/code/data/enums';
 import type { ProjectProp, DifficultyConfig, GameConfig } from '@/code/data/types';
 
+// DEBUG CONSTANTS
+export const defDebugMode: boolean = true;
+export const defDebugShowMove: boolean = true;
+
+//
+
 export const projectProp: ProjectProp = {
   title: "Reversi",
   author: "Paweł Papierkowski",
