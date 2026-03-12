@@ -1,0 +1,16 @@
+<div class="cell-content">
+@switch (cell().state) {
+  @case (0) { <!-- Unknown -->
+    <reversi-piece-unknown /> <!-- indicates error -->
+  }
+  @case (1) { <!-- Empty -->
+    <!-- do nothing -->
+  }
+  @case (2) { <!-- Black piece -->
+    <reversi-piece-black />
+  }
+  @case (3) { <!-- White piece -->
+    <reversi-piece-white />
+  }
+}
+</div>

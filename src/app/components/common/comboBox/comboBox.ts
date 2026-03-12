@@ -20,7 +20,7 @@ import {TranslatePipe} from '@ngx-translate/core';
   styleUrl: './comboBox.css'
 })
 export class ComboBox {
-  options = input<string[]|number[]>();
+  options = input.required<string[]|number[]>();
   placeholder = input('comboBox.placeholder'); // if nothing is selected, this will be shown
   langPrefix = input('');
   disabled = input(false);

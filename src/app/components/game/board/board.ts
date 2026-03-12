@@ -1,14 +1,24 @@
-import { Component, inject } from '@angular/core';
-import {TranslatePipe} from '@ngx-translate/core';
+import { Component, inject, computed } from '@angular/core';
 
-import { GameStateService } from '@/code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
+
+import { ReversiCell } from '@/components/game/cell/cell';
 
 @Component({
-  selector: 'app-game-board',
-  imports: [TranslatePipe],
+  selector: 'reversi-board',
+  imports: [ReversiCell],
   templateUrl: './board.html',
-  styleUrl: './board.css'
+  styleUrl: './board.css',
+  host: {
+    '[style.--board-size]': 'gameStateService.gameState().settings.boardSize'
+  }
 })
-export class Board {
+export class ReversiBoard {
   readonly gameStateService = inject(GameStateService);
+
+  // Computed signal to generate letters: ['a', 'b', 'c' ...]
+  readonly columns = computed(() => {
+    const size = this.gameStateService.gameState().settings.boardSize;
+    return Array.from({ length: size }, (_, i) => String.fromCharCode(97 + i));
+  });
 }

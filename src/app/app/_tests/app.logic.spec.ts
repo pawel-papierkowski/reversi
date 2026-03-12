@@ -8,7 +8,7 @@ import { App } from '../app';
 import { EnGameStatus, EnCellState, EnMode, EnPlayerType } from '@/code/data/enums';
 import type { GameState, Cell } from "@/code/data/gameState";
 import { createGameState, createCell, createCellFill, createGameHistoryEntry } from "@/code/data/gameState";
-import { GameStateService } from '@/code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
 
 describe('App (logic)', () => {
   let fixture: ComponentFixture<App>;
@@ -36,6 +36,8 @@ describe('App (logic)', () => {
     const startGameState = createGameState();
     // Mutate only the fields that change after "Start Game" is clicked.
 
+    startGameState.statistics.player1Score = 2;
+    startGameState.statistics.player2Score = 2;
     startGameState.settings.boardSize = boardSize;
     startGameState.board.status = EnGameStatus.InProgress;
 

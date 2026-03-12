@@ -22,7 +22,7 @@ h1 {
   color: #484848;
   font-size: 54px;
   text-align: center;
-  text-shadow: 0 0 5px currentColor;
+  text-shadow: 0 0 3px currentColor;
 }
 
 h2 {
@@ -32,9 +32,25 @@ h2 {
   text-shadow: 0 0 2px currentColor;
 }
 
+h3 {
+  color: #484848;
+  font-size: 16px;
+  text-align: center;
+  text-shadow: 0 0 1px currentColor;
+}
+
 /*** Common elements used on multiple pages. ***/
 
 /* Menu. */
+
+.menu-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+}
 
 .menu {
   display: grid;
@@ -42,6 +58,7 @@ h2 {
   gap: 10px;
 
   width: 100%;
+  max-width: 50vw;
 
   margin: 6px 0px;
   padding: 5px;
@@ -60,6 +77,12 @@ h2 {
   width: 100%;
 }
 
+@media (max-width: 700px) {
+  .menu {
+    max-width: 80vw;
+  }
+}
+
 /* Sidepanel. */
 
 .sidepanel-left {
@@ -71,7 +94,7 @@ h2 {
   z-index: 100; /* Ensure it's above other content */
 
   min-width: 200px;
-  max-width: 350px;
+  max-width: 300px;
 }
 
 .sidepanel-right {

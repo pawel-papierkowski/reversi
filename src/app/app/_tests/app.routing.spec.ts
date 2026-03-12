@@ -9,7 +9,7 @@ import { App } from '../app';
 
 import type { GameState, GameSettings, } from "@/code/data/gameState";
 import { createGameState, createGameSettings } from "@/code/data/gameState";
-import { GameStateService } from '@/code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
 
 describe('App (routing)', () => {
   let fixture: ComponentFixture<App>;

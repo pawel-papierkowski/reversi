@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 
 import { EnMode } from '@/code/data/enums';
-import { GameStateService } from '@/code/services/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
 
 @Component({
   selector: 'app-game-statistics',

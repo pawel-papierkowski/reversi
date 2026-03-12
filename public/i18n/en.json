@@ -42,8 +42,9 @@
   "game.statistics.moveCount": "Move",
   "game.statistics.ties": "Draws",
   "game.statistics.tiesInRow": "Draws in row",
-  "game.statistics.playerWins": "{{name}} wins",
-  "game.statistics.playerWinsInRow": "{{name}} wins in row",
+  "game.statistics.playerScore": "Score",
+  "game.statistics.playerWins": "Wins",
+  "game.statistics.playerWinsInRow": "Wins in row",
 
   "game.history.title": "History",
 

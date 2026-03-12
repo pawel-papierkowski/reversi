@@ -1,13 +1,14 @@
-<div>
+<div class="menu-wrapper">
   <app-main-menu-options />
   <div class="menu">
-    <button data-testid="btn-start" (click)="startGame()">
-      {{ 'mainMenu.btn.start' | translate }}
-    </button>
     @if (gameStateService.isGameOngoing()) {
       <button data-testid="btn-continue" (click)="continueGame()">
         {{ 'mainMenu.btn.continue' | translate }}
       </button>
     }
+
+    <button data-testid="btn-start" (click)="startGame()">
+      {{ 'mainMenu.btn.start' | translate }}
+    </button>
   </div>
 </div>
