@@ -1,0 +1,19 @@
+<!-- The main container establishes the 3D perspective -->
+<div class="piece-container">
+
+  <!-- The flipper rotates based on the cell state. -->
+  <!-- White is the "front" (0deg) and Black is the "back" (180deg). -->
+  <div [class]="classes()" [class.flipped]="state() === EnCellState.B">
+
+    <!-- WHITE PIECE (Front) -->
+    <div class="side front">
+      <reversi-piece-white />
+    </div>
+
+    <!-- BLACK PIECE (Back) -->
+    <div class="side back">
+      <reversi-piece-black />
+    </div>
+
+  </div>
+</div>

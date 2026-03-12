@@ -25,7 +25,10 @@
     <div>{{'game.statistics.tiesInRow' | translate}}:</div>
     <div>{{ gameStateService.gameState().statistics.tiesInRow }}</div>
 
-    <h3>{{gameStateService.gameState().players[0].name}}</h3>
+    <h3>
+      {{gameStateService.gameState().players[0].name}}
+      <reversi-piece [state]="EnCellState.B" mode="inline" [anim]="false" />
+    </h3>
     <div>{{'game.statistics.playerScore' | translate }}:</div>
     <div>{{ gameStateService.gameState().statistics.player1Score }}</div>
     <div>{{'game.statistics.playerWins' | translate }}:</div>
@@ -33,7 +36,10 @@
     <div>{{'game.statistics.playerWinsInRow' | translate }}:</div>
     <div>{{ gameStateService.gameState().statistics.player1WinInRow }}</div>
 
-    <h3>{{gameStateService.gameState().players[1].name}}</h3>
+    <h3>
+      {{gameStateService.gameState().players[1].name}}
+      <reversi-piece [state]="EnCellState.W" mode="inline" [anim]="false" />
+    </h3>
     <div>{{'game.statistics.playerScore' | translate }}:</div>
     <div>{{ gameStateService.gameState().statistics.player2Score }}</div>
     <div>{{'game.statistics.playerWins' | translate }}:</div>

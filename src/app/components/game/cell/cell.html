@@ -1,16 +1,12 @@
-<div class="cell-content">
-@switch (cell().state) {
-  @case (0) { <!-- Unknown -->
+<div class="cell-content" (click)="cellClick()">
+  @if (cell().state === 0) { <!-- Unknown -->
     <reversi-piece-unknown /> <!-- indicates error -->
   }
-  @case (1) { <!-- Empty -->
-    <!-- do nothing -->
+
+  <!-- cell().state === 1 - Empty does not show anything. -->
+
+  @if (cell().state === 2 || cell().state === 3) { <!-- Black or white piece -->
+    <!-- Passes the enum down, triggering the flip automatically if it changes. -->
+    <reversi-piece [state]="cell().state" />
   }
-  @case (2) { <!-- Black piece -->
-    <reversi-piece-black />
-  }
-  @case (3) { <!-- White piece -->
-    <reversi-piece-white />
-  }
-}
 </div>

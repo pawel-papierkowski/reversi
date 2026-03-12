@@ -129,17 +129,19 @@ export function createCellFill(state: EnCellState): Cell {
 
 export type Player = {
   type: EnPlayerType;
+  cellState: EnCellState;
   name: string;
 }
 
-export function createPlayer(): Player {
+export function createPlayer(cellState: EnCellState): Player {
   return {
     type: EnPlayerType.Human,
+    cellState: cellState,
     name: '',
   };
 }
 export function createPlayers(): Player[] {
-  return [createPlayer(), createPlayer()];
+  return [createPlayer(EnCellState.B), createPlayer(EnCellState.W)];
 }
 
 //

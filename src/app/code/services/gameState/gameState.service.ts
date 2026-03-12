@@ -153,6 +153,7 @@ export class GameStateService {
     if (first) this.usedName = '';
     return {
       type : this.generatePlayerType(first),
+      cellState: first ? EnCellState.B : EnCellState.W,
       name : this.generatePlayerName(first)
     };
   }
