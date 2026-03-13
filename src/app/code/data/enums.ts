@@ -75,3 +75,16 @@ export const cellStateDescr: Record<EnCellState, string> = {
   [EnCellState.B]: 'Black',
   [EnCellState.W]: 'White',
 };
+
+//
+
+export enum EnDir {
+  N,  //  X, -Y
+  NE, // +X, -Y
+  E,  // +X,  Y
+  SE, // +X, +Y
+  S,  //  X, +Y
+  SW, // -X, +Y
+  W,  // -X,  Y
+  NW, // -X, -Y
+}

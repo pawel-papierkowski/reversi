@@ -7,11 +7,9 @@ import {TranslatePipe} from '@ngx-translate/core';
  * Serves as replacement for select and option elements since these cannot be styled properly.
  * Variable options expects array of strings or numbers. selectedOption should be value to get/set.
  * Features:
- * <ul>
- * <li>Can choose multiple options.</li>
- * <li>Can be disabled.</li>
- * <li>Integration with translate pipeline.</li>
- * </ul>
+ * - Can choose multiple options.
+ * - Can be disabled.
+ * - Integration with translate pipeline.
  */
 @Component({
   selector: 'combo-box',
@@ -19,7 +17,7 @@ import {TranslatePipe} from '@ngx-translate/core';
   templateUrl: './comboBox.html',
   styleUrl: './comboBox.css'
 })
-export class ComboBox {
+export class ComboBoxCmp {
   options = input.required<string[]|number[]>();
   placeholder = input('comboBox.placeholder'); // if nothing is selected, this will be shown
   langPrefix = input('');

@@ -9,6 +9,6 @@ import { projectProp } from "@/code/data/const";
   templateUrl: './footer.html',
   styleUrl: './footer.css'
 })
-export class Footer {
+export class FooterCmp {
   projectProp = projectProp;
 }

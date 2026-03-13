@@ -1,12 +1,18 @@
 <div class="cell-content" (click)="cellClick()">
-  @if (cell().state === 0) { <!-- Unknown -->
+  @if (cell().state === EnCellState.Unknown) {
     <reversi-piece-unknown /> <!-- indicates error -->
   }
 
-  <!-- cell().state === 1 - Empty does not show anything. -->
+  @if (cell().state === EnCellState.Empty) {
+    <!-- Potential moves show only when defDebugShowMove === true -->
+    @if (cell().potentialMove !== EnCellState.Empty) {
+      <reversi-piece [state]="cell().potentialMove" [opacity]="50" />
+    }
+  }
 
-  @if (cell().state === 2 || cell().state === 3) { <!-- Black or white piece -->
-    <!-- Passes the enum down, triggering the flip automatically if it changes. -->
+  @if (cell().state === EnCellState.B || cell().state === EnCellState.W) {
+    <!-- Black or white piece. This condition must exists, since we need single element
+         to handle both states so we can see flipping. -->
     <reversi-piece [state]="cell().state" />
   }
 </div>

@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
-import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { GameService } from '@/code/services/game/game.service';
 
 /**
  * Makes sure you can enter page only when game is ongoing.
@@ -10,8 +10,8 @@ import { GameStateService } from '@/code/services/gameState/gameState.service';
  */
 export const gameOngoingGuard: CanActivateFn = () => {
   const router = inject(Router);
-  const gameState = inject(GameStateService);
+  const gameService = inject(GameService);
 
-  if (gameState.isGameOngoing()) return true;
+  if (gameService.isGameOngoing()) return true;
   return router.createUrlTree(['']); // kick back to main menu
 };

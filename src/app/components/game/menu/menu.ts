@@ -11,21 +11,21 @@ import { EnGameStatus } from '@/code/data/enums';
   templateUrl: './menu.html',
   styleUrl: './menu.css'
 })
-export class GameMenu {
-  readonly router = inject(Router);
-  readonly gameStateService = inject(GameStateService);
+export class GameMenuCmp {
+  public readonly router = inject(Router);
+  private readonly gameStateService = inject(GameStateService);
 
-  canShowNextRound(): boolean {
+  public canShowNextRound(): boolean {
     const status = this.gameStateService.gameState().board.status;
     if (status === EnGameStatus.PlayerWon || status === EnGameStatus.Tie) return true;
     return false;
   }
 
-  nextRound() {
+  public nextRound() {
     // TODO: move on to next round.
   }
 
-  backToMenu() {
+  public backToMenu() {
     this.router.navigate(['/']);
   }
 }

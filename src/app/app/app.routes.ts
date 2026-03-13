@@ -2,25 +2,25 @@ import { Routes } from '@angular/router';
 
 import { gameOngoingGuard } from '../guards/gameOngoing.guard';
 
-import { MainMenu } from '../webpages/mainMenu/mainMenu';
-import { GameScreen } from '../webpages/gameScreen/gameScreen';
-import { PageNotFound } from '../webpages/pageNotFound/pageNotFound';
+import { MainMenuPage } from '../webpages/mainMenu/mainMenu';
+import { GameScreenPage } from '../webpages/gameScreen/gameScreen';
+import { PageNotFoundPage } from '../webpages/pageNotFound/pageNotFound';
 
 export const routes: Routes = [
   {
     path: '',
     title: 'Reversi: Main Menu',
-    component: MainMenu,
+    component: MainMenuPage,
   },
   {
     path: 'board',
     title: 'Reversi: Board',
-    component: GameScreen,
+    component: GameScreenPage,
     canActivate: [ gameOngoingGuard ],
   },
   {
     path: '**',
     title: '404 Page not found',
-    component: PageNotFound,
+    component: PageNotFoundPage,
   },
 ];

@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   templateUrl: './piece-black.html',
   styleUrl: './piece-any.css'
 })
-export class ReversiPieceBlack {
+export class ReversiPieceBlackCmp {
 }

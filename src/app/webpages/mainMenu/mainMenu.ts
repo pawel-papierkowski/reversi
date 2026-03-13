@@ -2,28 +2,26 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {TranslatePipe} from '@ngx-translate/core';
 
-import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { GameService } from '@/code/services/game/game.service';
 
-import { MainMenuOptions } from '@/components/mainMenuOptions/mainMenuOptions';
+import { MainMenuOptionsCmp } from '@/components/mainMenuOptions/mainMenuOptions';
 
 @Component({
   selector: 'app-main-menu',
-  imports: [TranslatePipe, MainMenuOptions],
+  imports: [TranslatePipe, MainMenuOptionsCmp],
   templateUrl: './mainMenu.html',
   styleUrl: './mainMenu.css'
 })
-export class MainMenu {
-  readonly router = inject(Router);
-  readonly gameStateService = inject(GameStateService);
+export class MainMenuPage {
+  public readonly router = inject(Router);
+  public readonly gameService = inject(GameService);
 
-  startGame() {
-    // use settings from main menu options form
-    this.gameStateService.applySettings();
-    this.gameStateService.initializeGame();
+  public startGame() {
+    this.gameService.startGame();
     this.router.navigate(['/board']);
   }
 
-  continueGame() {
+  public continueGame() {
     this.router.navigate(['/board']);
   }
 }

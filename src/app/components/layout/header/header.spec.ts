@@ -2,22 +2,22 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { vi } from 'vitest';
 
-import { Header } from './header';
+import { HeaderCmp } from './header';
 
 describe('Header', () => {
-  let fixture: ComponentFixture<Header>;
-  let component: Header;
+  let fixture: ComponentFixture<HeaderCmp>;
+  let component: HeaderCmp;
   let translateService: TranslateService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        Header,
+        HeaderCmp,
         TranslateModule.forRoot() // Dummy translation module so TranslatePipe works.
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Header);
+    fixture = TestBed.createComponent(HeaderCmp);
     component = fixture.componentInstance;
     translateService = TestBed.inject(TranslateService);
 

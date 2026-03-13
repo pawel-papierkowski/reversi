@@ -111,17 +111,27 @@ export function createGameStatistics(): GameStatistics {
 
 export type Cell = {
   state: EnCellState;
+  potentialMove: EnCellState; // used only when defDebugShowMove === true
 }
 
 export function createCell(): Cell {
   return {
     state: EnCellState.Empty,
+    potentialMove: EnCellState.Empty,
   };
 }
 
 export function createCellFill(state: EnCellState): Cell {
   return {
     state: state,
+    potentialMove: EnCellState.Empty,
+  };
+}
+
+export function createCellFull(state: EnCellState, potentialMove: EnCellState): Cell {
+  return {
+    state: state,
+    potentialMove: potentialMove,
   };
 }
 
@@ -129,14 +139,14 @@ export function createCellFill(state: EnCellState): Cell {
 
 export type Player = {
   type: EnPlayerType;
-  cellState: EnCellState;
+  piece: EnCellState.B | EnCellState.W;
   name: string;
 }
 
-export function createPlayer(cellState: EnCellState): Player {
+export function createPlayer(piece: EnCellState.B | EnCellState.W): Player {
   return {
     type: EnPlayerType.Human,
-    cellState: cellState,
+    piece: piece,
     name: '',
   };
 }
@@ -173,10 +183,14 @@ export function createGameHistory(): GameHistory {
 //
 
 export type ReversiMove = {
+  x: number;
+  y: number;
 };
 
-export function createLegalMove(): ReversiMove {
+export function createReversiMove(x: number, y: number): ReversiMove {
   return {
+    x: x,
+    y: y
   };
 }
 

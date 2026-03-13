@@ -4,19 +4,18 @@ import {TranslatePipe} from '@ngx-translate/core';
 import { EnMode, EnCellState } from '@/code/data/enums';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 
-import { PlayerName } from '@/components/common/playerName/playerName';
+import { PlayerNameCmp } from '@/components/common/playerName/playerName';
 
 @Component({
   selector: 'app-game-statistics',
-  imports: [TranslatePipe, PlayerName],
+  imports: [TranslatePipe, PlayerNameCmp],
   templateUrl: './statistics.html',
   styleUrl: './statistics.css'
 })
-export class Statistics {
-  readonly gameStateService = inject(GameStateService);
-  EnCellState = EnCellState;
+export class StatisticsCmp {
+  public readonly gameStateService = inject(GameStateService);
 
-  showWhenHumanVsAi() : boolean {
+  public showWhenHumanVsAi() : boolean {
     return this.gameStateService.menuSettings().mode === EnMode.HumanVsAi;
   }
 }

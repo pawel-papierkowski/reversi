@@ -5,12 +5,12 @@ import {TranslateService} from "@ngx-translate/core";
 
 import { languages, fallbackLang } from "@/code/data/const";
 
-import { Header } from '@/components/layout/header/header';
-import { Footer } from '@/components/layout/footer/footer';
+import { HeaderCmp } from '@/components/layout/header/header';
+import { FooterCmp } from '@/components/layout/footer/footer';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Footer],
+  imports: [RouterOutlet, HeaderCmp, FooterCmp],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
