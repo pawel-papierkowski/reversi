@@ -35,7 +35,7 @@ export class ReversiCellCmp {
       default: break;
     }
 
-    this.legalMoveService.resolve();
+    this.legalMoveService.resolveMoves();
     this.legalMoveService.debugShowMoves();
   }
 

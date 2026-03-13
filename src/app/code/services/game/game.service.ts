@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { EnGameStatus } from '@/code/data/enums';
+import type { ReversiMove } from "@/code/data/gameState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
@@ -22,15 +23,17 @@ export class GameService {
     this.gameStateService.applySettings();
     this.gameStateService.initializeGame();
 
-    this.beforeNextMove();
+    this.afterMove(null); // initial state of board
   }
 
   /**
-   * Prepare needed stuff before next move.
+   * Prepares needed stuff after making move or at beginning of game.
+   * @param move Move that lead to this state of board. Null if it is initial state of board.
    */
-  public beforeNextMove() {
-    this.legalMoveService.resolve();
+  public afterMove(move: ReversiMove | null) {
+    this.legalMoveService.resolveMoves();
     this.legalMoveService.debugShowMoves();
+    this.gameStateService.addToHistory(move);
   }
 
   // VARIOUS
