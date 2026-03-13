@@ -28,12 +28,12 @@
   "mainMenu.settings.boardSize.8": "8x8",
   "mainMenu.settings.boardSize.10": "10x10",
 
-  "game.status.playerType": "{{type}}: <strong>{{name}}</strong>",
-  "game.status.currentPlayer": "Current player: <strong>{{name}}</strong>",
+  "game.status.currentPlayer": "Current player",
   "game.status.currStatus.stop": "Game is halted due to bug.",
   "game.status.currStatus.pending": "Game is pending...",
-  "game.status.currStatus.inProgress": "Game is in progress...",
-  "game.status.currStatus.playerWon": "Player <strong>{{name}}</strong> won!",
+  "game.status.currStatus.inProgress.human": "Waiting for player move...",
+  "game.status.currStatus.inProgress.ai": "Waiting for AI move...",
+  "game.status.currStatus.playerWon": "Winning player:",
   "game.status.currStatus.tie": "Game finished in draw.",
 
   "game.statistics.basic": "Basic data",

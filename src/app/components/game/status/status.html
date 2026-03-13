@@ -1,34 +1,40 @@
 <div class="status">
   <div class="player">
-    <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(0), name:getPlayerName(0)}"></div>
-    <reversi-piece [state]="EnCellState.B" mode="inline" [anim]="false" />
+    {{'enum.playerType.'+gameStateService.gameState().players[0].type | translate}}:
+    <app-player-name [player]="gameStateService.gameState().players[0]" [anim]="false" />
   </div>
   <div class="player">
-    <div [innerHTML]="'game.status.playerType' | translate:{type:getPlayerType(1), name:getPlayerName(1)}"></div>
-    <reversi-piece [state]="EnCellState.W" mode="inline" [anim]="false" />
+    {{'enum.playerType.'+gameStateService.gameState().players[1].type | translate}}:
+    <app-player-name [player]="gameStateService.gameState().players[1]" [anim]="false" />
   </div>
   <div class="doubleColumn player">
-    <div [innerHTML]="'game.status.currentPlayer' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayerIx)}"></div>
-    <reversi-piece [state]="getPlayerCellState(gameStateService.gameState().board.currPlayerIx)" mode="inline"/>
+    {{'game.status.currentPlayer' | translate}}:
+    <app-player-name [player]="gameStateService.getCurrPlayer()" [anim]="true" />
   </div>
 
   <!-- Game state. -->
   <div class="doubleColumn">
   @switch (gameStateService.gameState().board.status) {
-    @case (0) { <!-- Stop -->
+    @case (EnGameStatus.Stop) {
       <div [innerHTML]="'game.status.currStatus.stop' | translate"></div>
     }
-    @case (1) { <!-- Pending, you should not be able to see it, but whatever -->
+    @case (EnGameStatus.Pending) { <!-- you should not be able to see it, but whatever -->
       <div [innerHTML]="'game.status.currStatus.pending' | translate"></div>
     }
-    @case (2) { <!-- InProgress -->
-      <!-- TODO more details, especially if it is human vs AI. -->
-      <div [innerHTML]="'game.status.currStatus.inProgress' | translate"></div>
+    @case (EnGameStatus.InProgress) {
+      @if (gameStateService.getCurrPlayer().type === EnPlayerType.Human) {
+        {{'game.status.currStatus.inProgress.human' | translate}}
+      }
+      @else {
+        {{'game.status.currStatus.inProgress.ai' | translate}}
+        <asset-spinner/>
+      }
     }
-    @case (3) { <!-- PlayerWon -->
-      <div [innerHTML]="'game.status.currStatus.playerWon' | translate:{name:getPlayerName(gameStateService.gameState().board.currPlayerIx)}"></div>
+    @case (EnGameStatus.PlayerWon) {
+      {{'game.status.currStatus.playerWon' | translate}}
+      <app-player-name [player]="gameStateService.getCurrPlayer()" [anim]="true" />!
     }
-    @case (4) { <!-- Tie -->
+    @case (EnGameStatus.Tie) {
       <div [innerHTML]="'game.status.currStatus.tie' | translate"></div>
     }
   }

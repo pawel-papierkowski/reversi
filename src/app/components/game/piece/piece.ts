@@ -2,8 +2,8 @@ import { Component, input, computed } from '@angular/core';
 
 import { EnCellState } from '@/code/data/enums';
 
-import { ReversiPieceWhite } from '@/components/game/piece/piece-white';
-import { ReversiPieceBlack } from '@/components/game/piece/piece-black';
+import { ReversiPieceWhite } from '@/components/assets/piece/piece-white';
+import { ReversiPieceBlack } from '@/components/assets/piece/piece-black';
 
 @Component({
   selector: 'reversi-piece',
@@ -19,7 +19,7 @@ export class ReversiPiece {
   state = input.required<EnCellState>();
   anim = input<boolean>(true); // if false, disable animation
   mode = input<'board' | 'inline'>('board'); // Optional input: 'board' (default) or 'inline'.
-  
+
   classes = computed<string[]>(() => {
     const cssClasses: string[] = [];
     cssClasses.push('flipper');
