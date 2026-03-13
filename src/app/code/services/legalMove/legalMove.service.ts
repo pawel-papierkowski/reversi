@@ -20,10 +20,10 @@ export class LegalMoveService {
    * Finds out all legal moves for current game state.
    * @returns Array of legal moves. Can be empty if no legal moves available.
    */
-  public resolve() {
+  public resolveMoves() {
     const cells = this.gameStateService.gameState().board.cells;
     const playerPiece = this.gameStateService.getCurrPlayer().piece;
-    const moves = this.resolveCustom(cells, playerPiece);
+    const moves = this.resolveMovesCustom(cells, playerPiece);
     this.gameStateService.gameState().board.legalMoves = moves;
   }
 
@@ -33,7 +33,7 @@ export class LegalMoveService {
    * @param playerPiece Player piece.
    * @returns Array of legal moves. Can be empty if no legal moves available.
    */
-  public resolveCustom(cells: Cell[][], playerPiece: EnCellState) : ReversiMove[] {
+  public resolveMovesCustom(cells: Cell[][], playerPiece: EnCellState) : ReversiMove[] {
     const foundMoves: ReversiMove[] = [];
     const boardSize = this.gameStateService.gameState().settings.boardSize;
 

@@ -1,9 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 
-import type { GameState, GameSettings, DebugSettings, Cell, Player, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
-import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForDev, createDebugSettingsForProd } from "@/code/data/gameState";
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
 import { playerNames, projectProp } from '@/code/data/const';
+import type { GameState, GameSettings, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
+import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForDev, createDebugSettingsForProd } from "@/code/data/gameState";
 
 /** Game state service.
  * Provides convenient functions to handle game state like initialization of game or round.
@@ -42,6 +42,22 @@ export class GameStateService {
       ...state, // duplicates rest of state
       settings: structuredClone(this.menuSettings()) // make sure we use copy of settings
     }));
+  }
+
+  /**
+   * Add current state of board to history.
+   * @param move Move that lead to this state of board. Null if it is initial state of board.
+   */
+  public addToHistory(move: ReversiMove | null) {
+    // -1 indicates no player made move (initial state of board)
+    const playerIx = move === null ? -1 : this.gameState().board.currPlayerIx;
+
+    const moveEntry: GameHistoryEntry = {
+      playerIx: playerIx,
+      move: move,
+      cells: structuredClone(this.gameState().board.cells),
+    };
+    this.gameState().board.history.moves.push(moveEntry);
   }
 
   // //////////////////////////////////////////////////////////////////////////
@@ -83,7 +99,7 @@ export class GameStateService {
         cells: newCells,
         legalMoves: [],
         currPlayerIx: 0,
-        history: this.generateHistory(),
+        history: this.generateEmptyHistory(),
       },
       statistics: {
         ...state.statistics,
@@ -126,18 +142,11 @@ export class GameStateService {
   }
 
   /**
-   * Generates starting history with one entry (initial state of board).
+   * Generates empty history.
    * @returns History.
    */
-  private generateHistory(): GameHistory {
+  private generateEmptyHistory(): GameHistory {
     const moves: GameHistoryEntry[] = [];
-    // first entry in history is always initial state of board before making any moves
-    const moveEntry: GameHistoryEntry = {
-      playerIx: -1, // indicates no player made move
-      move: null,
-      cells: this.generateCells(),
-    };
-    moves.push(moveEntry);
     return {
       moves: moves,
     };
