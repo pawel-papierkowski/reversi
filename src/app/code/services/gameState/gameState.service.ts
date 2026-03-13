@@ -23,6 +23,27 @@ export class GameStateService {
     return this.gameState().board.status !== EnGameStatus.Pending;
   }
 
+  /**
+   * Resolves player with given index.
+   * @param playerIx Player index.
+   * @returns Player.
+   */
+  public getPlayer(playerIx: number) : Player {
+    const player = this.gameState().players[playerIx];
+    return player;
+  }
+
+  /**
+   * Resolves current player.
+   * @returns Current player.
+   */
+  getCurrPlayer() : Player {
+    const playerIx = this.gameState().board.currPlayerIx;
+    return this.getPlayer(playerIx);
+  }
+
+  // //////////////////////////////////////////////////////////////////////////
+
   /** Use temporary settings as actual settings. */
   public applySettings() {
     this.gameState.update(state => ({

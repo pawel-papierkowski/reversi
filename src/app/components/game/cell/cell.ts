@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 
 import type { Cell } from "@/code/data/gameState";
 
-import { ReversiPieceUnknown } from '@/components/game/piece/piece-unknown';
+import { ReversiPieceUnknown } from '@/components/assets/piece/piece-unknown';
 import { ReversiPiece } from '@/components/game/piece/piece';
 import { EnCellState } from '@/code/data/enums';
 

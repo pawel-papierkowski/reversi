@@ -6,7 +6,7 @@ import { modeDescr, playerTypeDescr, difficultyDescr, EnMode } from '@/code/data
 import { gameConfig } from '@/code/data/const';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 
-import { ComboBox } from '@/components/common/comboBox/comboBox';
+import { ComboBox } from '@/components/basic/comboBox/comboBox';
 
 @Component({
   selector: 'app-main-menu-options',

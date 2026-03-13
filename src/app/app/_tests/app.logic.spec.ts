@@ -2,7 +2,7 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
 import { setupTestBedTranslate } from './app.test-setup';
-import { selectComboboxOption } from '@/components/common/comboBox/_tests/comboBox.test-setup';
+import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
 
 import { App } from '../app';
 import { EnGameStatus, EnCellState, EnMode, EnPlayerType } from '@/code/data/enums';

@@ -28,12 +28,12 @@
   "mainMenu.settings.boardSize.8": "8x8",
   "mainMenu.settings.boardSize.10": "10x10",
 
-  "game.status.playerType": "{{type}}: <strong>{{name}}</strong>",
-  "game.status.currentPlayer": "Aktualny gracz: <strong>{{name}}</strong>",
+  "game.status.currentPlayer": "Aktualny gracz",
   "game.status.currStatus.stop": "Gra jest zatrzymana z powodu błędu.",
   "game.status.currStatus.pending": "Gra oczekuje na start...",
-  "game.status.currStatus.inProgress": "W trakcie gry...",
-  "game.status.currStatus.playerWon": "Gracz <strong>{{name}}</strong> wygrał!",
+  "game.status.currStatus.inProgress.human": "Oczekuje na ruch gracza...",
+  "game.status.currStatus.inProgress.ai": "Oczekuje na ruch SI...",
+  "game.status.currStatus.playerWon": "Wygrał gracz",
   "game.status.currStatus.tie": "Rozgrywka zakończyła się remisem.",
 
   "game.statistics.basic": "Podstawowe dane",

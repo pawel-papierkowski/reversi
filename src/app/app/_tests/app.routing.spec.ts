@@ -8,8 +8,9 @@ import { setupTestBed } from './app.test-setup';
 import { App } from '../app';
 
 import type { GameState, GameSettings, } from "@/code/data/gameState";
-import { createGameState, createGameSettings } from "@/code/data/gameState";
+import { createGameState, createGameSettings, createPlayer } from "@/code/data/gameState";
 import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { EnCellState } from '@/code/data/enums';
 
 describe('App (routing)', () => {
   let fixture: ComponentFixture<App>;
@@ -21,6 +22,8 @@ describe('App (routing)', () => {
     applySettings: ReturnType<typeof vi.fn>;
     initializeGame: ReturnType<typeof vi.fn>;
     isGameOngoing: ReturnType<typeof vi.fn>;
+    getPlayer: ReturnType<typeof vi.fn>;
+    getCurrPlayer: ReturnType<typeof vi.fn>;
     gameState: WritableSignal<GameState>;
     menuSettings: WritableSignal<GameSettings>;
   };
@@ -33,6 +36,8 @@ describe('App (routing)', () => {
       applySettings: vi.fn(),
       initializeGame: vi.fn(),
       isGameOngoing: vi.fn().mockReturnValue(true), // Ensure the guard allows navigation by returning true
+      getPlayer: vi.fn().mockReturnValue(createPlayer(EnCellState.B)),
+      getCurrPlayer: vi.fn().mockReturnValue(createPlayer(EnCellState.B)),
       gameState: signal<GameState>(createGameState()),
       menuSettings: signal<GameSettings>(createGameSettings()),
     };
