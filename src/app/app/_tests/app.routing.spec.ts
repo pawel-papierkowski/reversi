@@ -7,42 +7,27 @@ import { setupTestBed } from './app.test-setup';
 
 import { App } from '../app';
 
-import type { GameState, GameSettings, } from "@/code/data/gameState";
-import { createGameState, createGameSettings, createPlayer } from "@/code/data/gameState";
+import { GameService } from '@/code/services/game/game.service';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
-import { EnCellState } from '@/code/data/enums';
 
 describe('App (routing)', () => {
+  let gameService: GameService;
+  let gameStateService: GameStateService;
+
   let fixture: ComponentFixture<App>;
   let router: Router;
   let location: Location;
 
-  // Define the mock object using Vitest.
-  let mockGameStateService: {
-    applySettings: ReturnType<typeof vi.fn>;
-    initializeGame: ReturnType<typeof vi.fn>;
-    isGameOngoing: ReturnType<typeof vi.fn>;
-    getPlayer: ReturnType<typeof vi.fn>;
-    getCurrPlayer: ReturnType<typeof vi.fn>;
-    gameState: WritableSignal<GameState>;
-    menuSettings: WritableSignal<GameSettings>;
-  };
-
   beforeEach(async () => {
     vi.clearAllMocks(); // Clear state of mocks.
 
-    // Initialize Vitest mock functions.
-    mockGameStateService = {
-      applySettings: vi.fn(),
-      initializeGame: vi.fn(),
-      isGameOngoing: vi.fn().mockReturnValue(true), // Ensure the guard allows navigation by returning true
-      getPlayer: vi.fn().mockReturnValue(createPlayer(EnCellState.B)),
-      getCurrPlayer: vi.fn().mockReturnValue(createPlayer(EnCellState.B)),
-      gameState: signal<GameState>(createGameState()),
-      menuSettings: signal<GameSettings>(createGameSettings()),
-    };
+    fixture = await setupTestBed([
+      GameService,
+      GameStateService
+    ]);
 
-    fixture = await setupTestBed([{ provide: GameStateService, useValue: mockGameStateService }]);
+    gameService = TestBed.inject(GameService);
+    gameStateService = TestBed.inject(GameStateService);
     router = TestBed.inject(Router);
     location = TestBed.inject(Location);
 
@@ -56,6 +41,10 @@ describe('App (routing)', () => {
   // Routing.
 
   it('should redirect to /board when Start Game button is clicked', async () => {
+    const isGameOngoingSpy = vi.spyOn(gameService, 'isGameOngoing');
+    const applySettingsSpy = vi.spyOn(gameStateService, 'applySettings');
+    const initializeGameSpy = vi.spyOn(gameStateService, 'initializeGame');
+
     // Assert we start on the main menu.
     expect(location.path()).toBe('');
 
@@ -66,16 +55,17 @@ describe('App (routing)', () => {
     await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
 
     // Verify Vitest mock functions were called.
-    expect(mockGameStateService.isGameOngoing).toHaveBeenCalled();
-    expect(mockGameStateService.applySettings).toHaveBeenCalledTimes(1);
-    expect(mockGameStateService.initializeGame).toHaveBeenCalledTimes(1);
+    expect(isGameOngoingSpy).toHaveBeenCalled();
+    expect(applySettingsSpy).toHaveBeenCalledTimes(1);
+    expect(initializeGameSpy).toHaveBeenCalledTimes(1);
 
     expect(location.path()).toBe('/board'); // Verify the URL changed successfully.
   });
 
   it('should redirect to main menu if navigating directly to /board without an ongoing game', async () => {
-    // Override the mock from beforeEach to simulate no active game.
-    mockGameStateService.isGameOngoing.mockReturnValue(false);
+    const isGameOngoingSpy = vi.spyOn(gameService, 'isGameOngoing');
+    const applySettingsSpy = vi.spyOn(gameStateService, 'applySettings');
+    const initializeGameSpy = vi.spyOn(gameStateService, 'initializeGame');
 
     await router.navigate(['/board']); // Attempt to navigate directly to the board (simulating URL entry).
     await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
@@ -84,13 +74,17 @@ describe('App (routing)', () => {
     expect(location.path()).toBe('');
 
     // Verify the guard checked the game state and prevented starting new game.
-    expect(mockGameStateService.isGameOngoing).toHaveBeenCalled();
-    expect(mockGameStateService.applySettings).toHaveBeenCalledTimes(0);
-    expect(mockGameStateService.initializeGame).toHaveBeenCalledTimes(0);
+    expect(isGameOngoingSpy).toHaveBeenCalled();
+    expect(applySettingsSpy).toHaveBeenCalledTimes(0);
+    expect(initializeGameSpy).toHaveBeenCalledTimes(0);
 
   });
 
   it('should be in proper state: start game, back to menu, continue game', async () => {
+    const isGameOngoingSpy = vi.spyOn(gameService, 'isGameOngoing');
+    const applySettingsSpy = vi.spyOn(gameStateService, 'applySettings');
+    const initializeGameSpy = vi.spyOn(gameStateService, 'initializeGame');
+
     // Assert we start on the main menu.
     expect(location.path()).toBe('');
 
@@ -119,9 +113,9 @@ describe('App (routing)', () => {
     expect(location.path()).toBe('/board'); // Verify the URL changed successfully.
 
     // Verify Vitest mock functions were called.
-    expect(mockGameStateService.isGameOngoing).toHaveBeenCalled();
+    expect(isGameOngoingSpy).toHaveBeenCalled();
     // called only once - continue game should not start new game
-    expect(mockGameStateService.applySettings).toHaveBeenCalledTimes(1);
-    expect(mockGameStateService.initializeGame).toHaveBeenCalledTimes(1);
+    expect(applySettingsSpy).toHaveBeenCalledTimes(1);
+    expect(initializeGameSpy).toHaveBeenCalledTimes(1);
   });
 });

@@ -4,8 +4,9 @@ import { signal } from '@angular/core';
 
 import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
 
-import { MainMenuOptions } from './mainMenuOptions';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
+
+import { MainMenuOptionsCmp } from './mainMenuOptions';
 
 // Create a mock service to safely observe the settings state
 class MockGameStateService {
@@ -19,13 +20,13 @@ class MockGameStateService {
 }
 
 describe('MainMenuOptions', () => {
-  let fixture: ComponentFixture<MainMenuOptions>;
+  let fixture: ComponentFixture<MainMenuOptionsCmp>;
   let gameStateService: MockGameStateService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        MainMenuOptions,
+        MainMenuOptionsCmp,
         TranslateModule.forRoot() // Dummy translation module so TranslatePipe works.
       ],
       providers: [
@@ -34,7 +35,7 @@ describe('MainMenuOptions', () => {
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MainMenuOptions);
+    fixture = TestBed.createComponent(MainMenuOptionsCmp);
 
     // Grab a reference to the mocked service so we can assert against it later.
     gameStateService = TestBed.inject(GameStateService) as unknown as MockGameStateService;

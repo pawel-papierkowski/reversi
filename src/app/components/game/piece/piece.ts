@@ -2,23 +2,26 @@ import { Component, input, computed } from '@angular/core';
 
 import { EnCellState } from '@/code/data/enums';
 
-import { ReversiPieceWhite } from '@/components/assets/piece/piece-white';
-import { ReversiPieceBlack } from '@/components/assets/piece/piece-black';
+import { ReversiPieceWhiteCmp } from '@/components/assets/piece/piece-white';
+import { ReversiPieceBlackCmp } from '@/components/assets/piece/piece-black';
 
 @Component({
   selector: 'reversi-piece',
-  imports: [ReversiPieceWhite, ReversiPieceBlack],
+  imports: [ReversiPieceWhiteCmp, ReversiPieceBlackCmp],
   templateUrl: './piece.html',
   styleUrl: './piece.css',
   host: {
     // Dynamically add the 'inline-mode' class to the host element if mode is 'inline'
-    '[class.inline-mode]': 'mode() === "inline"'
+    '[class.inline-mode]': 'mode() === "inline"',
+    // Dynamically set opacity based on attribute.
+    '[style.opacity.%]': 'opacity()'
   }
 })
-export class ReversiPiece {
+export class ReversiPieceCmp {
   state = input.required<EnCellState>();
   anim = input<boolean>(true); // if false, disable animation
   mode = input<'board' | 'inline'>('board'); // Optional input: 'board' (default) or 'inline'.
+  opacity = input<number>(100); // by default full opacity
 
   classes = computed<string[]>(() => {
     const cssClasses: string[] = [];

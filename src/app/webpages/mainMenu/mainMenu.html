@@ -1,7 +1,7 @@
 <div class="menu-wrapper">
   <app-main-menu-options />
   <div class="menu">
-    @if (gameStateService.isGameOngoing()) {
+    @if (gameService.isGameOngoing()) {
       <button data-testid="btn-continue" (click)="continueGame()">
         {{ 'mainMenu.btn.continue' | translate }}
       </button>

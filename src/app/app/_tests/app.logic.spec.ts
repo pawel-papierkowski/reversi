@@ -3,11 +3,11 @@ import { Router } from '@angular/router';
 
 import { setupTestBedTranslate } from './app.test-setup';
 import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
+import { genStartState } from '@/code/services/gameState/gameState.test-setup';
 
 import { App } from '../app';
-import { EnGameStatus, EnCellState, EnMode, EnPlayerType } from '@/code/data/enums';
-import type { GameState, Cell } from "@/code/data/gameState";
-import { createGameState, createCell, createCellFill, createGameHistoryEntry } from "@/code/data/gameState";
+import { EnMode, EnPlayerType } from '@/code/data/enums';
+import type { GameState } from "@/code/data/gameState";
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 
 describe('App (logic)', () => {
@@ -29,46 +29,6 @@ describe('App (logic)', () => {
   });
 
   //
-
-  /** Generate game state after start of game.
-   */
-  function genStartState(actualGameState: GameState, boardSize: number): GameState {
-    const startGameState = createGameState();
-    // Mutate only the fields that change after "Start Game" is clicked.
-
-    startGameState.statistics.player1Score = 2;
-    startGameState.statistics.player2Score = 2;
-    startGameState.settings.boardSize = boardSize;
-    startGameState.board.status = EnGameStatus.InProgress;
-
-    // Game board should have four pieces in middle already.
-    const ix = boardSize/2 - 1;
-    startGameState.board.cells = genCells(boardSize); // generate empty board
-    startGameState.board.cells[ix][ix] = createCellFill(EnCellState.W);
-    startGameState.board.cells[ix+1][ix] = createCellFill(EnCellState.B);
-    startGameState.board.cells[ix][ix+1] = createCellFill(EnCellState.B);
-    startGameState.board.cells[ix+1][ix+1] = createCellFill(EnCellState.W);
-
-    // Should have first move (initial board state) already in history.
-    const move = createGameHistoryEntry();
-    move.cells = startGameState.board.cells;
-    startGameState.board.history.moves.push(move);
-
-    // Game view should be set.
-    startGameState.view.cells = startGameState.board.cells;
-
-    // Player names are random, so we test them separately.
-    startGameState.players[0].name = actualGameState.players[0].name;
-    startGameState.players[1].name = actualGameState.players[1].name;
-    return startGameState;
-  }
-
-  function genCells(boardSize: number): Cell[][] {
-    const cells : Cell[][] = Array.from({ length: boardSize }, () =>
-      Array.from({ length: boardSize }, () => createCell())
-    );
-    return cells;
-  }
 
   function assertGameState(actualGameState: GameState, expectedGameState: GameState) {
     // Deep equality check (except names, as these are random).

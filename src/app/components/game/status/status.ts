@@ -4,18 +4,17 @@ import {TranslatePipe } from '@ngx-translate/core';
 import { EnCellState, EnPlayerType, EnGameStatus } from '@/code/data/enums';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 
-import { PlayerName } from '@/components/common/playerName/playerName';
-import { Spinner } from '@/components/assets/basic/spinner/spinner';
+import { PlayerNameCmp } from '@/components/common/playerName/playerName';
+import { SpinnerCmp } from '@/components/assets/basic/spinner/spinner';
 
 @Component({
   selector: 'app-game-status',
-  imports: [TranslatePipe, PlayerName, Spinner],
+  imports: [TranslatePipe, PlayerNameCmp, SpinnerCmp],
   templateUrl: './status.html',
   styleUrl: './status.css'
 })
-export class Status {
-  readonly gameStateService = inject(GameStateService);
-  EnCellState = EnCellState;
-  EnPlayerType = EnPlayerType;
-  EnGameStatus = EnGameStatus;
+export class StatusCmp {
+  public readonly gameStateService = inject(GameStateService);
+  public EnPlayerType = EnPlayerType;
+  public EnGameStatus = EnGameStatus;
 }

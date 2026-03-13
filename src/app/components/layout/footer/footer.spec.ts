@@ -1,21 +1,21 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { Footer } from './footer';
+import { FooterCmp } from './footer';
 
 describe('Footer', () => {
-  let fixture: ComponentFixture<Footer>;
-  let component: Footer;
+  let fixture: ComponentFixture<FooterCmp>;
+  let component: FooterCmp;
 
   beforeEach(async () => {
       await TestBed.configureTestingModule({
         imports: [
-          Footer,
+          FooterCmp,
           TranslateModule.forRoot() // Dummy translation module so TranslatePipe works.
         ]
       }).compileComponents();
 
-      fixture = TestBed.createComponent(Footer);
+      fixture = TestBed.createComponent(FooterCmp);
       component = fixture.componentInstance;
   });
 

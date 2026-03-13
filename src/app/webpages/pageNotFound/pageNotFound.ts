@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   template: '<div>404 PAGE NOT FOUND</div>',
   styles: ''
 })
-export class PageNotFound {
+export class PageNotFoundPage {
 }

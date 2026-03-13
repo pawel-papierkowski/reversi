@@ -11,7 +11,7 @@ import { languages } from "@/code/data/const";
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
-export class Header {
+export class HeaderCmp {
   languages = languages;
 
   constructor(private translateService: TranslateService) {

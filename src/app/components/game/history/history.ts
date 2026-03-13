@@ -9,6 +9,6 @@ import { GameStateService } from '@/code/services/gameState/gameState.service';
   templateUrl: './history.html',
   styleUrl: './history.css'
 })
-export class History {
-  readonly gameStateService = inject(GameStateService);
+export class HistoryCmp {
+  private readonly gameStateService = inject(GameStateService);
 }

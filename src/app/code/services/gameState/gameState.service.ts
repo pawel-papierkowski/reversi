@@ -16,14 +16,6 @@ export class GameStateService {
   readonly menuSettings = signal<GameSettings>(createGameSettings());
 
   /**
-   * Check if game is ongoing.
-   * @returns True if game is ongoing, otherwise false.
-   */
-  public isGameOngoing() : boolean {
-    return this.gameState().board.status !== EnGameStatus.Pending;
-  }
-
-  /**
    * Resolves player with given index.
    * @param playerIx Player index.
    * @returns Player.
@@ -37,7 +29,7 @@ export class GameStateService {
    * Resolves current player.
    * @returns Current player.
    */
-  getCurrPlayer() : Player {
+  public getCurrPlayer() : Player {
     const playerIx = this.gameState().board.currPlayerIx;
     return this.getPlayer(playerIx);
   }
@@ -174,7 +166,7 @@ export class GameStateService {
     if (first) this.usedName = '';
     return {
       type : this.generatePlayerType(first),
-      cellState: first ? EnCellState.B : EnCellState.W,
+      piece: first ? EnCellState.B : EnCellState.W,
       name : this.generatePlayerName(first)
     };
   }
