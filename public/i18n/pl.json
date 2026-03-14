@@ -32,6 +32,7 @@
   "game.status.currStatus.stop": "Gra jest zatrzymana z powodu błędu.",
   "game.status.currStatus.pending": "Gra oczekuje na start...",
   "game.status.currStatus.inProgress.human": "Oczekuje na ruch gracza...",
+  "game.status.currStatus.inProgress.human.noMoves": "Brak posunięć dla tego graca.",
   "game.status.currStatus.inProgress.ai": "Oczekuje na ruch SI...",
   "game.status.currStatus.playerWon": "Wygrał gracz",
   "game.status.currStatus.tie": "Rozgrywka zakończyła się remisem.",
@@ -48,5 +49,7 @@
 
   "game.history.title": "Historia",
 
-  "game.backToMenu": "Wróć do menu"
+  "game.btn.skipMove": "Opuść ruch",
+  "game.btn.nextRound": "Następna rozgrywka",
+  "game.btn.backToMenu": "Wróć do menu"
 }

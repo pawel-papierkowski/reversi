@@ -32,6 +32,7 @@
   "game.status.currStatus.stop": "Game is halted due to bug.",
   "game.status.currStatus.pending": "Game is pending...",
   "game.status.currStatus.inProgress.human": "Waiting for player move...",
+  "game.status.currStatus.inProgress.human.noMoves": "No legal moves available for this player.",
   "game.status.currStatus.inProgress.ai": "Waiting for AI move...",
   "game.status.currStatus.playerWon": "Winning player:",
   "game.status.currStatus.tie": "Game finished in draw.",
@@ -48,5 +49,7 @@
 
   "game.history.title": "History",
 
-  "game.backToMenu": "Back to menu"
+  "game.btn.skipMove": "Skip move",
+  "game.btn.nextRound": "Next round",
+  "game.btn.backToMenu": "Back to menu"
 }

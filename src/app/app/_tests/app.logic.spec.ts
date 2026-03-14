@@ -3,11 +3,12 @@ import { Router } from '@angular/router';
 
 import { setupTestBedTranslate } from './app.test-setup';
 import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
-import { genStartState } from '@/code/services/gameState/gameState.test-setup';
+import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
 
 import { App } from '../app';
 import { EnMode, EnPlayerType } from '@/code/data/enums';
 import type { GameState } from "@/code/data/gameState";
+
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 
 describe('App (logic)', () => {
@@ -28,16 +29,6 @@ describe('App (logic)', () => {
     fixture.detectChanges();
   });
 
-  //
-
-  function assertGameState(actualGameState: GameState, expectedGameState: GameState) {
-    // Deep equality check (except names, as these are random).
-    expect(actualGameState).toEqual(expectedGameState);
-    // Ensure player names at least exist.
-    expect(actualGameState.players[0].name.length).toBeGreaterThan(0);
-    expect(actualGameState.players[1].name.length).toBeGreaterThan(0);
-  }
-
   // //////////////////////////////////////////////////////////////////////////
   // Game logic.
 
@@ -50,7 +41,7 @@ describe('App (logic)', () => {
 
     // Now we check game state.
     const actualGameState = gameStateService.gameState();
-    const expectedGameState = genStartState(actualGameState, 8);
+    const expectedGameState = genStartState(8);
     assertGameState(actualGameState, expectedGameState);
   });
 
@@ -68,7 +59,7 @@ describe('App (logic)', () => {
 
     // Now we check game state.
     const actualGameState = gameStateService.gameState();
-    const expectedGameState = genStartState(actualGameState, 4);
+    const expectedGameState = genStartState(4);
     expectedGameState.settings.mode = EnMode.HumanVsAi;
     expectedGameState.settings.whoFirst = EnPlayerType.AI;
     expectedGameState.players[0].type = EnPlayerType.AI;
@@ -88,7 +79,7 @@ describe('App (logic)', () => {
 
     // Now we check game state.
     const actualGameState = gameStateService.gameState();
-    const expectedGameState = genStartState(actualGameState, 8);
+    const expectedGameState = genStartState(8);
     expectedGameState.settings.mode = EnMode.AiVsAi;
     expectedGameState.players[0].type = EnPlayerType.AI;
     expectedGameState.players[1].type = EnPlayerType.AI;

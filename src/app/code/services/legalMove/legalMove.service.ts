@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 
-import { EnCellState, EnDir } from '@/code/data/enums';
+import { EnCellState } from '@/code/data/enums';
+import type { DirCoord } from '@/code/data/dirCoord';
 import type { ReversiMove, Cell } from '@/code/data/gameState';
 import { createReversiMove } from '@/code/data/gameState';
-import type { DirCoord } from '@/code/services/legalMove/legalMoveTypes';
-import { createDirCoord, applyDir, getOppPiece } from '@/code/services/legalMove/legalMoveTypes';
+import { applyDir, getOppPiece } from '@/code/data/dirCoord';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 
@@ -15,6 +15,21 @@ import { GameStateService } from '@/code/services/gameState/gameState.service';
 @Injectable({providedIn: 'root'})
 export class LegalMoveService {
   private readonly gameStateService = inject(GameStateService);
+
+  /**
+   * Find move for matching coordinates.
+   * @param x X coordinate.
+   * @param y Y coordinate.
+   * @returns Found move or null if no move found.
+   */
+  public findMove(x: number, y: number) : ReversiMove|null {
+    for (let move of this.gameStateService.gameState().board.legalMoves) {
+      if (move.x === x && move.y === y) return move;
+    }
+    return null;
+  }
+
+  //
 
   /**
    * Finds out all legal moves for current game state.
@@ -60,66 +75,18 @@ export class LegalMoveService {
     if (cell.state !== EnCellState.Empty) return null;
 
     const oppPlayerPiece = getOppPiece(playerPiece);
-    const offsets : DirCoord[] = [];
-    // Find out all directions around given cell.
-    // Already exclude coordinates out of range or containing something else than piece of opposite color.
-    for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
-      let dirCoord : DirCoord = createDirCoord(dir, x, y);
-      dirCoord = applyDir(dirCoord);
-      if (this.canUseOffset(cells, dirCoord, oppPlayerPiece)) offsets.push(dirCoord);
-    }
+    const potentialMoves = this.gameStateService.resolvePotentialMoves(cells, x, y, oppPlayerPiece);
+    if (potentialMoves.length === 0) return null; // no eligible potential moves found
 
     // Now for all these direction cast traces to check if it ends in cell containing piece of your color.
     // Only then it is legal move.
-    for (let i=0; i<offsets.length; i++) {
-      const offset = offsets[i];
-      if (this.trace(cells, offset, playerPiece, oppPlayerPiece)) return createReversiMove(x, y);
+    for (let i=0; i<potentialMoves.length; i++) {
+      const potentialMove = potentialMoves[i];
+      const opposingPieces = this.gameStateService.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
+      if (opposingPieces.length > 0) return createReversiMove(x, y);
     }
 
     return null; // no legal move found
-  }
-
-  /**
-   * Check if can use offset coordinates (starting points for tracing). Conditions:
-   * - X and Y cannot be outside range.
-   * - Cell must contain piece for opposing player.
-   * @param cells State of board.
-   * @param dirCoord Coordinates to use.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @returns True if can use given coordinates, otherwise false.
-   */
-  private canUseOffset(cells: Cell[][], dirCoord : DirCoord, oppPlayerPiece: EnCellState) : boolean {
-    const size = this.gameStateService.gameState().settings.boardSize;
-    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
-    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
-    const cell = cells[dirCoord.x][dirCoord.y];
-    return cell.state === oppPlayerPiece;
-  }
-
-  /**
-   * Trace from given coordinates in given direction across board until you hit edge or cell that has
-   * something else than piece of opposing player. If that cell has your piece, bingo. Move is valid.
-   * @param cells State of board.
-   * @param dirCoord Coordinates+direction to use.
-   * @param playerPiece Piece of your player.
-   * @returns True if given coordinates are for legal move, otherwise false.
-   */
-  private trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState): boolean {
-    do {
-      dirCoord = applyDir(dirCoord); // move coordinates
-      if (!this.hitEdge(dirCoord)) return false; // hit edge of board, can't be valid move
-      const cell = cells[dirCoord.x][dirCoord.y];
-      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return false; // it is illegal move!
-      if (cell.state === oppPlayerPiece) continue; // still pieces of opposite player, continue
-      if (cell.state === playerPiece) return true; // it is legal move!
-    } while (true);
-  }
-
-  private hitEdge(dirCoord : DirCoord): boolean {
-    const size = this.gameStateService.gameState().settings.boardSize;
-    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
-    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
-    return true;
   }
 
   // //////////////////////////////////////////////////////////////////////////

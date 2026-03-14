@@ -25,7 +25,7 @@ describe('LegalMoveService', () => {
 
   describe('find legal move(s)', () => {
     it('on starting board', () => {
-      const gameState = genStartState(null, 8);
+      const gameState = genStartState(8);
 
       const expectedLegalMoves : ReversiMove[] = [
         createReversiMove(2, 3),
@@ -37,7 +37,7 @@ describe('LegalMoveService', () => {
     });
 
     it('on board that has only one legal move available', () => {
-      const gameState = genStartState(null, 8);
+      const gameState = genStartState(8);
       const cells = gameState.board.cells;
       cells[3][3].state = EnCellState.B;
       cells[4][4].state = EnCellState.B;
@@ -50,7 +50,7 @@ describe('LegalMoveService', () => {
     });
 
     it('on edge of board', () => {
-      const gameState = genEmptyState(null, 8);
+      const gameState = genEmptyState(8);
       const cells = gameState.board.cells;
       cells[0][0].state = EnCellState.B;
       cells[1][0].state = EnCellState.W;
@@ -66,7 +66,7 @@ describe('LegalMoveService', () => {
 
   describe('does not find legal move', () => {
     it('on board with all pieces of one color', () => {
-      const gameState = genStartState(null, 8);
+      const gameState = genStartState(8);
       const cells = gameState.board.cells;
       cells[3][3].state = EnCellState.B;
       cells[4][4].state = EnCellState.B;
@@ -76,7 +76,7 @@ describe('LegalMoveService', () => {
     });
 
     it('when there is empty space between opposite piece and your piece', () => {
-      const gameState = genEmptyState(null, 8);
+      const gameState = genEmptyState(8);
       const cells = gameState.board.cells;
       cells[1][1].state = EnCellState.W;
       cells[4][4].state = EnCellState.B;

@@ -74,6 +74,7 @@ export function createDebugSettingsForProd(): DebugSettings {
 type GameStatistics = {
   round: number;
   moveCount: number;
+  emptyCells: number;
 
   ties: number;
   tiesInRow: number;
@@ -91,6 +92,7 @@ export function createGameStatistics(): GameStatistics {
   return {
     round: 0,
     moveCount: 0,
+    emptyCells: 0,
 
     ties: 0,
     tiesInRow: 0,
@@ -196,7 +198,7 @@ export function createReversiMove(x: number, y: number): ReversiMove {
 
 //
 
-type ReversiBoard = {
+export type ReversiBoard = {
   status: EnGameStatus;
   cells: Cell[][]; // Current state of board.
   legalMoves: ReversiMove[]; // List of available legal moves for this board state and current player.
@@ -220,22 +222,22 @@ export function createGameBoard(): ReversiBoard {
 // ///////////////////////
 
 export type GameState = {
-  view: GameView; // what should be shown on screen: updated when needed
   settings: GameSettings; // persists between games unless updated in main menu
   statistics: GameStatistics; // statistics: reset for new game, update for new round
   players: Player[]; // players: reset for new game
   board: ReversiBoard; // data about board state: reset for new game and every round
+  view: GameView; // what should be shown on screen: updated when needed
   debugSettings: DebugSettings; // debug settings: reset for new game
 };
 
 /** Create default game state. */
 export function createGameState(): GameState {
   return {
-    view: createGameView(),
     settings: createGameSettings(),
     statistics: createGameStatistics(),
     players: createPlayers(), // actually filled later, as we need to know settings like mode and who is first
     board: createGameBoard(),
+    view: createGameView(),
     debugSettings: createDebugSettingsForDev(),
   };
 }

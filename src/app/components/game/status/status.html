@@ -23,7 +23,15 @@
     }
     @case (EnGameStatus.InProgress) {
       @if (gameStateService.getCurrPlayer().type === EnPlayerType.Human) {
-        {{'game.status.currStatus.inProgress.human' | translate}}
+        @if (canSkipMove()) {
+          {{'game.status.currStatus.inProgress.human.noMoves' | translate}}
+          <button data-testid="btn-skipMove" (click)="skipMove()">
+            {{ 'game.btn.skipMove' | translate }}
+          </button>
+        }
+        @else {
+          {{'game.status.currStatus.inProgress.human' | translate}}
+        }
       }
       @else {
         {{'game.status.currStatus.inProgress.ai' | translate}}
@@ -32,7 +40,7 @@
     }
     @case (EnGameStatus.PlayerWon) {
       {{'game.status.currStatus.playerWon' | translate}}
-      <app-player-name [player]="gameStateService.getCurrPlayer()" [anim]="true" />!
+      <app-player-name [player]="gameStateService.getWinningPlayer()" [anim]="true" />!
     }
     @case (EnGameStatus.Tie) {
       <div [innerHTML]="'game.status.currStatus.tie' | translate"></div>
