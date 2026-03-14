@@ -22,10 +22,20 @@ export class ReversiCellCmp {
   public readonly y = input.required<number>();
   public EnCellState = EnCellState;
 
+  //
+
+  /**
+   * Provides unique test identificator.
+   * @returns Test identificator of cell.
+   */
+  public cellTestId(): string {
+    return `cell-${this.x()}x${this.y()}`;
+  }
+
   /**
    * React to cell click.
    */
-  cellClick() {
+  public cellClick() {
     // No worries, makeMove() verifies if move for this cell is legal.
     this.gameService.makeMove(this.x(), this.y());
     //this.gameService.debugSwapPiece(this.cell());

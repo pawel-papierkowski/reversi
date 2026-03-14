@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { EnGameStatus, EnCellState } from '@/code/data/enums';
-import type { ReversiMove, Cell } from "@/code/data/gameState";
+import type { Cell } from "@/code/data/gameState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
@@ -109,6 +109,11 @@ export class GameService {
    */
   public debugSetPiece(x: number, y: number, newState: EnCellState) {
     const cell = this.gameStateService.gameState().board.cells[x][y];
+    const oldState = cell.state;
+    if (oldState === newState) return;
+    if (oldState === EnCellState.Empty) this.gameStateService.gameState().statistics.emptyCells--;
+    if (newState === EnCellState.Empty) this.gameStateService.gameState().statistics.emptyCells++;
+
     cell.state = newState;
     this.updateSideData();
   }
@@ -116,13 +121,24 @@ export class GameService {
   /**
    * Manually swap cell state: Empty->Black->White->Empty. Updates potential moves and scoring.
    * Player stays same.
-   * @param cell Cell to modify.
+   * @param x X coordinate.
+   * @param y Y coordinate.
    */
-  public debugSwapPiece(cell: Cell) {
+  public debugSwapPiece(x: number, y: number) {
+    const cell = this.gameStateService.gameState().board.cells[x][y];
+
     switch (cell.state) {
-      case EnCellState.Empty: cell.state = EnCellState.B; break;
+      case EnCellState.Empty: {
+        cell.state = EnCellState.B;
+        this.gameStateService.gameState().statistics.emptyCells--;
+        break;
+      }
       case EnCellState.B: cell.state = EnCellState.W; break;
-      case EnCellState.W: cell.state = EnCellState.Empty; break;
+      case EnCellState.W: {
+        cell.state = EnCellState.Empty;
+        this.gameStateService.gameState().statistics.emptyCells++;
+        break;
+      }
       default: break;
     }
 

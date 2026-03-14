@@ -1,4 +1,4 @@
-<div class="cell-content" (click)="cellClick()">
+<div class="cell-content" [attr.data-testid]="cellTestId()" (click)="cellClick()">
   @if (cell().state === EnCellState.Unknown) {
     <reversi-piece-unknown /> <!-- indicates error -->
   }
