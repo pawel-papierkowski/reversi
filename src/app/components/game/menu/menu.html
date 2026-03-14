@@ -2,12 +2,12 @@
   <div class="menu">
     @if (canShowNextRound()) {
       <button data-testid="btn-nextRound" (click)="nextRound()">
-        {{ 'game.nextRound' | translate }}
+        {{ 'game.btn.nextRound' | translate }}
       </button>
     }
 
     <button data-testid="btn-backToMenu" (click)="backToMenu()">
-      {{ 'game.backToMenu' | translate }}
+      {{ 'game.btn.backToMenu' | translate }}
     </button>
   </div>
 </div>

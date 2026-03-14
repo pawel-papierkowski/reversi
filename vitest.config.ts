@@ -8,7 +8,7 @@ export default defineConfig({
     tsconfigPaths()
   ],
   test: {
-    globals: true,
+    globals: true, // This enables global access to expect, describe, etc.
     environment: 'jsdom',
     setupFiles: ['src/test-setup.ts'],
     include: ['src/**/*.spec.ts'],
