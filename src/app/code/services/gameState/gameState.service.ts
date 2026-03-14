@@ -154,8 +154,9 @@ export class GameStateService {
    */
   public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState): DirCoord[] {
     const opposingPieces: DirCoord[] = [];
-    // we could be already one step away from origin point
-    if (cells[dirCoord.x][dirCoord.y].state === oppPlayerPiece) opposingPieces.push(structuredClone(dirCoord));
+    // we always are one step away from origin point
+    //if (cells[dirCoord.x][dirCoord.y].state === oppPlayerPiece)
+    opposingPieces.push(structuredClone(dirCoord));
 
     do {
       dirCoord = applyDir(dirCoord); // move coordinates

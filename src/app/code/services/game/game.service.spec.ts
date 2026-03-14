@@ -24,7 +24,7 @@ describe('GameService', () => {
 
   //
 
-  describe('execute move', () => {
+  describe('make move', () => {
     it('on starting board', () => {
       gameService.makeMove(2, 3);
 
@@ -50,6 +50,10 @@ describe('GameService', () => {
 
       assertGameState(actualGameState, expectedGameState);
     });
+
+    // TODO test for more cases, including:
+    // - making move that flips many cells
+    // - clicking on invalid cell
   });
 
   describe('debug', () => {
