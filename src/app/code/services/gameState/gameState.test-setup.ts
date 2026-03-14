@@ -124,9 +124,9 @@ export function assertGameState(actualGameState: GameState, expectedGameState: G
 function assertGameBoard(actualBoard: ReversiBoard, expectedBoard: ReversiBoard) {
   expect(actualBoard.status, 'Board status should be same').toEqual(expectedBoard.status);
   expect(actualBoard.currPlayerIx, 'Board currPlayerIx should be same').toEqual(expectedBoard.currPlayerIx);
-  assertGameHistory(actualBoard.history, expectedBoard.history);
-  expect(actualBoard.legalMoves, 'Board legalMoves should be same').toEqual(expectedBoard.legalMoves);
   expect(actualBoard.cells, 'Board cells should be same').toEqual(expectedBoard.cells);
+  expect(actualBoard.legalMoves, 'Board legalMoves should be same').toEqual(expectedBoard.legalMoves);
+  assertGameHistory(actualBoard.history, expectedBoard.history);
 }
 
 /**

@@ -51,4 +51,88 @@ describe('GameService', () => {
       assertGameState(actualGameState, expectedGameState);
     });
   });
+
+  describe('debug', () => {
+    it('set piece', () => {
+      gameService.debugSetPiece(0, 0, EnCellState.B);
+
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(8);
+      expectedGameState.statistics.emptyCells = 59;
+      expectedGameState.statistics.player1Score = 3;
+      expectedGameState.statistics.player2Score = 2;
+      expectedGameState.board.cells[0][0] = createCellFill(EnCellState.B);
+
+      // This particular change does not affect available legal moves.
+      //expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      //legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('unset piece', () => {
+      gameService.debugSetPiece(3, 3, EnCellState.Empty); // white piece was here
+
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(8);
+      expectedGameState.statistics.emptyCells = 61;
+      expectedGameState.statistics.player1Score = 2;
+      expectedGameState.statistics.player2Score = 1;
+      expectedGameState.board.cells[3][3] = createCellFill(EnCellState.Empty);
+
+      // This particular change does affect available legal moves.
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('swap piece Empty->Black', () => {
+      gameService.debugSwapPiece(2, 3);
+
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(8);
+      expectedGameState.statistics.emptyCells = 59;
+      expectedGameState.statistics.player1Score = 3;
+      expectedGameState.statistics.player2Score = 2;
+      expectedGameState.board.cells[2][3] = createCellFill(EnCellState.B);
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('swap piece Black->White', () => {
+      gameService.debugSwapPiece(4, 3);
+
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(8);
+      expectedGameState.statistics.emptyCells = 60;
+      expectedGameState.statistics.player1Score = 1;
+      expectedGameState.statistics.player2Score = 3;
+      expectedGameState.board.cells[4][3] = createCellFill(EnCellState.W);
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('swap piece White->Empty', () => {
+      gameService.debugSwapPiece(4, 4);
+
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(8);
+      expectedGameState.statistics.emptyCells = 61;
+      expectedGameState.statistics.player1Score = 2;
+      expectedGameState.statistics.player2Score = 1;
+      expectedGameState.board.cells[4][4] = createCellFill(EnCellState.Empty);
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+
+      assertGameState(actualGameState, expectedGameState);
+    });
+  });
 });

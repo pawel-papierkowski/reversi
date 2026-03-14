@@ -6,15 +6,18 @@ import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBo
 import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
 
 import { App } from '../app';
-import { EnMode, EnPlayerType } from '@/code/data/enums';
-import type { GameState } from "@/code/data/gameState";
+import { EnCellState, EnMode, EnPlayerType } from '@/code/data/enums';
+import type { GameHistoryEntry } from "@/code/data/gameState";
+import { createCellFill, createCellFull } from "@/code/data/gameState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 
 describe('App (logic)', () => {
   let fixture: ComponentFixture<App>;
   let router: Router;
   let gameStateService: GameStateService;
+  let legalMoveService: LegalMoveService;
 
   beforeEach(async () => {
     localStorage.clear(); // Reset local storage before every test to avoid pollution.
@@ -22,6 +25,7 @@ describe('App (logic)', () => {
     fixture = await setupTestBedTranslate([]);
     router = TestBed.inject(Router);
     gameStateService = TestBed.inject(GameStateService);
+    legalMoveService = TestBed.inject(LegalMoveService);
 
     // Trigger initial navigation to load the '' (MainMenu) route.
     router.initialNavigation();
@@ -83,6 +87,48 @@ describe('App (logic)', () => {
     expectedGameState.settings.mode = EnMode.AiVsAi;
     expectedGameState.players[0].type = EnPlayerType.AI;
     expectedGameState.players[1].type = EnPlayerType.AI;
+
+    assertGameState(actualGameState, expectedGameState);
+  });
+
+  //
+
+  it('should correctly react on cell click', async () => {
+    selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 1); // 6x6
+
+    // Find the primary Start Game button inside the rendered MainMenu and click it.
+    const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
+    startButton.click();
+
+    await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
+
+    // Find correct cell and click it.
+    const cell = fixture.nativeElement.querySelector('[data-testid="cell-4x3"]') as HTMLButtonElement;
+    cell.click();
+
+    await fixture.whenStable(); // Wait for Angular to finish.
+    fixture.detectChanges();
+
+    // Now we check game state.
+    const actualGameState = gameStateService.gameState();
+    const expectedGameState = genStartState(6);
+    expectedGameState.statistics.moveCount = 1;
+    expectedGameState.statistics.emptyCells = 31;
+    expectedGameState.statistics.player1Score = 4;
+    expectedGameState.statistics.player2Score = 1;
+    expectedGameState.board.currPlayerIx = 1;
+    expectedGameState.board.cells[4][3] = createCellFull(EnCellState.B, EnCellState.B); // move that black just made
+    expectedGameState.board.cells[3][3] = createCellFill(EnCellState.B); // flipped white piece
+
+    const historyEntry: GameHistoryEntry = {
+      playerIx: 0,
+      move: {x:4, y:3},
+      cells: structuredClone(expectedGameState.board.cells)
+    };
+    expectedGameState.board.history.moves.push(historyEntry);
+
+    expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
+    legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
 
     assertGameState(actualGameState, expectedGameState);
   });
