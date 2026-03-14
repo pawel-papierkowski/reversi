@@ -93,7 +93,30 @@ describe('App (logic)', () => {
 
   //
 
-  it('should correctly react on cell click', async () => {
+  it('cell click on invalid cell should not change anything', async () => {
+    selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
+
+    // Find the primary Start Game button inside the rendered MainMenu and click it.
+    const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
+    startButton.click();
+
+    await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
+
+    // Find correct cell and click it. Note this cell is not on list of legal moves.
+    const cell = fixture.nativeElement.querySelector('[data-testid="cell-2x2"]') as HTMLButtonElement;
+    cell.click();
+
+    await fixture.whenStable(); // Wait for Angular to finish.
+    fixture.detectChanges();
+
+    // Now we check game state. Nothing should change.
+    const actualGameState = gameStateService.gameState();
+    const expectedGameState = genStartState(4);
+
+    assertGameState(actualGameState, expectedGameState);
+  });
+
+  it('cell click should add and flip pieces', async () => {
     selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 1); // 6x6
 
     // Find the primary Start Game button inside the rendered MainMenu and click it.
@@ -101,6 +124,14 @@ describe('App (logic)', () => {
     startButton.click();
 
     await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
+
+    const expectedHistoryEntry1: GameHistoryEntry = {
+      playerIx: 0,
+      move: {x:4, y:3},
+      cells: structuredClone(gameStateService.gameState().board.cells)
+    };
+    expectedHistoryEntry1.cells[4][3].state = EnCellState.B; // added
+    expectedHistoryEntry1.cells[3][3].state = EnCellState.B; // flipped
 
     // Find correct cell and click it.
     const cell = fixture.nativeElement.querySelector('[data-testid="cell-4x3"]') as HTMLButtonElement;
@@ -117,18 +148,71 @@ describe('App (logic)', () => {
     expectedGameState.statistics.player1Score = 4;
     expectedGameState.statistics.player2Score = 1;
     expectedGameState.board.currPlayerIx = 1;
-    expectedGameState.board.cells[4][3] = createCellFull(EnCellState.B, EnCellState.B); // move that black just made
-    expectedGameState.board.cells[3][3] = createCellFill(EnCellState.B); // flipped white piece
+    expectedGameState.board.cells[4][3].state = EnCellState.B; // move that black just made
+    expectedGameState.board.cells[3][3].state = EnCellState.B; // flipped white piece
 
-    const historyEntry: GameHistoryEntry = {
-      playerIx: 0,
-      move: {x:4, y:3},
-      cells: structuredClone(expectedGameState.board.cells)
-    };
-    expectedGameState.board.history.moves.push(historyEntry);
+    expectedGameState.board.history.moves.push(expectedHistoryEntry1);
 
     expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
     legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+
+    assertGameState(actualGameState, expectedGameState);
+  });
+
+  it('two clicks should add and flip pieces for both players', async () => {
+    selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
+
+    // Find the primary Start Game button inside the rendered MainMenu and click it.
+    const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
+    startButton.click();
+
+    await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
+
+    const expectedHistoryEntry1: GameHistoryEntry = {
+      playerIx: 0,
+      move: {x:1, y:0},
+      cells: structuredClone(gameStateService.gameState().board.cells)
+    };
+    expectedHistoryEntry1.cells[1][0].state = EnCellState.B; // added
+    expectedHistoryEntry1.cells[1][1].state = EnCellState.B; // flipped
+
+    // Find correct cell and click it as black.
+    const cell1 = fixture.nativeElement.querySelector('[data-testid="cell-1x0"]') as HTMLButtonElement;
+    cell1.click();
+
+    await fixture.whenStable(); // Wait for Angular to finish.
+
+    const expectedHistoryEntry2: GameHistoryEntry = {
+      playerIx: 1,
+      move: {x:0, y:2},
+      cells: structuredClone(gameStateService.gameState().board.cells)
+    };
+    expectedHistoryEntry2.cells[0][2].state = EnCellState.W; // added
+    expectedHistoryEntry2.cells[1][2].state = EnCellState.W; // flipped
+
+    // Find correct cell and click it as white.
+    const cell2 = fixture.nativeElement.querySelector('[data-testid="cell-0x2"]') as HTMLButtonElement;
+    cell2.click();
+
+    await fixture.whenStable(); // Wait for Angular to finish.
+
+    // Now we check game state.
+    const actualGameState = gameStateService.gameState();
+    const expectedGameState = genStartState(4);
+    expectedGameState.statistics.moveCount = 2;
+    expectedGameState.statistics.emptyCells = 10;
+    expectedGameState.statistics.player1Score = 3;
+    expectedGameState.statistics.player2Score = 3;
+    expectedGameState.board.cells[1][0].state = EnCellState.B; // black move
+    expectedGameState.board.cells[1][1].state = EnCellState.B; // flipped white piece
+    expectedGameState.board.cells[0][2].state = EnCellState.W; // white move
+    expectedGameState.board.cells[1][2].state = EnCellState.W; // flipped black piece
+
+    expectedGameState.board.history.moves.push(expectedHistoryEntry1);
+    expectedGameState.board.history.moves.push(expectedHistoryEntry2);
+
+    expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+    legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
     assertGameState(actualGameState, expectedGameState);
   });
