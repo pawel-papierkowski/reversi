@@ -1,5 +1,5 @@
 import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState } from '@/code/data/enums';
-import { defDebugMode, defDebugShowMove } from '@/code/data/const';
+import { defDebugMode, defDebugHint } from '@/code/data/const';
 
 // ////////////////////////////////////////////////////////////////////////////
 // FULL GAME STATE                                                           //
@@ -30,6 +30,7 @@ export type GameSettings = {
   whoFirst: EnPlayerType; // matters only in human vs AI mode
   difficulty: EnDifficulty;
   boardSize: number;
+  showHints: boolean; // shows legal moves on board
 };
 
 export function createGameSettings(): GameSettings {
@@ -38,6 +39,7 @@ export function createGameSettings(): GameSettings {
     whoFirst: EnPlayerType.Human,
     difficulty: EnDifficulty.Easy,
     boardSize: 8,
+    showHints: defDebugHint,
   };
 }
 
@@ -48,14 +50,12 @@ export function createGameSettings(): GameSettings {
 // Settable only in code.
 export type DebugSettings = {
   debugMode: boolean;
-  showMove: boolean; // if true, show
 };
 
 /** Debug settings for development: get values from constants. */
 export function createDebugSettingsForDev(): DebugSettings {
   return {
     debugMode: defDebugMode,
-    showMove: defDebugShowMove,
   };
 }
 
@@ -63,7 +63,6 @@ export function createDebugSettingsForDev(): DebugSettings {
 export function createDebugSettingsForProd(): DebugSettings {
   return {
     debugMode: false,
-    showMove: false,
   };
 }
 
@@ -159,9 +158,9 @@ export function createPlayers(): Player[] {
 //
 
 export type GameHistoryEntry = {
-  playerIx: number; // needed as player must skip move if no legal moves available at given moment for that player
-  move: ReversiMove | null; // move itself
-  cells: Cell[][]; // board state as copy of main board at that moment
+  playerIx: number; // Which player did that move.
+  move: ReversiMove | null; // Move itself. Null indicates no move (initial state of board or pass).
+  cells: Cell[][]; // Board state as copy of main board at that moment.
 };
 
 export function createGameHistoryEntry(): GameHistoryEntry {

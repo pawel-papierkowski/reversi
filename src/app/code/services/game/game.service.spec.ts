@@ -19,13 +19,13 @@ describe('GameService', () => {
     gameStateService = TestBed.inject(GameStateService);
     legalMoveService = TestBed.inject(LegalMoveService);
     gameService = TestBed.inject(GameService);
-    gameService.startGame();
   });
 
   //
 
   describe('make move', () => {
     it('on starting board', () => {
+      gameService.startGame();
       gameService.makeMove(2, 3);
 
       const actualGameState = gameStateService.gameState();
@@ -35,7 +35,7 @@ describe('GameService', () => {
       expectedGameState.statistics.player1Score = 4;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells[2][3] = createCellFull(EnCellState.B, EnCellState.B); // move that black just made
+      expectedGameState.board.cells[2][3] = createCellFill(EnCellState.B); // move that black just made
       expectedGameState.board.cells[3][3] = createCellFill(EnCellState.B); // flipped white piece
 
       const historyEntry: GameHistoryEntry = {
@@ -43,21 +43,97 @@ describe('GameService', () => {
         move: {x:2, y:3},
         cells: structuredClone(expectedGameState.board.cells)
       };
+      legalMoveService.clearPotentialMoves(historyEntry.cells);
       expectedGameState.board.history.moves.push(historyEntry);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
 
       assertGameState(actualGameState, expectedGameState);
     });
 
-    // TODO test for more cases, including:
-    // - making move that flips many cells
-    // - clicking on invalid cell
+    it('that flips many pieces', () => {
+      gameService.startGame();
+      // manually add pieces
+      gameService.debugSetPiece(1, 3, EnCellState.W);
+      gameService.debugSetPiece(2, 3, EnCellState.W); // board looks like this:
+      gameService.debugSetPiece(3, 3, EnCellState.W); // ________
+      gameService.debugSetPiece(4, 3, EnCellState.W); // _WWWWWWB
+      gameService.debugSetPiece(5, 3, EnCellState.W); // ___BW___
+      gameService.debugSetPiece(6, 3, EnCellState.W); // ________
+      gameService.debugSetPiece(7, 3, EnCellState.B);
+
+      gameService.makeMove(0, 3);
+
+      const historyEntry1: GameHistoryEntry = {
+        playerIx: 0,
+        move: {x:0, y:3},
+        cells: structuredClone(gameStateService.gameState().board.cells)
+      };
+      legalMoveService.clearPotentialMoves(historyEntry1.cells);
+
+      //
+
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(8);
+      expectedGameState.statistics.moveCount = 1;
+      expectedGameState.statistics.emptyCells = 54;
+      expectedGameState.statistics.player1Score = 9;
+      expectedGameState.statistics.player2Score = 1;
+      expectedGameState.board.currPlayerIx = 1;
+      expectedGameState.board.cells[0][3] = createCellFill(EnCellState.B);
+      expectedGameState.board.cells[1][3] = createCellFill(EnCellState.B);
+      expectedGameState.board.cells[2][3] = createCellFill(EnCellState.B);
+      expectedGameState.board.cells[3][3] = createCellFill(EnCellState.B);
+      expectedGameState.board.cells[4][3] = createCellFill(EnCellState.B);
+      expectedGameState.board.cells[5][3] = createCellFill(EnCellState.B);
+      expectedGameState.board.cells[6][3] = createCellFill(EnCellState.B);
+      expectedGameState.board.cells[7][3] = createCellFill(EnCellState.B);
+
+      expectedGameState.board.history.moves.push(historyEntry1);
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+
+      expect(actualGameState.board.history.moves[1].cells, 'History [1] cells should be same').toEqual(expectedGameState.board.history.moves[1].cells);
+
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('unsuccessfully (invalid move)', () => {
+      gameService.startGame();
+
+      gameService.makeMove(1, 1); // invalid move, nothing should change
+
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(8);
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('- unsuccessful pass', () => {
+    // see app.logic.spec.ts for test on actual pass
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+
+      expect(gameService.canPassMove(), 'Cannot pass.').toEqual(false);
+      gameService.passMove(); // should not do anything
+
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(4);
+      assertGameState(actualGameState, expectedGameState);
+    });
   });
 
   describe('debug', () => {
+    it('nothing happens', () => {
+      gameService.startGame();
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(8);
+      assertGameState(actualGameState, expectedGameState);
+    });
+
     it('set piece', () => {
+      gameService.startGame();
       gameService.debugSetPiece(0, 0, EnCellState.B);
 
       const actualGameState = gameStateService.gameState();
@@ -69,12 +145,13 @@ describe('GameService', () => {
 
       // This particular change does not affect available legal moves.
       //expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      //legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      //legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       assertGameState(actualGameState, expectedGameState);
     });
 
     it('unset piece', () => {
+      gameService.startGame();
       gameService.debugSetPiece(3, 3, EnCellState.Empty); // white piece was here
 
       const actualGameState = gameStateService.gameState();
@@ -86,12 +163,13 @@ describe('GameService', () => {
 
       // This particular change does affect available legal moves.
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       assertGameState(actualGameState, expectedGameState);
     });
 
     it('swap piece Empty->Black', () => {
+      gameService.startGame();
       gameService.debugSwapPiece(2, 3);
 
       const actualGameState = gameStateService.gameState();
@@ -102,12 +180,13 @@ describe('GameService', () => {
       expectedGameState.board.cells[2][3] = createCellFill(EnCellState.B);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       assertGameState(actualGameState, expectedGameState);
     });
 
     it('swap piece Black->White', () => {
+      gameService.startGame();
       gameService.debugSwapPiece(4, 3);
 
       const actualGameState = gameStateService.gameState();
@@ -118,12 +197,13 @@ describe('GameService', () => {
       expectedGameState.board.cells[4][3] = createCellFill(EnCellState.W);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       assertGameState(actualGameState, expectedGameState);
     });
 
     it('swap piece White->Empty', () => {
+      gameService.startGame();
       gameService.debugSwapPiece(4, 4);
 
       const actualGameState = gameStateService.gameState();
@@ -134,7 +214,7 @@ describe('GameService', () => {
       expectedGameState.board.cells[4][4] = createCellFill(EnCellState.Empty);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.debugShowMovesCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       assertGameState(actualGameState, expectedGameState);
     });

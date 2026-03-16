@@ -3,6 +3,10 @@
   display: flex;
   justify-content: center; /* Centers the board horizontally */
   width: 100%;
+
+  --border-background: #224422;
+  --cell-background-light: #2da14c;
+  --cell-background-dark: #299345;
 }
 
 .board {
@@ -18,8 +22,8 @@
   grid-template-columns: 2rem repeat(var(--board-size), 1fr) 2rem;
   grid-template-rows: 2rem repeat(var(--board-size), 1fr) 2rem;
 
-  /* Remove border/bg from the main container so markers don't have green backgrounds */
-  background-color: transparent;
+  /* Default background of board, effectively becoming borders of cells. */
+  background-color: var(--border-background);
 }
 
 /* We don't strictly need .row with CSS grid, but keeping it for your HTML structure */
@@ -32,8 +36,9 @@
   align-items: center;
   justify-content: center;
 
-  border: 1px solid rgba(0,0,0,0.3);
-  background-color: #2da14c; /* Move the green background directly to the cells */
+  border: 1px solid var(--border-background);
+  border-radius: 5px;
+  background-color: var(--cell-background-light);
 
   font-size: clamp(1rem, 2vw, 2rem); /* Responsive text size */
   font-weight: bold;
@@ -42,37 +47,46 @@
   cursor: pointer;
 }
 
+.cell.dark {
+  background: var(--cell-background-dark);
+}
+
+.cell.light {
+  background-color: var(--cell-background-light);
+}
+
 /* Outer border for the TOP edge of the board */
 .cell.top-edge {
-  border-top: 3px solid black;
+  border-top: 3px solid var(--border-background);
 }
 
 /* Outer border for the LEFT edge of the board */
 .cell.left-edge {
-  border-left: 3px solid black;
+  border-left: 3px solid var(--border-background);
 }
 
 /* Outer border for the BOTTOM edge of the board */
 .cell.bottom-edge {
-  border-bottom: 3px solid black;
+  border-bottom: 3px solid var(--border-background);
 }
 
 /* Outer border for the RIGHT edge of the board */
 .cell.right-edge {
-  border-right: 3px solid black;
+  border-right: 3px solid var(--border-background);
 }
 
 /* Markers styling */
-.marker {
+.label {
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: normal;
   font-size: clamp(0.8rem, 1.5vw, 1.2rem);
   color: #333333;
+  background-color: #ffffff;
 }
 
-.marker.empty {
+.label.empty {
   /* No special styles needed, just keeps the corner slot blank */
 }
 

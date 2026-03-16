@@ -27,6 +27,7 @@
   "mainMenu.settings.boardSize.6": "6x6",
   "mainMenu.settings.boardSize.8": "8x8",
   "mainMenu.settings.boardSize.10": "10x10",
+  "mainMenu.settings.hint": "Pokaż podpowiedzi",
 
   "game.status.currentPlayer": "Aktualny gracz",
   "game.status.currStatus.stop": "Gra jest zatrzymana z powodu błędu.",
@@ -49,7 +50,7 @@
 
   "game.history.title": "Historia",
 
-  "game.btn.skipMove": "Opuść ruch",
+  "game.btn.passMove": "Opuść ruch",
   "game.btn.nextRound": "Następna rozgrywka",
   "game.btn.backToMenu": "Wróć do menu"
 }

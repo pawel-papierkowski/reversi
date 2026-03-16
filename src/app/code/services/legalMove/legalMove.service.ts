@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 
 import { EnCellState } from '@/code/data/enums';
-import type { DirCoord } from '@/code/data/dirCoord';
 import type { ReversiMove, Cell } from '@/code/data/gameState';
 import { createReversiMove } from '@/code/data/gameState';
-import { applyDir, getOppPiece } from '@/code/data/dirCoord';
+import { getOppPiece } from '@/code/data/dirCoord';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 
@@ -94,23 +93,23 @@ export class LegalMoveService {
   // DEBUG
 
   /**
-   * Show legal moves on board for current game state.
+   * Show potential legal moves on board for current game state.
    */
-  public debugShowMoves() {
+  public showHints() {
     const cells = this.gameStateService.gameState().board.cells;
     const playerPiece = this.gameStateService.getCurrPlayer().piece;
     const moves = this.gameStateService.gameState().board.legalMoves;
-    this.debugShowMovesCustom(cells, playerPiece, moves);
+    this.showHintsCustom(cells, playerPiece, moves);
   }
 
   /**
-   * Show legal moves on board for custom data.
-   * @param cells State of board.
+   * Show potential legal moves on board for custom data.
+   * @param cells State of board to modify.
    * @param playerPiece Player piece.
    * @param moves Array of legal moves.
    */
-  public debugShowMovesCustom(cells: Cell[][], playerPiece: EnCellState, moves: ReversiMove[]) {
-    if (!this.gameStateService.gameState().debugSettings.showMove) return;
+  public showHintsCustom(cells: Cell[][], playerPiece: EnCellState, moves: ReversiMove[]) {
+    if (!this.canShowPotentialMoves()) return;
     this.clearPotentialMoves(cells); // First, clear board.
 
     for (let i=0; i<moves.length; i++) {
@@ -121,10 +120,19 @@ export class LegalMoveService {
   }
 
   /**
+   * Check if can show potential legal moves.
+   * @returns True if can show hints, otherwise false.
+   */
+  private canShowPotentialMoves(): boolean {
+    if (this.gameStateService.gameState().settings.showHints) return true;
+    return false;
+  }
+
+  /**
    * Clears out potential move field in all cells.
    * @param cells State of board.
    */
-  private clearPotentialMoves(cells: Cell[][])  {
+  public clearPotentialMoves(cells: Cell[][])  {
     const boardSize = this.gameStateService.gameState().settings.boardSize;
     for (let x=0; x<boardSize; x++) {
       for (let y=0; y<boardSize; y++) {

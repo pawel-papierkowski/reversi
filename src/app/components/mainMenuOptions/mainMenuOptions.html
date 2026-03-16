@@ -21,4 +21,7 @@
   <combo-box id="boardSize" data-testid="cb-mainMenu-boardSize"
     langPrefix="mainMenu.settings.boardSize" [options]="gameConfig.boardSizes"
     [(selectedOption)]="gameStateService.menuSettings().boardSize" />
+
+  <label for="hint">{{'mainMenu.settings.hint' | translate}}:</label>
+  <input type="checkbox" [(ngModel)]="gameStateService.menuSettings().showHints" />
 </fieldset>

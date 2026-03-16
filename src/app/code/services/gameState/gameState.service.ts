@@ -100,6 +100,7 @@ export class GameStateService {
   private setCell(cell: Cell) {
     const player = this.getCurrPlayer();
     cell.state = player.piece;
+    cell.potentialMove = EnCellState.Empty;
   }
 
   //
@@ -195,22 +196,6 @@ export class GameStateService {
   }
 
   /**
-   * Add current state of board to history.
-   * @param move Move that lead to this state of board. Null if it is initial state of board.
-   */
-  public addToHistory(move: ReversiMove | null) {
-    // -1 indicates no player made move (initial state of board)
-    const playerIx = move === null ? -1 : this.gameState().board.currPlayerIx;
-
-    const moveEntry: GameHistoryEntry = {
-      playerIx: playerIx,
-      move: move,
-      cells: structuredClone(this.gameState().board.cells),
-    };
-    this.gameState().board.history.moves.push(moveEntry);
-  }
-
-  /**
    * Recalculate score for current board state.
    */
   public recalcScoring() {
@@ -218,7 +203,8 @@ export class GameStateService {
     const boardSize = this.gameState().settings.boardSize;
     const cells = this.gameState().board.cells;
 
-    statistics.player1Score = 0; // reset score first
+    statistics.emptyCells = 0; // reset score first
+    statistics.player1Score = 0;
     statistics.player2Score = 0;
 
     // Go over entire board and check every cell.
@@ -227,6 +213,7 @@ export class GameStateService {
         const cell = cells[x][y];
         if (cell.state == EnCellState.B) statistics.player1Score++;
         else if (cell.state == EnCellState.W) statistics.player2Score++;
+        else if (cell.state == EnCellState.Empty) statistics.emptyCells++;
       }
     }
   }

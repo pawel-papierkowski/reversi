@@ -23,10 +23,10 @@
     }
     @case (EnGameStatus.InProgress) {
       @if (gameStateService.getCurrPlayer().type === EnPlayerType.Human) {
-        @if (canSkipMove()) {
+        @if (canPassMove()) {
           {{'game.status.currStatus.inProgress.human.noMoves' | translate}}
-          <button data-testid="btn-skipMove" (click)="skipMove()">
-            {{ 'game.btn.skipMove' | translate }}
+          <button data-testid="btn-pass" (click)="passMove()">
+            {{ 'game.btn.pass' | translate }}
           </button>
         }
         @else {

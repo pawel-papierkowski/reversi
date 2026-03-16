@@ -27,6 +27,7 @@
   "mainMenu.settings.boardSize.6": "6x6",
   "mainMenu.settings.boardSize.8": "8x8",
   "mainMenu.settings.boardSize.10": "10x10",
+  "mainMenu.settings.hint": "Show hints",
 
   "game.status.currentPlayer": "Current player",
   "game.status.currStatus.stop": "Game is halted due to bug.",
@@ -49,7 +50,7 @@
 
   "game.history.title": "History",
 
-  "game.btn.skipMove": "Skip move",
+  "game.btn.passMove": "Pass",
   "game.btn.nextRound": "Next round",
   "game.btn.backToMenu": "Back to menu"
 }
