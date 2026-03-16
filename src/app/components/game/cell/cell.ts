@@ -38,6 +38,6 @@ export class ReversiCellCmp {
   public cellClick() {
     // No worries, makeMove() verifies if move for this cell is legal.
     this.gameService.makeMove(this.x(), this.y());
-    //this.gameService.debugSwapPiece(this.cell());
+    //this.gameService.debugSwapPiece(this.x(), this.y());
   }
 }

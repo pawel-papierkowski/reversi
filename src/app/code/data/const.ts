@@ -5,7 +5,7 @@ import type { ProjectProp, DifficultyConfig, GameConfig } from '@/code/data/type
 
 // DEBUG CONSTANTS
 export const defDebugMode: boolean = true;
-export const defDebugShowMove: boolean = true;
+export const defDebugHint: boolean = true;
 
 //
 

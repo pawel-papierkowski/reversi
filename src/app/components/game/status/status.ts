@@ -23,15 +23,15 @@ export class StatusCmp {
   //
 
   /**
-   * Check if current player can skip move.
-   * @returns True if can skip move, otherwise false.
+   * Check if current player can pass move.
+   * @returns True if can pass move, otherwise false.
    */
-  public canSkipMove(): boolean {
-    return this.gameService.canSkipMove();
+  public canPassMove(): boolean {
+    return this.gameService.canPassMove();
   }
 
-  /** Skip move. */
-  public skipMove() {
-    this.gameService.skipMove();
+  /** Pass move. */
+  public passMove() {
+    this.gameService.passMove();
   }
 }

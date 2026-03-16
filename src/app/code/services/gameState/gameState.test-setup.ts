@@ -20,13 +20,13 @@ export function genStartState(boardSize: number): GameState {
   const startGameState = genState(boardSize);
 
   const ix = boardSize/2 - 1; // for size 8 it will be 3
-  // pieces already on board
+  // add pieces already on board in center
   startGameState.board.cells[ix][ix] = createCellFill(EnCellState.W);
   startGameState.board.cells[ix+1][ix] = createCellFill(EnCellState.B);
   startGameState.board.cells[ix][ix+1] = createCellFill(EnCellState.B);
   startGameState.board.cells[ix+1][ix+1] = createCellFill(EnCellState.W);
 
-  // legal moves
+  // set potential legal moves
   startGameState.board.cells[ix-1][ix] = createCellFull(EnCellState.Empty, EnCellState.B);
   startGameState.board.cells[ix][ix-1] = createCellFull(EnCellState.Empty, EnCellState.B);
   startGameState.board.cells[ix+1][ix+2] = createCellFull(EnCellState.Empty, EnCellState.B);
@@ -56,11 +56,8 @@ export function genStartState(boardSize: number): GameState {
 function genState(boardSize: number): GameState {
   const startGameState = createGameState();
   // Mutate only the fields that change after "Start Game" is clicked.
-
   startGameState.settings.boardSize = boardSize;
   startGameState.board.status = EnGameStatus.InProgress;
-
-  // Game board should have four pieces in middle already.
   startGameState.board.cells = genCells(boardSize); // generate empty board
   return startGameState;
 }
@@ -79,17 +76,54 @@ function genCells(boardSize: number): Cell[][] {
 
 /**
  * Call it after modifications to board.
- * @param startGameState Generated game state.
+ * @param gameState Generated game state.
  */
-function genDataFromBoard(startGameState: GameState) {
-  // Should have first move (initial board state) already in history.
+function genDataFromBoard(gameState: GameState) {
+  // Should have first entry (initial board state) already in history.
   const historyEntry = createGameHistoryEntry();
-  historyEntry.cells = structuredClone(startGameState.board.cells);
-  startGameState.board.history.moves.push(historyEntry);
+  historyEntry.cells = structuredClone(gameState.board.cells);
+  clearPotentialMoves(gameState, historyEntry.cells);
+  gameState.board.history.moves.push(historyEntry);
 
   // Game view should be set.
-  startGameState.view.cells = startGameState.board.cells;
+  gameState.view.cells = gameState.board.cells;
 }
+
+function clearPotentialMoves(startGameState: GameState, cells: Cell[][])  {
+  const boardSize = startGameState.settings.boardSize;
+  for (let x=0; x<boardSize; x++) {
+    for (let y=0; y<boardSize; y++) {
+      cells[x][y].potentialMove = EnCellState.Empty;
+    }
+  }
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+// HELPERS
+
+  /**
+   * Add move to history entry. Note it also affects main board.
+   * @param playerIx Player index.
+   * @param moves Moves. First entry is actual move, others are flipped pieces. Empty array means no change to board.
+   */
+  export function addToHistory(gameState: GameState, playerIx: number, moves: {x:number, y: number}[]) {
+    if (moves.length > 0) {
+      const piece = playerIx === 0 ? EnCellState.B: EnCellState.W;
+      for (let i=0; i<moves.length; i++) {
+        const move = moves[i];
+        gameState.board.cells[move.x][move.y].state = piece;
+      }
+    }
+
+    // actually add to history
+    const historyEntry: GameHistoryEntry = {
+      playerIx: playerIx,
+      move: moves.length === 0 ? null : {x:moves[0].x, y:moves[0].y},
+      cells: structuredClone(gameState.board.cells)
+    };
+    clearPotentialMoves(gameState, historyEntry.cells);
+    gameState.board.history.moves.push(historyEntry);
+  }
 
 // ////////////////////////////////////////////////////////////////////////////
 // ASSERTIONS

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { EnGameStatus, EnCellState } from '@/code/data/enums';
-import type { Cell } from "@/code/data/gameState";
+import type { GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
@@ -23,7 +23,7 @@ export class GameService {
     this.gameStateService.initializeGame();
 
     this.updateSideData();
-    this.gameStateService.addToHistory(null); // initial board state as first entry in history
+    this.addToHistory(-1, null); // initial board state as first entry in history
   }
 
   /**
@@ -33,7 +33,7 @@ export class GameService {
    */
   private updateSideData() {
     this.legalMoveService.resolveMoves();
-    this.legalMoveService.debugShowMoves();
+    this.legalMoveService.showHints();
     this.gameStateService.recalcScoring();
   }
 
@@ -50,14 +50,15 @@ export class GameService {
 
     // Legal move found, execute it.
     this.gameStateService.executeMove(move);
-    // Current state of board as latest entry in history. Note it is still for player that made move.
-    this.gameStateService.addToHistory(move);
+    // Current state of board as latest entry in history. Notes:
+    // - State of board is from PoV of player that made move AFTER making move.
+    // - Potential moves are erased.
+    this.addToHistory(this.gameStateService.gameState().board.currPlayerIx, move);
 
     this.gameStateService.changePlayer();
     this.gameStateService.gameState().statistics.moveCount++;
-    this.gameStateService.gameState().statistics.emptyCells--;
 
-    // NOW update side data, as it must be for next player.
+    // NOW update side data, as these must be for next player.
     this.updateSideData();
 
     // TODO: probably here we will detect if game ended and switch status to PlayerWon or Tie.
@@ -66,9 +67,29 @@ export class GameService {
     // - both players have no legal moves for current board state
   }
 
-  /** Skip move. Works only if player can skip (no legal moves available). */
-  public skipMove() {
-    if (!this.canSkipMove()) return;
+  /**
+   * Add current state of board to history. Note potential legal moves are erased.
+   * @param playerIx Player index or -1 if no player made move (initial state of board).
+   * @param move Move that lead to this state of board. Null if it is initial state of board.
+   */
+  private addToHistory(playerIx: number, move: ReversiMove | null) {
+    const moveEntry: GameHistoryEntry = {
+      playerIx: playerIx,
+      move: move,
+      cells: structuredClone(this.gameStateService.gameState().board.cells),
+    };
+    this.legalMoveService.clearPotentialMoves(moveEntry.cells);
+    this.gameStateService.gameState().board.history.moves.push(moveEntry);
+  }
+
+  //
+
+  /** Pass move. Works only if player can pass (no legal moves available). */
+  public passMove() {
+    if (!this.canPassMove()) return;
+
+    // Pass move generates special history entry.
+    this.addToHistory(this.gameStateService.gameState().board.currPlayerIx, null);
 
     this.gameStateService.changePlayer();
     this.gameStateService.gameState().statistics.moveCount++;
@@ -76,12 +97,12 @@ export class GameService {
   }
 
   /**
-   * Check if current player can skip move. Player can do it when:
+   * Check if current player can pass move. Player can do it when:
    * - there is still at least one empty cell on board
    * - current player has no legal moves
-   * @returns True if can skip move, otherwise false.
+   * @returns True if can pass move, otherwise false.
    */
-  public canSkipMove(): boolean {
+  public canPassMove(): boolean {
     if (this.gameStateService.gameState().statistics.emptyCells === 0) return false;
     if (this.gameStateService.gameState().board.legalMoves.length > 0) return false;
     return true;
@@ -111,10 +132,9 @@ export class GameService {
     const cell = this.gameStateService.gameState().board.cells[x][y];
     const oldState = cell.state;
     if (oldState === newState) return;
-    if (oldState === EnCellState.Empty) this.gameStateService.gameState().statistics.emptyCells--;
-    if (newState === EnCellState.Empty) this.gameStateService.gameState().statistics.emptyCells++;
 
     cell.state = newState;
+    // no need to set cell.potentialMove, updateSideData() recalculates them all anyway
     this.updateSideData();
   }
 
@@ -128,17 +148,9 @@ export class GameService {
     const cell = this.gameStateService.gameState().board.cells[x][y];
 
     switch (cell.state) {
-      case EnCellState.Empty: {
-        cell.state = EnCellState.B;
-        this.gameStateService.gameState().statistics.emptyCells--;
-        break;
-      }
+      case EnCellState.Empty: cell.state = EnCellState.B; break;
       case EnCellState.B: cell.state = EnCellState.W; break;
-      case EnCellState.W: {
-        cell.state = EnCellState.Empty;
-        this.gameStateService.gameState().statistics.emptyCells++;
-        break;
-      }
+      case EnCellState.W: cell.state = EnCellState.Empty; break;
       default: break;
     }
 
