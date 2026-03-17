@@ -18,6 +18,10 @@ body {
 
 /* General. */
 
+button {
+  padding: 2px 5px;
+}
+
 h1 {
   color: #484848;
   font-size: 54px;

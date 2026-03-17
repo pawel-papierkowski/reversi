@@ -37,8 +37,15 @@ export class LegalMoveService {
   public resolveMoves() {
     const cells = this.gameStateService.gameState().board.cells;
     const playerPiece = this.gameStateService.getCurrPlayer().piece;
-    const moves = this.resolveMovesCustom(cells, playerPiece);
-    this.gameStateService.gameState().board.legalMoves = moves;
+    const currPlayerMoves = this.resolveMovesCustom(cells, playerPiece);
+    this.gameStateService.gameState().board.legalMoves = currPlayerMoves;
+
+    // detect double pass
+    if (currPlayerMoves.length === 0) {
+      const oppPlayerPiece = playerPiece === EnCellState.B ? EnCellState.W : EnCellState.B;
+      const nextPlayerMoves = this.resolveMovesCustom(cells, oppPlayerPiece);
+      if (nextPlayerMoves.length === 0) this.gameStateService.gameState().board.doublePass = true;
+    }
   }
 
   /**

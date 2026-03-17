@@ -1,6 +1,6 @@
 {
   "name": "reversi-angular",
-  "version": "0.4.5",
+  "version": "0.5.5",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -41,6 +41,7 @@
     "@angular/build": "^21.1.5",
     "@angular/cli": "^21.1.5",
     "@angular/compiler-cli": "^21.1.0",
+    "@types/node": "^25.5.0",
     "@vitest/coverage-v8": "^4.0.18",
     "jsdom": "^27.4.0",
     "typescript": "~5.9.2",

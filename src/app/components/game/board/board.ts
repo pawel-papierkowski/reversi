@@ -19,6 +19,6 @@ export class ReversiBoardCmp {
   // Computed signal to generate letters: ['a', 'b', 'c' ...]
   public readonly columns = computed(() => {
     const size = this.gameStateService.gameState().settings.boardSize;
-    return Array.from({ length: size }, (_, i) => String.fromCharCode(97 + i));
+    return Array.from({ length: size }, (_, i) => String.fromCharCode(97 + i)); // 97 is ASCII 'a'
   });
 }

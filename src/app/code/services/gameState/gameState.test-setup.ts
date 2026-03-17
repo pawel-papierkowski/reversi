@@ -79,6 +79,8 @@ function genCells(boardSize: number): Cell[][] {
  * @param gameState Generated game state.
  */
 function genDataFromBoard(gameState: GameState) {
+  gameState.statistics.round = 1;
+
   // Should have first entry (initial board state) already in history.
   const historyEntry = createGameHistoryEntry();
   historyEntry.cells = structuredClone(gameState.board.cells);
@@ -158,9 +160,10 @@ export function assertGameState(actualGameState: GameState, expectedGameState: G
 function assertGameBoard(actualBoard: ReversiBoard, expectedBoard: ReversiBoard) {
   expect(actualBoard.status, 'Board status should be same').toEqual(expectedBoard.status);
   expect(actualBoard.currPlayerIx, 'Board currPlayerIx should be same').toEqual(expectedBoard.currPlayerIx);
+  assertGameHistory(actualBoard.history, expectedBoard.history);
   expect(actualBoard.cells, 'Board cells should be same').toEqual(expectedBoard.cells);
   expect(actualBoard.legalMoves, 'Board legalMoves should be same').toEqual(expectedBoard.legalMoves);
-  assertGameHistory(actualBoard.history, expectedBoard.history);
+  expect(actualBoard.doublePass, 'Board doublePass should be same').toEqual(expectedBoard.doublePass);
 }
 
 /**

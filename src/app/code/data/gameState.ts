@@ -1,4 +1,4 @@
-import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState } from '@/code/data/enums';
+import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState, EnViewMode } from '@/code/data/enums';
 import { defDebugMode, defDebugHint } from '@/code/data/const';
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -11,12 +11,14 @@ import { defDebugMode, defDebugHint } from '@/code/data/const';
 // //////////
 
 type GameView = {
+  viewMode: EnViewMode;
   // Separate from cells in board because we want to show also state of board from history.
   cells: Cell[][];
 };
 
 export function createGameView(): GameView {
   return {
+    viewMode: EnViewMode.CurrentBoard,
     cells: [],
   };
 }
@@ -28,8 +30,8 @@ export function createGameView(): GameView {
 export type GameSettings = {
   mode: EnMode;
   whoFirst: EnPlayerType; // matters only in human vs AI mode
-  difficulty: EnDifficulty;
-  boardSize: number;
+  difficulty: EnDifficulty; // matters only in human vs AI or AI vs AI mode
+  boardSize: number;  // size of board, default is 8x8
   showHints: boolean; // shows legal moves on board
 };
 
@@ -201,6 +203,7 @@ export type ReversiBoard = {
   status: EnGameStatus;
   cells: Cell[][]; // Current state of board.
   legalMoves: ReversiMove[]; // List of available legal moves for this board state and current player.
+  doublePass: boolean; // If true, both current and next player has no legal moves.
   currPlayerIx: number; // index for gameState.players
   history: GameHistory; // tracks history of moves in current round
 };
@@ -210,6 +213,7 @@ export function createGameBoard(): ReversiBoard {
     status: EnGameStatus.Pending,
     cells: [], // actually filled later, as we need to know settings like board size
     legalMoves: [],
+    doublePass: false,
     currPlayerIx: 0,
     history: createGameHistory(),
   };

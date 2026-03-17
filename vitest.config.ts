@@ -22,6 +22,17 @@ export default defineConfig({
         'src/**/*.config.ts'    // Ignore config files
       ],
       reporter: ['text', 'html', 'lcov'] // Generate terminal output, HTML report, and lcov for IDE
+    },
+
+    onConsoleLog(log, type) {
+      // Print the raw string exactly as it was logged
+      if (type === 'stdout') {
+        process.stdout.write(`${log}\n`);
+      } else {
+        process.stderr.write(`${log}\n`);
+      }
+      // Return false to tell Vitest NOT to print its own formatted version
+      return false;
     }
   }
 });
