@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir } from '@/code/data/enums';
+import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
 import { playerNames, projectProp } from '@/code/data/const';
 import type { DirCoord } from '@/code/data/dirCoord';
 import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
@@ -233,8 +233,7 @@ export class GameStateService {
       players: this.generatePlayers(),
       debugSettings: this.generateDebugSettings(),
     }));
-
-    this.initializeRound();
+    // execute initializeRound() separately after that
   }
 
   /** Generate debug settings. Ensures production always has debug turn off. */
@@ -246,7 +245,7 @@ export class GameStateService {
   //
 
   /**
-   * Initializes new round.
+   * Initializes new round. That involves resetting of most game data.
    */
   public initializeRound() {
     const boardSize = this.gameState().settings.boardSize;
@@ -258,17 +257,20 @@ export class GameStateService {
         status: EnGameStatus.InProgress,
         cells: newCells, // yes, common reference
         legalMoves: [],
+        doublePass: false,
         currPlayerIx: 0,
         history: this.generateEmptyHistory(), // will add initial entry later
       },
       statistics: {
-        ...state.statistics,
-        moveCount: 0, // reset stats for current state of board
+        ...state.statistics, // rest of statistics (win/tie counts) won't be touched
+        round: state.statistics.round+1,
+        moveCount: 0, // reset part of stats for start of new round
         emptyCells: boardSize*boardSize - 4,
         player1Score: 2,
         player2Score: 2,
       },
       view: {
+        viewMode: EnViewMode.CurrentBoard,
         cells: newCells, // yes, common reference
       },
     }));

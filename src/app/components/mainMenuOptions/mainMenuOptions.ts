@@ -22,7 +22,22 @@ export class MainMenuOptionsCmp {
   public readonly playerTypes = Object.keys(playerTypeDescr).map(Number);
   public readonly difficulties = Object.keys(difficultyDescr).map(Number);
 
+  /**
+   * Check if whoFirst combobox should be disabled.
+   * @returns True if whoFirst combobox should be disabled, otherwise false.
+   */
   public isWhoFirstDisabled() : boolean {
     return !(this.gameStateService.menuSettings().mode === EnMode.HumanVsAi);
+  }
+
+  /**
+   * Check if difficulty combobox should be disabled.
+   * @returns True if difficulty combobox should be disabled, otherwise false.
+   */
+  public isDifficultyDisabled() : boolean {
+    switch (this.gameStateService.menuSettings().mode) {
+      case EnMode.HumanVsHuman: return true;
+      default: return false;
+    }
   }
 }

@@ -50,7 +50,7 @@
 
   "game.history.title": "History",
 
-  "game.btn.passMove": "Pass",
+  "game.btn.pass": "Pass",
   "game.btn.nextRound": "Next round",
   "game.btn.backToMenu": "Back to menu"
 }

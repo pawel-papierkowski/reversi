@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { EnGameStatus, EnCellState } from '@/code/data/enums';
+import { EnGameStatus, EnCellState, EnPlayerType, EnViewMode } from '@/code/data/enums';
 import type { GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
@@ -21,9 +21,7 @@ export class GameService {
   public startGame() {
     this.gameStateService.applySettings(); // use settings from main menu options form
     this.gameStateService.initializeGame();
-
-    this.updateSideData();
-    this.addToHistory(-1, null); // initial board state as first entry in history
+    this.nextRound();
   }
 
   /**
@@ -40,11 +38,12 @@ export class GameService {
   // PLAYER ACTIONS
 
   /**
-   * Tries to make move.
+   * Tries to make move. Note both human and AI call this function.
    * @param x X coordinate.
    * @param y Y coordinate.
    */
   public makeMove(x: number, y: number) {
+    if (!this.canMakeMove()) return; // cannot make move in general
     const move = this.legalMoveService.findMove(x, y);
     if (move === null) return; // no legal move found for this cell, abort
 
@@ -61,10 +60,19 @@ export class GameService {
     // NOW update side data, as these must be for next player.
     this.updateSideData();
 
-    // TODO: probably here we will detect if game ended and switch status to PlayerWon or Tie.
-    // Game can end if:
-    // - no more empty cells left
-    // - both players have no legal moves for current board state
+    if (this.canEndRound()) this.endRound();
+  }
+
+  /**
+   * Check if can make move in general.
+   * @returns True if move is allowed, otherwise false.
+   */
+  private canMakeMove(): boolean {
+    // must be in progress
+    if (this.gameStateService.gameState().board.status !== EnGameStatus.InProgress) return false;
+    // cannot make move when reviewing past moves from history
+    if (this.gameStateService.gameState().view.viewMode !== EnViewMode.CurrentBoard) return false;
+    return true;
   }
 
   /**
@@ -80,6 +88,46 @@ export class GameService {
     };
     this.legalMoveService.clearPotentialMoves(moveEntry.cells);
     this.gameStateService.gameState().board.history.moves.push(moveEntry);
+  }
+
+  /**
+   * Checks conditions when current game is over. Game can end if:
+   * - no more empty cells left
+   * - both players have no legal moves for current board state
+   * @returns True if game is over, otherwise false.
+   */
+  private canEndRound(): boolean {
+    // ran out of empty cells
+    if (this.gameStateService.gameState().statistics.emptyCells === 0) return true;
+    // doublePass is true only if both current and next player have no legal moves
+    if (this.gameStateService.gameState().board.doublePass) return true;
+    return false;
+  }
+
+  /**
+   * Set game to end state. In this state you can only quit, start new round or review history.
+   */
+  private endRound() {
+    const stats = this.gameStateService.gameState().statistics;
+    if (stats.player1Score === stats.player2Score) {
+      this.gameStateService.gameState().board.status = EnGameStatus.Tie;
+      // advance appropriate statistics
+      stats.player1WinInRow = 0;
+      stats.player2WinInRow = 0;
+      stats.ties++;
+      stats.tiesInRow++;
+    } else {
+      this.gameStateService.gameState().board.status = EnGameStatus.PlayerWon;
+      // advance appropriate statistics
+      stats.tiesInRow = 0;
+      if (stats.player1Score > stats.player2Score) {
+        stats.player1Win++;
+        stats.player1WinInRow++;
+      } else {
+        stats.player2Win++;
+        stats.player2WinInRow++;
+      }
+    }
   }
 
   //
@@ -100,11 +148,13 @@ export class GameService {
    * Check if current player can pass move. Player can do it when:
    * - there is still at least one empty cell on board
    * - current player has no legal moves
+   * - next player HAS legal moves
    * @returns True if can pass move, otherwise false.
    */
   public canPassMove(): boolean {
     if (this.gameStateService.gameState().statistics.emptyCells === 0) return false;
     if (this.gameStateService.gameState().board.legalMoves.length > 0) return false;
+    if (this.gameStateService.gameState().board.doublePass) return false;
     return true;
   }
 
@@ -116,6 +166,14 @@ export class GameService {
    */
   public isGameOngoing() : boolean {
     return this.gameStateService.gameState().board.status !== EnGameStatus.Pending;
+  }
+
+  /** Move to next round. */
+  public nextRound() {
+    this.gameStateService.initializeRound();
+
+    this.updateSideData();
+    this.addToHistory(-1, null); // initial board state as first entry in history
   }
 
   // //////////////////////////////////////////////////////////////////////////

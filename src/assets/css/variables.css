@@ -21,12 +21,18 @@
 /*** Default theme. ***/
 :root {
   /* Combobox. */
+  --combobox-min-width: 175px;
+  --combobox-padding: 2px;
   --combobox-border: 1px solid #aaaaaa;
   --combobox-background: #e8e8e8;
   --combobox-text: #111827;
   --combobox-background-hover: #d8d8d8;
   --combobox-text-hover: #111827;
 
+  --combobox-options-min-width: 150px;
+  --combobox-options-max-height: 300px;
+
+  --combobox-option-padding: 2px;
   --combobox-option-border: 1px solid #aaaaaa;
   --combobox-option-background: #f0f0f0;
   --combobox-option-background-hover: #d8d8d8;

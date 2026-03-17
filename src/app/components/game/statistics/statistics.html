@@ -6,6 +6,8 @@
     @if (showWhenHumanVsAi()) {
       <div>{{'mainMenu.settings.whoFirst' | translate}}:</div>
       <div>{{'enum.playerType.'+gameStateService.gameState().settings.whoFirst | translate }}</div>
+    }
+    @if (showWhenAiInvolved()) {
       <div>{{'mainMenu.settings.difficulty' | translate}}:</div>
       <div>{{'enum.difficulty.'+gameStateService.gameState().settings.difficulty | translate }}</div>
     }

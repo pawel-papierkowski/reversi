@@ -20,6 +20,16 @@ export const playerTypeDescr: Record<EnPlayerType, string> = {
   [EnPlayerType.AI]: 'AI',
 };
 
+export enum EnViewMode {
+  CurrentBoard, // we see current board
+  History, // we see history entry
+}
+
+export const viewModeDescr: Record<EnViewMode, string> = {
+  [EnViewMode.CurrentBoard]: 'Current board',
+  [EnViewMode.History]: 'History',
+};
+
 //
 
 export enum EnDifficulty {

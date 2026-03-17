@@ -15,6 +15,7 @@
   <label for="difficulty">{{'mainMenu.settings.difficulty' | translate}}:</label>
   <combo-box id="difficulty" data-testid="cb-mainMenu-difficulty"
     langPrefix="enum.difficulty" [options]="difficulties"
+    [disabled]="isDifficultyDisabled()"
     [(selectedOption)]="gameStateService.menuSettings().difficulty" />
 
   <label for="boardSize">{{'mainMenu.settings.boardSize' | translate}}:</label>

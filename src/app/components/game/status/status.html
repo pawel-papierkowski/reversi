@@ -39,8 +39,10 @@
       }
     }
     @case (EnGameStatus.PlayerWon) {
-      {{'game.status.currStatus.playerWon' | translate}}
-      <app-player-name [player]="gameStateService.getWinningPlayer()" [anim]="true" />!
+      <div class="player">
+        {{'game.status.currStatus.playerWon' | translate}}
+        <app-player-name [player]="gameStateService.getWinningPlayer()" [anim]="true" />!
+      </div>
     }
     @case (EnGameStatus.Tie) {
       <div [innerHTML]="'game.status.currStatus.tie' | translate"></div>

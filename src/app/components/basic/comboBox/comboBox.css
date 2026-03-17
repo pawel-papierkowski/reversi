@@ -3,14 +3,14 @@
   display: inline-block;
 
   margin: 0px 5px;
-  padding: 0px;
+  padding: var(--combobox-padding);
 
   color: var(--combobox-text);
   background: var(--combobox-background);
 
   border: var(--combobox-border);
   border-radius: 5px;
-  min-width: 175px;
+  min-width: var(--combobox-min-width);
 }
 
 .combobox:hover {
@@ -76,14 +76,14 @@
   border-radius: 5px;
   background: var(--combobox-option-background);
 
-  min-width: 150px;
-  max-height: 300px;
+  min-width: var(--combobox-options-min-width);
+  max-height: var(--combobox-options-max-height);
   overflow-y: auto;
   z-index: 10010;
 }
 
 .option {
-  padding: 1px;
+  padding: var(--combobox-option-padding);
   cursor: pointer;
 }
 
