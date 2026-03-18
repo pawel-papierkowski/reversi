@@ -89,6 +89,7 @@ export class GameService {
       cells: structuredClone(this.gameStateService.gameState().board.cells),
     };
     this.legalMoveService.clearPotentialMoves(moveEntry.cells);
+    // ensure latest history entry is first on list
     this.gameStateService.gameState().board.history.moves.unshift(moveEntry);
   }
 
@@ -164,10 +165,57 @@ export class GameService {
    * @returns True if can pass move, otherwise false.
    */
   public canPassMove(): boolean {
-    if (this.gameStateService.gameState().statistics.emptyCells === 0) return false;
+    // cannot pass when reviewing past moves from history
+    if (this.gameStateService.gameState().view.viewMode !== EnViewMode.CurrentBoard) return false;
+    // cannot pass when current player still has some moves
     if (this.gameStateService.gameState().board.legalMoves.length > 0) return false;
+    // cannot pass when game is finished due to both players having no legal moves
     if (this.gameStateService.gameState().board.doublePass) return false;
     return true;
+  }
+
+  /**
+   * Show historical state of board for selected history entry.
+   * @param historyEntry History entry to show.
+   */
+  public jumpToEntry(historyEntry: GameHistoryEntry) {
+    if (!this.canJumpToEntry()) return;
+
+    this.gameStateService.gameState.update(state => ({
+      ...state,
+      view: {
+        viewMode: EnViewMode.History,
+        viewMove: historyEntry.id,
+        cells: historyEntry.cells,
+      }
+    }));
+  }
+
+  /**
+   * Check if can jump to history entry.
+   * @returns True if can, otherwise false.
+   */
+  private canJumpToEntry(): boolean {
+    // not when AI is thinking on move
+    if (this.gameStateService.getCurrPlayer().type === EnPlayerType.AI) return false;
+    return true;
+  }
+
+  /**
+   * Exits history mode.
+   */
+  public exitHistory() {
+    // already out of history mode
+    if (this.gameStateService.gameState().view.viewMode === EnViewMode.CurrentBoard) return;
+
+    this.gameStateService.gameState.update(state => ({
+      ...state,
+      view: {
+        viewMode: EnViewMode.CurrentBoard,
+        viewMove: -1,
+        cells: this.gameStateService.gameState().board.cells, // current board
+      }
+    }));
   }
 
   // VARIOUS
