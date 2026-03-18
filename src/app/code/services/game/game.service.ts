@@ -108,26 +108,36 @@ export class GameService {
    * Set game to end state. In this state you can only quit, start new round or review history.
    */
   private endRound() {
-    const stats = this.gameStateService.gameState().statistics;
-    if (stats.player1Score === stats.player2Score) {
-      this.gameStateService.gameState().board.status = EnGameStatus.Tie;
+    let status: EnGameStatus;
+    const statistics = this.gameStateService.gameState().statistics;
+    if (statistics.player1Score === statistics.player2Score) {
+      status = EnGameStatus.Tie;
       // advance appropriate statistics
-      stats.player1WinInRow = 0;
-      stats.player2WinInRow = 0;
-      stats.ties++;
-      stats.tiesInRow++;
+      statistics.player1WinInRow = 0;
+      statistics.player2WinInRow = 0;
+      statistics.ties++;
+      statistics.tiesInRow++;
     } else {
-      this.gameStateService.gameState().board.status = EnGameStatus.PlayerWon;
+      status = EnGameStatus.PlayerWon;
       // advance appropriate statistics
-      stats.tiesInRow = 0;
-      if (stats.player1Score > stats.player2Score) {
-        stats.player1Win++;
-        stats.player1WinInRow++;
+      statistics.tiesInRow = 0;
+      if (statistics.player1Score > statistics.player2Score) {
+        statistics.player1Win++;
+        statistics.player1WinInRow++;
       } else {
-        stats.player2Win++;
-        stats.player2WinInRow++;
+        statistics.player2Win++;
+        statistics.player2WinInRow++;
       }
     }
+    // propetly update game state
+    this.gameStateService.gameState.update(state => ({
+      ...state,
+      board: {
+        ...state.board,
+        statistics: statistics,
+        status: status
+      }
+    }));
   }
 
   //

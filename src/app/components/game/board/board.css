@@ -10,20 +10,41 @@
 }
 
 .board {
-  /* 1. Responsive sizing */
+  position: relative; /* This keeps the absolute overlay inside the board */
+
+  /* Responsive sizing */
   width: 100%;
   max-width: 50vw; /* Board won't exceed 50% of the screen width */
   aspect-ratio: 1 / 1; /* Forces the board to always be a perfect square */
 
-  /* 2. Grid Layout */
+  /* Grid Layout */
   display: grid;
   /* --board-size is defined in host in board.ts, allowing programmatic change of board size */
   /* First row/col is small (e.g., 2rem) for markers, the rest are equal fractions (1fr) */
   grid-template-columns: 2rem repeat(var(--board-size), 1fr) 2rem;
   grid-template-rows: 2rem repeat(var(--board-size), 1fr) 2rem;
 
-  /* Default background of board, effectively becoming borders of cells. */
+  /* Default background of board. Includes borders of cells. */
   background-color: var(--border-background);
+
+  /* Explicit default state makes the animation smoother */
+  filter: grayscale(0%) sepia(0%) contrast(100%);
+  /* Animates any changes to the filter over 1 second */
+  transition: filter 1s ease-in-out;
+}
+
+.board.endRound {
+  filter: grayscale(70%) sepia(0%) contrast(110%);
+}
+
+.board.history {
+  filter: grayscale(0%) sepia(90%) contrast(120%);
+}
+
+@media (max-width: 1200px) {
+  .board {
+    max-width: 90vw;
+  }
 }
 
 /* We don't strictly need .row with CSS grid, but keeping it for your HTML structure */
@@ -31,7 +52,10 @@
   display: contents; /* Makes the .row dive disappear from the grid layout, letting cells act as direct children of .board */
 }
 
+/* CELL */
+
 .cell {
+  position: relative; /* This keeps the absolute overlay inside the board */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -75,6 +99,8 @@
   border-right: 3px solid var(--border-background);
 }
 
+/* LABEL */
+
 /* Markers styling */
 .label {
   display: flex;
@@ -88,10 +114,4 @@
 
 .label.empty {
   /* No special styles needed, just keeps the corner slot blank */
-}
-
-@media (max-width: 1200px) {
-  .board {
-    max-width: 90vw;
-  }
 }

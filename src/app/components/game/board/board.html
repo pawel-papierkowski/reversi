@@ -1,4 +1,4 @@
-<div class="board">
+<div [class]="boardCss()">
   <!-- TOP ROW: Empty corner + Letters. -->
   <div class="label empty"></div> <!-- Top-left empty corner -->
   @for (letter of columns(); track $index) {
