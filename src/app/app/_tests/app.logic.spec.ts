@@ -6,7 +6,7 @@ import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBo
 import { assertGameState, genStartState, addToHistory } from '@/code/services/gameState/gameState.test-setup';
 
 import { App } from '../app';
-import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
+import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnViewMode } from '@/code/data/enums';
 import type { GameState } from "@/code/data/gameState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
@@ -33,6 +33,14 @@ describe('App (logic)', () => {
   });
 
   //
+
+  async function startGame() {
+    // Find the primary Start Game button inside the rendered MainMenu and click it.
+    const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
+    expect(startButton, 'Start button must exist').not.toBeNullable();
+    startButton.click();
+    await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
+  }
 
   /**
    * Clicks on cell indicated by first move. Moves are provided as string with move sequence using
@@ -89,8 +97,8 @@ describe('App (logic)', () => {
 
     // Find pass move button and click it.
     const passButton = fixture.nativeElement.querySelector('[data-testid="btn-pass"]') as HTMLButtonElement;
-    passButton.click();
     expect(passButton, 'Pass button must exist').not.toBeNullable();
+    passButton.click();
     await fixture.whenStable();
   }
 
@@ -111,10 +119,7 @@ describe('App (logic)', () => {
 
   describe('should have correct game state when game starts', () => {
     it('with default settings', async () => {
-      // Find the primary Start Game button inside the rendered MainMenu and click it.
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
+      await startGame();
 
       // Now we check game state.
       const actualGameState = gameStateService.gameState();
@@ -127,11 +132,7 @@ describe('App (logic)', () => {
       selectComboboxOption(fixture, 'cb-mainMenu-mode', 1);
       selectComboboxOption(fixture, 'cb-mainMenu-whoFirst', 1);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0);
-
-      // Find the primary Start Game button inside the rendered MainMenu and click it.
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
+      await startGame();
 
       // Now we check game state.
       const actualGameState = gameStateService.gameState();
@@ -146,11 +147,7 @@ describe('App (logic)', () => {
     it('in AI vs AI mode', async () => {
       // Change mode to AI vs AI
       selectComboboxOption(fixture, 'cb-mainMenu-mode', 2);
-
-      // Find the primary Start Game button inside the rendered MainMenu and click it.
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable(); // Wait for Angular's async router navigation to finish.
+      await startGame();
 
       // Now we check game state.
       const actualGameState = gameStateService.gameState();
@@ -167,10 +164,7 @@ describe('App (logic)', () => {
     it('on invalid cell should not change anything', async () => {
       // board 4x4, moves: b2
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
-
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable();
+      await startGame();
 
       // Find correct cell and click it. Note this cell is not on list of legal moves.
       const cell = fixture.nativeElement.querySelector('[data-testid="cell-2x2"]') as HTMLButtonElement;
@@ -188,10 +182,7 @@ describe('App (logic)', () => {
       // board 6x6, moves: e4
       const expectedGameState = genStartState(6);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 1); // 6x6
-
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable();
+      await startGame();
 
       await clickOnCellMoves(expectedGameState, 0, "e4 d4"); // black e4
 
@@ -215,11 +206,7 @@ describe('App (logic)', () => {
       // board 4x4, moves: b1 a3
       const expectedGameState = genStartState(4);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
-
-      // Find the primary Start Game button inside the rendered MainMenu and click it.
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable();
+      await startGame();
 
       await clickOnCellMoves(expectedGameState, 0, "b1 b2"); // black b1
       await clickOnCellMoves(expectedGameState, 1, "a3 b3"); // white a3
@@ -243,13 +230,9 @@ describe('App (logic)', () => {
   describe('special situation when', () => {
     it('one of players cannot make legal move and has to pass move', async () => {
       const expectedGameState = genStartState(4);
-      // board 4x4, moves: b1 c1 d3 a1
+      // board 4x4, moves: b1 c1 d3 a1 pass
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
-
-      // Find the primary Start Game button inside the rendered MainMenu and click it.
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable();
+      await startGame();
       assertPassButton(false, 'after start');
 
       await clickOnCellMoves(expectedGameState, 0, "b1 b2"); // black b1
@@ -292,10 +275,7 @@ describe('App (logic)', () => {
       const expectedGameState = genStartState(4);
       // board 4x4, moves: b1 a1 a2 c1 d1 a3 a4 d2 d3 b4 c4 d4
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
-
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable();
+      await startGame();
       assertPassButton(false, 'after start');
 
       await clickOnCellMoves(expectedGameState, 0, "b1 b2"); // black b1
@@ -357,10 +337,7 @@ describe('App (logic)', () => {
       const expectedGameState = genStartState(4);
       // board 4x4, moves: c4 d4 d3 b4 a4 d2 b1 a3 d1 a2 a1 pass c1
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
-
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable();
+      await startGame();
       assertPassButton(false, 'after start');
 
       await clickOnCellMoves(expectedGameState, 0, "c4 c3"); // black c4
@@ -424,10 +401,7 @@ describe('App (logic)', () => {
       const expectedGameState = genStartState(4);
       // board 4x4, moves: c4 d4 d3 b4 a4 d2 d1 a2 pass b1
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
-
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable();
+      await startGame();
       assertPassButton(false, 'after start');
 
       await clickOnCellMoves(expectedGameState, 0, "c4 c3"); // black c4
@@ -489,10 +463,7 @@ describe('App (logic)', () => {
       const expectedGameState = genStartState(6);
       // board 6x6, moves: d5 e3 d2 e5 f4 c5 d6 e4 b4
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 1); // 6x6
-
-      const startButton = fixture.nativeElement.querySelector('[data-testid="btn-start"]') as HTMLButtonElement;
-      startButton.click();
-      await fixture.whenStable();
+      await startGame();
       assertPassButton(false, 'after start');
 
       await clickOnCellMoves(expectedGameState, 0, "d5 d4"); // black d5
@@ -548,6 +519,71 @@ describe('App (logic)', () => {
       expectedGameStateNewRound.statistics.player1Win = 1;
       expectedGameStateNewRound.statistics.player1WinInRow = 1;
       assertGameState(actualGameStateNewRound, expectedGameStateNewRound);
+    });
+  });
+
+  describe('history', () => {
+    it('click on history entry and exit', async () => {
+      const expectedGameState = genStartState(4);
+      // board 4x4, moves: b1 c1 d3 a1 pass
+      selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
+      await startGame();
+
+      await clickOnCellMoves(expectedGameState, 0, "b1 b2"); // black b1
+      await clickOnCellMoves(expectedGameState, 1, "c1 c2"); // white c1
+      await clickOnCellMoves(expectedGameState, 0, "d3 c2 c3"); // black d3
+      await clickOnCellMoves(expectedGameState, 1, "a1 b1"); // white a1
+      await clickOnPass(expectedGameState, 0); // black pass
+
+      // CHECKING WEBPAGE
+      // Currently there should be 6 entries in history panel: initial state, 4 moves and pass.
+      const historyEntries = fixture.nativeElement.querySelectorAll('.historyEntry');
+      expect(historyEntries.length, 'Amount of history entries is different').toEqual(6);
+
+      // entering history at id 3
+      const historyEntry = historyEntries[3] as HTMLElement;
+      historyEntry.click();
+      await fixture.whenStable();
+
+      // Now we check game state when we are in history.
+      expectedGameState.statistics.moveCount = 5;
+      expectedGameState.statistics.emptyCells = 8;
+      expectedGameState.statistics.player1Score = 5;
+      expectedGameState.statistics.player2Score = 3;
+      expectedGameState.board.currPlayerIx = 1;
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
+      expectedGameState.view.viewMode = EnViewMode.History;
+      expectedGameState.view.viewMove = 2;
+      expectedGameState.view.cells = expectedGameState.board.history.moves[3].cells;
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+
+      const actualGameStateHist = gameStateService.gameState();
+      assertGameState(actualGameStateHist, expectedGameState);
+
+      // Button to exit history should be visible.
+      const exitHistoryButton = fixture.nativeElement.querySelector('[data-testid="btn-exitHistory"]') as HTMLButtonElement;
+      expect(exitHistoryButton, 'Exit history button must exist').not.toBeNullable();
+      exitHistoryButton.click();
+      await fixture.whenStable();
+
+      // Now we check game state after returning from history.
+      expectedGameState.statistics.moveCount = 5;
+      expectedGameState.statistics.emptyCells = 8;
+      expectedGameState.statistics.player1Score = 5;
+      expectedGameState.statistics.player2Score = 3;
+      expectedGameState.board.currPlayerIx = 1;
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
+      expectedGameState.view.viewMode = EnViewMode.CurrentBoard;
+      expectedGameState.view.viewMove = -1;
+      expectedGameState.view.cells = expectedGameState.board.cells;
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+
+      const actualGameState = gameStateService.gameState();
+      assertGameState(actualGameState, expectedGameState);
     });
   });
 });

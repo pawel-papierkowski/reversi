@@ -1,4 +1,4 @@
-<div [class]="cssClasses()" (click)="jumpToMove()">
+<div [class]="cssClasses()" (click)="jumpToEntry()">
   <reversi-piece [state]="getPiece()" mode="inline" [anim]="false" />
   {{ entry().id }}.
   {{ getText() | translate:{col:getCol(), row:getRow()} }}

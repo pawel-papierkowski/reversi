@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 
 import { EnCellState } from '@/code/data/enums';
 import type { GameHistoryEntry } from "@/code/data/gameState";
-import { createCellFill, createCellFull } from "@/code/data/gameState";
+import { createCellFill } from "@/code/data/gameState";
 
-import { assertGameState, genStartState, genEmptyState } from '@/code/services/gameState/gameState.test-setup';
+import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';

@@ -31,7 +31,9 @@ export class StatusCmp {
     return this.gameService.canPassMove();
   }
 
-  /** Pass move. */
+  /**
+   * Pass move.
+   */
   public passMove() {
     this.gameService.passMove();
   }
@@ -40,14 +42,6 @@ export class StatusCmp {
    * Exits history mode.
    */
   public exitHistory() {
-    if (this.gameStateService.gameState().view.viewMode === EnViewMode.CurrentBoard) return; // already out of history mode
-    this.gameStateService.gameState.update(state => ({
-      ...state,
-      view: {
-        viewMode: EnViewMode.CurrentBoard,
-        viewMove: -1,
-        cells: this.gameStateService.gameState().board.cells, // current board
-      }
-    }));
+    this.gameService.exitHistory();
   }
 }

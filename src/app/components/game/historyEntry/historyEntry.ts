@@ -3,10 +3,11 @@ import {TranslatePipe} from '@ngx-translate/core';
 
 import type { GameHistoryEntry } from "@/code/data/gameState";
 
-import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service'
+import { GameService } from '@/code/services/game/game.service';;
 
 import { ReversiPieceCmp } from '@/components/game/piece/piece';
-import { EnCellState, EnPlayerType, EnViewMode } from '@/code/data/enums';
+import { EnCellState } from '@/code/data/enums';
 
 @Component({
   selector: 'app-game-history-entry',
@@ -16,6 +17,7 @@ import { EnCellState, EnPlayerType, EnViewMode } from '@/code/data/enums';
 })
 export class HistoryEntryCmp {
   private readonly gameStateService = inject(GameStateService);
+  private readonly gameService = inject(GameService);
   public readonly entry = input.required<GameHistoryEntry>();
 
   cssClasses = computed<string[]>(() => {
@@ -61,25 +63,7 @@ export class HistoryEntryCmp {
   /**
    * Show historical state of board for selected move.
    */
-  public jumpToMove() {
-    if (!this.canJumpToMove()) return;
-
-    this.gameStateService.gameState.update(state => ({
-      ...state,
-      view: {
-        viewMode: EnViewMode.History,
-        viewMove: this.entry().id,
-        cells: this.entry().cells,
-      }
-    }));
-  }
-
-  /**
-   * Check if can jump to move.
-   * @returns True if can, otherwise false.
-   */
-  private canJumpToMove(): boolean {
-    if (this.gameStateService.getCurrPlayer().type === EnPlayerType.AI) return false;
-    return true;
+  public jumpToEntry() {
+    this.gameService.jumpToEntry(this.entry());
   }
 }
