@@ -201,7 +201,7 @@ describe('App (logic)', () => {
       expectedGameState.statistics.player1Score = 4;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[expectedGameState.board.history.moves.length-1].cells);
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
@@ -229,7 +229,7 @@ describe('App (logic)', () => {
       expectedGameState.statistics.emptyCells = 10;
       expectedGameState.statistics.player1Score = 3;
       expectedGameState.statistics.player2Score = 3;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[expectedGameState.board.history.moves.length-1].cells);
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
@@ -276,7 +276,7 @@ describe('App (logic)', () => {
       expectedGameState.statistics.player1Score = 5;
       expectedGameState.statistics.player2Score = 3;
       expectedGameState.board.currPlayerIx = 1; // would be 0 without pass
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[expectedGameState.board.history.moves.length-1].cells);
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
@@ -331,7 +331,7 @@ describe('App (logic)', () => {
       expectedGameState.board.status = EnGameStatus.PlayerWon;
       expectedGameState.board.doublePass = true;
       expectedGameState.board.currPlayerIx = 0;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[expectedGameState.board.history.moves.length-1].cells);
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
@@ -398,7 +398,7 @@ describe('App (logic)', () => {
       expectedGameState.board.status = EnGameStatus.Tie;
       expectedGameState.board.doublePass = true;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[expectedGameState.board.history.moves.length-1].cells);
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
@@ -462,7 +462,7 @@ describe('App (logic)', () => {
       expectedGameState.board.status = EnGameStatus.PlayerWon;
       expectedGameState.board.doublePass = true;
       expectedGameState.board.currPlayerIx = 0;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[expectedGameState.board.history.moves.length-1].cells);
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
@@ -528,7 +528,7 @@ describe('App (logic)', () => {
       expectedGameState.board.status = EnGameStatus.PlayerWon;
       expectedGameState.board.doublePass = true;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[expectedGameState.board.history.moves.length-1].cells);
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);

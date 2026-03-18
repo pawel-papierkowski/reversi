@@ -8,6 +8,7 @@
 
 /* Establish the 3D scene */
 .piece-container {
+  display: block;
   width: 100%;
   height: 100%;
   perspective: 600px; /* Gives the flip a realistic 3D depth */

@@ -1,9 +1,8 @@
 <div class="sidepanel-right">
   <div class="history">
     <h2>{{'game.history.title' | translate}}</h2>
-    <div>MOVE PLACEHOLDER</div>
-    <div>MOVE PLACEHOLDER</div>
-    <div>MOVE PLACEHOLDER</div>
-    <div>MOVE PLACEHOLDER</div>
+    @for (entry of getHistoryEntries(); track entry.id) {
+      <app-game-history-entry [entry]="entry" />
+    }
   </div>
 </div>

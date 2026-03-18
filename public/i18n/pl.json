@@ -37,6 +37,7 @@
   "game.status.currStatus.inProgress.ai": "Oczekuje na ruch SI...",
   "game.status.currStatus.playerWon": "Wygrał gracz",
   "game.status.currStatus.tie": "Rozgrywka zakończyła się remisem.",
+  "game.status.showsHistory": "Przeglądanie planszy dla ruchu nr {{moveId}}.",
 
   "game.statistics.basic": "Podstawowe dane",
   "game.statistics.stats": "Statystyki",
@@ -49,8 +50,12 @@
   "game.statistics.playerWinsInRow": "Wygrane pod rząd",
 
   "game.history.title": "Historia",
+  "game.history.start": "Początek gry",
+  "game.history.pass": "Pas",
+  "game.history.move": "{{col}}{{row}}",
 
-  "game.btn.pass": "Opuść ruch",
+  "game.btn.pass": "Spasuj",
+  "game.btn.exitHistory": "Wyjdź z historii",
   "game.btn.nextRound": "Następna rozgrywka",
   "game.btn.backToMenu": "Wróć do menu"
 }

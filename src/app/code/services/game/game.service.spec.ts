@@ -39,12 +39,13 @@ describe('GameService', () => {
       expectedGameState.board.cells[3][3] = createCellFill(EnCellState.B); // flipped white piece
 
       const historyEntry: GameHistoryEntry = {
+        id: 0,
         playerIx: 0,
         move: {x:2, y:3},
         cells: structuredClone(expectedGameState.board.cells)
       };
       legalMoveService.clearPotentialMoves(historyEntry.cells);
-      expectedGameState.board.history.moves.push(historyEntry);
+      expectedGameState.board.history.moves.unshift(historyEntry);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
@@ -65,12 +66,13 @@ describe('GameService', () => {
 
       gameService.makeMove(0, 3);
 
-      const historyEntry1: GameHistoryEntry = {
+      const historyEntry: GameHistoryEntry = {
+        id: 0,
         playerIx: 0,
         move: {x:0, y:3},
         cells: structuredClone(gameStateService.gameState().board.cells)
       };
-      legalMoveService.clearPotentialMoves(historyEntry1.cells);
+      legalMoveService.clearPotentialMoves(historyEntry.cells);
 
       //
 
@@ -90,13 +92,10 @@ describe('GameService', () => {
       expectedGameState.board.cells[6][3] = createCellFill(EnCellState.B);
       expectedGameState.board.cells[7][3] = createCellFill(EnCellState.B);
 
-      expectedGameState.board.history.moves.push(historyEntry1);
+      expectedGameState.board.history.moves.unshift(historyEntry);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
-
-      expect(actualGameState.board.history.moves[1].cells, 'History [1] cells should be same').toEqual(expectedGameState.board.history.moves[1].cells);
-
       assertGameState(actualGameState, expectedGameState);
     });
 

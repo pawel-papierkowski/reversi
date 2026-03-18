@@ -271,6 +271,7 @@ export class GameStateService {
       },
       view: {
         viewMode: EnViewMode.CurrentBoard,
+        viewMove: -1,
         cells: newCells, // yes, common reference
       },
     }));
