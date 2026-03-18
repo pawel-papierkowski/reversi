@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import {TranslatePipe } from '@ngx-translate/core';
 
-import { EnPlayerType, EnGameStatus } from '@/code/data/enums';
+import { EnPlayerType, EnGameStatus, EnViewMode } from '@/code/data/enums';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { GameService } from '@/code/services/game/game.service';
 
@@ -19,6 +19,7 @@ export class StatusCmp {
   public readonly gameService = inject(GameService);
   public EnPlayerType = EnPlayerType;
   public EnGameStatus = EnGameStatus;
+  public EnViewMode = EnViewMode;
 
   //
 
@@ -33,5 +34,20 @@ export class StatusCmp {
   /** Pass move. */
   public passMove() {
     this.gameService.passMove();
+  }
+
+  /**
+   * Exits history mode.
+   */
+  public exitHistory() {
+    if (this.gameStateService.gameState().view.viewMode === EnViewMode.CurrentBoard) return; // already out of history mode
+    this.gameStateService.gameState.update(state => ({
+      ...state,
+      view: {
+        viewMode: EnViewMode.CurrentBoard,
+        viewMove: -1,
+        cells: this.gameStateService.gameState().board.cells, // current board
+      }
+    }));
   }
 }

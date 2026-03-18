@@ -37,6 +37,7 @@
   "game.status.currStatus.inProgress.ai": "Waiting for AI move...",
   "game.status.currStatus.playerWon": "Winning player:",
   "game.status.currStatus.tie": "Game finished in draw.",
+  "game.status.showsHistory": "Viewing board for move {{moveId}}.",
 
   "game.statistics.basic": "Basic data",
   "game.statistics.stats": "Statistics",
@@ -49,8 +50,12 @@
   "game.statistics.playerWinsInRow": "Wins in row",
 
   "game.history.title": "History",
+  "game.history.start": "Start of game",
+  "game.history.pass": "Pass",
+  "game.history.move": "{{col}}{{row}}",
 
   "game.btn.pass": "Pass",
+  "game.btn.exitHistory": "Exit history",
   "game.btn.nextRound": "Next round",
   "game.btn.backToMenu": "Back to menu"
 }

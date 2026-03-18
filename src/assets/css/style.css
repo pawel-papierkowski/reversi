@@ -104,13 +104,24 @@ h3 {
 .sidepanel-right {
   position: fixed;
   top: 50px;
+  bottom: 0; /* Tells it to stop at the bottom of the screen */
   right: 0;
 
   overflow-y: auto; /* Scrollable if content is long */
   z-index: 100; /* Ensure it's above other content */
 
-  min-width: 200px;
-  max-width: 350px;
+  min-width: 175px;
+  max-width: 200px;
+
+  /* Hide scrollbar in Firefox. */
+  scrollbar-width: none;
+  /* Hide scrollbar in older IE/Edge. */
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar in Chrome, Safari, and newer Edge. */
+.sidepanel-right::-webkit-scrollbar {
+  display: none;
 }
 
 @media (max-width: 1200px) {

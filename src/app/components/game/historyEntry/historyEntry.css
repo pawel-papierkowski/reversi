@@ -1,0 +1,20 @@
+.historyEntry {
+  padding: 5px;
+
+  cursor: pointer;
+}
+
+.historyEntry:hover {
+  background-color: #dadada;
+  border-radius: 10px;
+}
+
+.historyEntry.selected {
+  background-color: #e7e98a;
+  border-radius: 10px;
+}
+
+.historyEntry.selected:hover {
+  background-color: #f4f691;
+  border-radius: 10px;
+}

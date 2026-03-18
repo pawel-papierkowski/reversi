@@ -81,13 +81,15 @@ export class GameService {
    * @param move Move that lead to this state of board. Null if it is initial state of board.
    */
   private addToHistory(playerIx: number, move: ReversiMove | null) {
+    const nextId = this.gameStateService.gameState().board.history.moves.length;
     const moveEntry: GameHistoryEntry = {
+      id: nextId,
       playerIx: playerIx,
       move: move,
       cells: structuredClone(this.gameStateService.gameState().board.cells),
     };
     this.legalMoveService.clearPotentialMoves(moveEntry.cells);
-    this.gameStateService.gameState().board.history.moves.push(moveEntry);
+    this.gameStateService.gameState().board.history.moves.unshift(moveEntry);
   }
 
   /**

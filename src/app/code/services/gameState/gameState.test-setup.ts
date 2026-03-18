@@ -118,13 +118,15 @@ function clearPotentialMoves(startGameState: GameState, cells: Cell[][])  {
     }
 
     // actually add to history
+    const nextId = gameState.board.history.moves.length;
     const historyEntry: GameHistoryEntry = {
+      id: nextId,
       playerIx: playerIx,
       move: moves.length === 0 ? null : {x:moves[0].x, y:moves[0].y},
       cells: structuredClone(gameState.board.cells)
     };
     clearPotentialMoves(gameState, historyEntry.cells);
-    gameState.board.history.moves.push(historyEntry);
+    gameState.board.history.moves.unshift(historyEntry);
   }
 
 // ////////////////////////////////////////////////////////////////////////////

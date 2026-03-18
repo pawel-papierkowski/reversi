@@ -33,7 +33,6 @@ export class ReversiBoardCmp {
     cssClasses.push('board');
     if (isHistory) cssClasses.push('history');
     else if (isEndRound) cssClasses.push('endRound');
-    console.info(cssClasses);
     return cssClasses;
   });
 }

@@ -11,14 +11,16 @@ import { defDebugMode, defDebugHint } from '@/code/data/const';
 // //////////
 
 type GameView = {
-  viewMode: EnViewMode;
-  // Separate from cells in board because we want to show also state of board from history.
+  viewMode: EnViewMode; // View mode - either real board or state from history.
+  viewMove: number; // Id of move in history. If -1, no move is viewed.
+  // Actually points to current board or board from history entry.
   cells: Cell[][];
 };
 
 export function createGameView(): GameView {
   return {
     viewMode: EnViewMode.CurrentBoard,
+    viewMove: -1,
     cells: [],
   };
 }
@@ -160,6 +162,7 @@ export function createPlayers(): Player[] {
 //
 
 export type GameHistoryEntry = {
+  id: number; // for track
   playerIx: number; // Which player did that move.
   move: ReversiMove | null; // Move itself. Null indicates no move (initial state of board or pass).
   cells: Cell[][]; // Board state as copy of main board at that moment.
@@ -167,6 +170,7 @@ export type GameHistoryEntry = {
 
 export function createGameHistoryEntry(): GameHistoryEntry {
   return {
+    id: 0,
     playerIx: -1,
     move: null,
     cells: [],

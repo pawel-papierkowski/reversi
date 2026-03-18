@@ -1,0 +1,5 @@
+<div [class]="cssClasses()" (click)="jumpToMove()">
+  <reversi-piece [state]="getPiece()" mode="inline" [anim]="false" />
+  {{ entry().id }}.
+  {{ getText() | translate:{col:getCol(), row:getRow()} }}
+</div>
