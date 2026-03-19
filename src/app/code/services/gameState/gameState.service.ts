@@ -4,7 +4,7 @@ import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } fr
 import { playerNames, projectProp, weights } from '@/code/data/const';
 import type { DirCoord } from '@/code/data/dirCoord';
 import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
-import type { GameState, GameSettings, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry,  } from "@/code/data/gameState";
+import type { GameState, GameSettings, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForDev, createDebugSettingsForProd } from "@/code/data/gameState";
 
 /** Game state service.
@@ -55,20 +55,34 @@ export class GameStateService {
   // //////////////////////////////////////////////////////////////////////////
 
   /**
-   * Execute move. That means changing state of selected cell and flipping
+   * Execute move for current state of board.
+   * That means changing state of selected cell and flipping
    * any contiguous line of opposite pieces that touch this piece.
    * @param move Move to execute.
    */
   public executeMove(move: ReversiMove) {
+    const cells = this.gameState().board.cells;
     const playerPiece = this.getCurrPlayer().piece;
-    const oppPlayerPiece = getOppPiece(playerPiece);
-    const cell = this.gameState().board.cells[move.x][move.y];
-    this.setCell(cell);
-    const potentialMoves = this.resolvePotentialMoves(this.gameState().board.cells, move.x, move.y, oppPlayerPiece);
+    return this.executeMoveCustom(cells, playerPiece, move);
+  }
 
+  /**
+   * Execute move for given board.
+   * That means changing state of selected cell and flipping
+   * any contiguous line of opposite pieces that touch this piece.
+   * @param cells State of board.
+   * @param playerPiece Player piece.
+   * @param move Move to execute.
+   */
+  public executeMoveCustom(cells: Cell[][], playerPiece: EnCellState, move: ReversiMove) {
+    const oppPlayerPiece = getOppPiece(playerPiece);
+    const cell = cells[move.x][move.y];
+    this.setCell(cell, playerPiece);
+
+    const potentialMoves = this.resolvePotentialMoves(cells, move.x, move.y, oppPlayerPiece);
     for (let i=0; i<potentialMoves.length; i++) {
       const potentialMove = potentialMoves[i];
-      this.tryFlipInDirection(potentialMove, playerPiece, oppPlayerPiece);
+      this.tryFlipInDirection(cells, potentialMove, playerPiece, oppPlayerPiece);
     }
   }
 
@@ -81,8 +95,7 @@ export class GameStateService {
    * @param playerPiece Piece of your player.
    * @param oppPlayerPiece Piece of opposing player.
    */
-  private tryFlipInDirection(potentialMove: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState) {
-    const cells = this.gameState().board.cells;
+  private tryFlipInDirection(cells: Cell[][], potentialMove: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState) {
     const opposingPieces: DirCoord[] = this.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
     if (opposingPieces.length === 0) return; // nothing to do in this direction
 
@@ -94,12 +107,12 @@ export class GameStateService {
   }
 
   /**
-   * Set new cell state for current player.
+   * Set new cell state for given player.
    * @param cell Cell to modify.
+   * @param playerPiece Player piece.
    */
-  private setCell(cell: Cell) {
-    const player = this.getCurrPlayer();
-    cell.state = player.piece;
+  private setCell(cell: Cell, playerPiece: EnCellState) {
+    cell.state = playerPiece;
     cell.potentialMove = EnCellState.Empty;
   }
 

@@ -22,3 +22,13 @@ export type GameConfig = {
   difficulties: DifficultyConfig[];
   boardSizes: number[];
 };
+
+/** Properties for AI. */
+export type AiProp = {
+  maxScore: number;
+  weights: Record<number, number[][]>;
+};
+
+// OTHER
+
+export type Coordinate = { x: number; y: number };
