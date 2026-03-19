@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
-import { playerNames, projectProp } from '@/code/data/const';
+import { playerNames, projectProp, weights } from '@/code/data/const';
 import type { DirCoord } from '@/code/data/dirCoord';
 import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
 import type { GameState, GameSettings, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry,  } from "@/code/data/gameState";
@@ -298,8 +298,14 @@ export class GameStateService {
    */
   private generateCellsEmpty() : Cell[][] {
     const boardSize = this.gameState().settings.boardSize;
-    const cells : Cell[][] = Array.from({ length: boardSize }, () =>
-      Array.from({ length: boardSize }, () => createCell())
+    const currentWeights = weights[boardSize];
+
+    const cells : Cell[][] = Array.from({ length: boardSize }, (_, rowIndex) =>
+      Array.from({ length: boardSize }, (_, colIndex) => {
+        // Lookup the predefined weight, falling back to 0 if the size isn't mapped.
+        const weight = currentWeights ? currentWeights[rowIndex][colIndex] : 0;
+        return createCell(weight);
+      })
     );
     return cells;
   }
