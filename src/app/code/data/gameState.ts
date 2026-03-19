@@ -117,27 +117,26 @@ export function createGameStatistics(): GameStatistics {
 export type Cell = {
   state: EnCellState;
   potentialMove: EnCellState; // used only when defDebugShowMove === true
+  weight: number; // weight of cell for AI
 }
 
-export function createCell(): Cell {
+export function createCell(weight: number): Cell {
   return {
     state: EnCellState.Empty,
     potentialMove: EnCellState.Empty,
+    weight: weight,
   };
 }
 
-export function createCellFill(state: EnCellState): Cell {
-  return {
-    state: state,
-    potentialMove: EnCellState.Empty,
-  };
+export function updateCellState(cell: Cell, state: EnCellState) {
+  cell.state = state;
+  // rest is unchanged
 }
 
-export function createCellFull(state: EnCellState, potentialMove: EnCellState): Cell {
-  return {
-    state: state,
-    potentialMove: potentialMove,
-  };
+export function updateCellFull(cell: Cell, state: EnCellState, potentialMove: EnCellState) {
+  cell.state = state;
+  cell.potentialMove = potentialMove;
+  // rest is unchanged
 }
 
 //

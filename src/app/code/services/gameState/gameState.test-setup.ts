@@ -1,8 +1,9 @@
 import { expect } from 'vitest';
 
 import { EnGameStatus, EnCellState } from '@/code/data/enums';
+import { weights } from '@/code/data/const';
 import type { GameState, Cell, ReversiBoard, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
-import { createGameState, createCell, createCellFill, createCellFull, createGameHistoryEntry, createReversiMove } from "@/code/data/gameState";
+import { createGameState, createCell, updateCellState, updateCellFull, createGameHistoryEntry, createReversiMove } from "@/code/data/gameState";
 
 /**
  * Generate game state after start of game, but with empty board.
@@ -21,16 +22,16 @@ export function genStartState(boardSize: number): GameState {
 
   const ix = boardSize/2 - 1; // for size 8 it will be 3
   // add pieces already on board in center
-  startGameState.board.cells[ix][ix] = createCellFill(EnCellState.W);
-  startGameState.board.cells[ix+1][ix] = createCellFill(EnCellState.B);
-  startGameState.board.cells[ix][ix+1] = createCellFill(EnCellState.B);
-  startGameState.board.cells[ix+1][ix+1] = createCellFill(EnCellState.W);
+  updateCellState(startGameState.board.cells[ix][ix], EnCellState.W);
+  updateCellState(startGameState.board.cells[ix+1][ix], EnCellState.B);
+  updateCellState(startGameState.board.cells[ix][ix+1], EnCellState.B);
+  updateCellState(startGameState.board.cells[ix+1][ix+1], EnCellState.W);
 
   // set potential legal moves
-  startGameState.board.cells[ix-1][ix] = createCellFull(EnCellState.Empty, EnCellState.B);
-  startGameState.board.cells[ix][ix-1] = createCellFull(EnCellState.Empty, EnCellState.B);
-  startGameState.board.cells[ix+1][ix+2] = createCellFull(EnCellState.Empty, EnCellState.B);
-  startGameState.board.cells[ix+2][ix+1] = createCellFull(EnCellState.Empty, EnCellState.B);
+  updateCellFull(startGameState.board.cells[ix-1][ix], EnCellState.Empty, EnCellState.B);
+  updateCellFull(startGameState.board.cells[ix][ix-1], EnCellState.Empty, EnCellState.B);
+  updateCellFull(startGameState.board.cells[ix+1][ix+2], EnCellState.Empty, EnCellState.B);
+  updateCellFull(startGameState.board.cells[ix+2][ix+1], EnCellState.Empty, EnCellState.B);
 
   startGameState.board.legalMoves = [
     createReversiMove(ix-1, ix),
@@ -68,8 +69,14 @@ function genState(boardSize: number): GameState {
  * @returns 2D array of cells.
  */
 function genCells(boardSize: number): Cell[][] {
-  const cells : Cell[][] = Array.from({ length: boardSize }, () =>
-    Array.from({ length: boardSize }, () => createCell())
+  const currentWeights = weights[boardSize];
+
+  const cells : Cell[][] = Array.from({ length: boardSize }, (_, rowIndex) =>
+    Array.from({ length: boardSize }, (_, colIndex) => {
+      // Lookup the predefined weight, falling back to 0 if the size isn't mapped.
+      const weight = currentWeights ? currentWeights[rowIndex][colIndex] : 0;
+      return createCell(weight);
+    })
   );
   return cells;
 }

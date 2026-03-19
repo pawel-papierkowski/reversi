@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { EnCellState } from '@/code/data/enums';
 import type { GameHistoryEntry } from "@/code/data/gameState";
-import { createCellFill } from "@/code/data/gameState";
+import { updateCellState } from "@/code/data/gameState";
 
 import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
 
@@ -35,8 +35,8 @@ describe('GameService', () => {
       expectedGameState.statistics.player1Score = 4;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells[2][3] = createCellFill(EnCellState.B); // move that black just made
-      expectedGameState.board.cells[3][3] = createCellFill(EnCellState.B); // flipped white piece
+      updateCellState(expectedGameState.board.cells[2][3], EnCellState.B); // move that black just made
+      updateCellState(expectedGameState.board.cells[3][3], EnCellState.B); // flipped white piece
 
       const historyEntry: GameHistoryEntry = {
         id: 0,
@@ -83,14 +83,14 @@ describe('GameService', () => {
       expectedGameState.statistics.player1Score = 9;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells[0][3] = createCellFill(EnCellState.B);
-      expectedGameState.board.cells[1][3] = createCellFill(EnCellState.B);
-      expectedGameState.board.cells[2][3] = createCellFill(EnCellState.B);
-      expectedGameState.board.cells[3][3] = createCellFill(EnCellState.B);
-      expectedGameState.board.cells[4][3] = createCellFill(EnCellState.B);
-      expectedGameState.board.cells[5][3] = createCellFill(EnCellState.B);
-      expectedGameState.board.cells[6][3] = createCellFill(EnCellState.B);
-      expectedGameState.board.cells[7][3] = createCellFill(EnCellState.B);
+      updateCellState(expectedGameState.board.cells[0][3], EnCellState.B);
+      updateCellState(expectedGameState.board.cells[1][3], EnCellState.B);
+      updateCellState(expectedGameState.board.cells[2][3], EnCellState.B);
+      updateCellState(expectedGameState.board.cells[3][3], EnCellState.B);
+      updateCellState(expectedGameState.board.cells[4][3], EnCellState.B);
+      updateCellState(expectedGameState.board.cells[5][3], EnCellState.B);
+      updateCellState(expectedGameState.board.cells[6][3], EnCellState.B);
+      updateCellState(expectedGameState.board.cells[7][3], EnCellState.B);
 
       expectedGameState.board.history.moves.unshift(historyEntry);
 
@@ -140,7 +140,7 @@ describe('GameService', () => {
       expectedGameState.statistics.emptyCells = 59;
       expectedGameState.statistics.player1Score = 3;
       expectedGameState.statistics.player2Score = 2;
-      expectedGameState.board.cells[0][0] = createCellFill(EnCellState.B);
+      updateCellState(expectedGameState.board.cells[0][0], EnCellState.B);
 
       // This particular change does not affect available legal moves.
       //expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
@@ -158,7 +158,7 @@ describe('GameService', () => {
       expectedGameState.statistics.emptyCells = 61;
       expectedGameState.statistics.player1Score = 2;
       expectedGameState.statistics.player2Score = 1;
-      expectedGameState.board.cells[3][3] = createCellFill(EnCellState.Empty);
+      updateCellState(expectedGameState.board.cells[3][3], EnCellState.Empty);
 
       // This particular change does affect available legal moves.
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
@@ -176,7 +176,7 @@ describe('GameService', () => {
       expectedGameState.statistics.emptyCells = 59;
       expectedGameState.statistics.player1Score = 3;
       expectedGameState.statistics.player2Score = 2;
-      expectedGameState.board.cells[2][3] = createCellFill(EnCellState.B);
+      updateCellState(expectedGameState.board.cells[2][3], EnCellState.B);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
@@ -193,7 +193,7 @@ describe('GameService', () => {
       expectedGameState.statistics.emptyCells = 60;
       expectedGameState.statistics.player1Score = 1;
       expectedGameState.statistics.player2Score = 3;
-      expectedGameState.board.cells[4][3] = createCellFill(EnCellState.W);
+      updateCellState(expectedGameState.board.cells[4][3], EnCellState.W);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
@@ -210,7 +210,7 @@ describe('GameService', () => {
       expectedGameState.statistics.emptyCells = 61;
       expectedGameState.statistics.player1Score = 2;
       expectedGameState.statistics.player2Score = 1;
-      expectedGameState.board.cells[4][4] = createCellFill(EnCellState.Empty);
+      updateCellState(expectedGameState.board.cells[4][4], EnCellState.Empty);
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
