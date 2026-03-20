@@ -1,0 +1,10 @@
+<fieldset [class]="getClasses()">
+  <legend>{{'game.status.player' | translate}} {{ player().ix+1 }}</legend>
+  <div class="player">
+    {{'enum.playerType.'+player().type | translate}}:
+    <app-player-name [player]="player()" [anim]="false" />
+  </div>
+  @if (currPlayer()) {
+    <asset-spinner class="spinner" />
+  }
+</fieldset>

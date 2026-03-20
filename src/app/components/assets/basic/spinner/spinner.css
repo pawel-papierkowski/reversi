@@ -5,7 +5,7 @@
   height: 1em;
 
   vertical-align: -0.14em; /* Drops it down just enough to look visually centered with text. */
-  /*margin: 0 0.25em; /* Add a tiny bit of spacing. */
+  margin: 0.25em 0em; /* Add a tiny bit of spacing. */
 }
 
 .spinner {

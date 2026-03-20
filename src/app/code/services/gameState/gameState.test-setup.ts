@@ -2,6 +2,7 @@ import { expect } from 'vitest';
 
 import { EnGameStatus, EnCellState } from '@/code/data/enums';
 import { weights } from '@/code/data/const';
+import type { Coordinate } from "@/code/data/types";
 import type { GameState, Cell, ReversiBoard, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createCell, updateCellState, updateCellFull, createGameHistoryEntry, createReversiMove } from "@/code/data/gameState";
 
@@ -104,6 +105,46 @@ function clearPotentialMoves(startGameState: GameState, cells: Cell[][])  {
     for (let y=0; y<boardSize; y++) {
       cells[x][y].potentialMove = EnCellState.Empty;
     }
+  }
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+// BOARD EDITING
+
+/**
+ * Set cells on board for given player.
+ * @param gameState Game state.
+ * @param piece Piece.
+ * @param coords Array of coordinates to set.
+ */
+export function setCells(gameState: GameState, piece: EnCellState, coords:Coordinate[]) {
+  const cells = gameState.board.cells;
+  for (const coord of coords) {
+    cells[coord.x][coord.y].state = piece;
+  }
+}
+
+/**
+ * Set cells on board for given player based on boardStr that contains human-readable
+ * state of board.
+ * @param gameState Game state.
+ * @param piece Piece.
+ * @param boardStr Board as string. B is black, W is white, _ is empty cell.
+ */
+export function setBoard(gameState: GameState, boardStr:string) {
+  const boardSize = gameState.settings.boardSize;
+  const cells = gameState.board.cells;
+  let ix = 0;
+  while (ix < boardStr.length) {
+    const char = boardStr[ix];
+
+    if (char === 'B' || char === 'W') {
+      const y = Math.floor(ix/boardSize);
+      const x = ix - y*boardSize;
+      cells[x][y].state = char === 'B' ? EnCellState.B : EnCellState.W;
+    }
+
+    ix++;
   }
 }
 

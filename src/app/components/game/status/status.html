@@ -1,16 +1,6 @@
 <div class="status">
-  <div class="player">
-    {{'enum.playerType.'+gameStateService.gameState().players[0].type | translate}}:
-    <app-player-name [player]="gameStateService.gameState().players[0]" [anim]="false" />
-  </div>
-  <div class="player">
-    {{'enum.playerType.'+gameStateService.gameState().players[1].type | translate}}:
-    <app-player-name [player]="gameStateService.gameState().players[1]" [anim]="false" />
-  </div>
-  <div class="doubleColumn player">
-    {{'game.status.currentPlayer' | translate}}:
-    <app-player-name [player]="gameStateService.getCurrPlayer()" [anim]="true" />
-  </div>
+  <app-player-box [playerIx]="0" />
+  <app-player-box [playerIx]="1" />
 
   <!-- Game state. -->
   <div class="doubleColumn">

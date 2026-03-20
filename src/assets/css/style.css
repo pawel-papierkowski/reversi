@@ -81,6 +81,14 @@ h3 {
   width: 100%;
 }
 
+.menu input[type="checkbox"] {
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0px 5px;
+  justify-self: start;
+  align-self: center;
+}
+
 @media (max-width: 700px) {
   .menu {
     max-width: 80vw;

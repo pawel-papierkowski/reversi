@@ -2,7 +2,7 @@
 
 Very simple project showing off the very basics of Angular frontend project. Basically step up from Hello World.
 
-This will be functional Reversi game.
+This is functional Reversi game - human vs human is fully playable. Currently, AI is being worked on.
 
 Link to webpage: https://pawel-papierkowski.github.io/reversi
 

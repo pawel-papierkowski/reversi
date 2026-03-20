@@ -60,3 +60,10 @@ export function createMiniMaxArgs(): MiniMaxArgs {
     moves: [],
   };
 }
+
+/** Arguments for evaluation code. */
+export type EvaluateArgs = {
+  piece: EnCellState; // Piece of current player.
+  isYou: boolean; // If true, this is you (so maximizing). Otherwise it is opponent (so minimizing).
+  cells: Cell[][]; // Current board state.
+}

@@ -2,9 +2,11 @@ import { Injectable, inject } from '@angular/core';
 
 import { EnGameStatus, EnCellState, EnPlayerType, EnViewMode } from '@/code/data/enums';
 import type { GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
+import type { EvaluateArgs } from "@/code/data/aiState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
+import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 
 /**
  * General game service.
@@ -13,6 +15,7 @@ import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 export class GameService {
   private readonly gameStateService = inject(GameStateService);
   private readonly legalMoveService = inject(LegalMoveService);
+  private readonly miniMaxService = inject(MiniMaxService);
 
   /**
    * Initializes game according to settings and prepare for first move.
@@ -33,6 +36,32 @@ export class GameService {
     this.legalMoveService.resolveMoves();
     this.legalMoveService.showHints();
     this.gameStateService.recalcScoring();
+    this.updateDebugData();
+  }
+
+  /** Update debug data. */
+  private updateDebugData() {
+    if (!this.gameStateService.gameState().debugSettings.debugMode) return;
+    this.updateDebugEvaluation();
+  }
+
+  private updateDebugEvaluation() {
+    let piece = this.gameStateService.getCurrPlayer().piece;
+    let cells = this.gameStateService.gameState().board.cells;
+    if (this.gameStateService.gameState().view.viewMode === EnViewMode.History) {
+      // We are in history mode, evaluate for historical board state.
+      const historyIx = this.gameStateService.gameState().view.viewMove;
+      const historyBoard = this.gameStateService.gameState().board.history.moves[historyIx];
+      piece = this.gameStateService.getPlayer(historyBoard.playerIx).piece;
+      cells = historyBoard.cells;
+    }
+
+    const args: EvaluateArgs = {
+      piece: piece,
+      isYou: true,
+      cells: cells,
+    };
+    this.gameStateService.gameState().debugData.evaluationScore = this.miniMaxService.evaluate(args);
   }
 
   // PLAYER ACTIONS

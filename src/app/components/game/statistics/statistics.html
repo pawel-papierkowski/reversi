@@ -47,4 +47,12 @@
     <div>{{'game.statistics.playerWinsInRow' | translate }}:</div>
     <div>{{ gameStateService.gameState().statistics.player2WinInRow }}</div>
   </div>
+
+  @if (gameStateService.gameState().debugSettings.debugPanel) {
+  <div class="debugPanel">
+    <h2>{{'game.debug.title' | translate}}</h2>
+    <div>{{'game.debug.evaluation' | translate }}:</div>
+    <div>{{ gameStateService.gameState().debugData.evaluationScore }}</div>
+  </div>
+  }
 </div>

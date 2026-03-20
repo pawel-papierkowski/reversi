@@ -5,12 +5,13 @@ import { EnPlayerType, EnGameStatus, EnViewMode } from '@/code/data/enums';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { GameService } from '@/code/services/game/game.service';
 
+import { PlayerBoxCmp } from '@/components/common/playerBox/playerBox';
 import { PlayerNameCmp } from '@/components/common/playerName/playerName';
 import { SpinnerCmp } from '@/components/assets/basic/spinner/spinner';
 
 @Component({
   selector: 'app-game-status',
-  imports: [TranslatePipe, PlayerNameCmp, SpinnerCmp],
+  imports: [TranslatePipe, PlayerBoxCmp, PlayerNameCmp, SpinnerCmp],
   templateUrl: './status.html',
   styleUrl: './status.css'
 })
