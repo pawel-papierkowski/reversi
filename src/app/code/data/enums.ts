@@ -33,12 +33,14 @@ export const viewModeDescr: Record<EnViewMode, string> = {
 //
 
 export enum EnDifficulty {
-  Easy, // AI makes completely random moves.
-  Medium, // AI goes to relatively shallow depth.
-  Hard, // AI goes deeper.
+  Mindless, // AI makes completely random moves.
+  Easy, // AI uses miniMax to shallow depth.
+  Medium, // AI goes deeper.
+  Hard, // AI goes deeper and uses additional tricks like dynamic weighting or different scoring.
 }
 
 export const difficultyDescr: Record<EnDifficulty, string> = {
+  [EnDifficulty.Mindless]: 'Mindless',
   [EnDifficulty.Easy]: 'Easy',
   [EnDifficulty.Medium]: 'Medium',
   [EnDifficulty.Hard]: 'Hard',

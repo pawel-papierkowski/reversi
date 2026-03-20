@@ -5,6 +5,7 @@ import type { ProjectProp, DifficultyConfig, GameConfig, AiProp } from '@/code/d
 
 // DEBUG CONSTANTS
 export const defDebugMode: boolean = true;
+export const defDebugPanel: boolean = true;
 export const defDebugHint: boolean = true;
 
 //

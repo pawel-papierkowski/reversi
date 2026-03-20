@@ -12,9 +12,10 @@
   "enum.mode.2": "SI kontra SI",
   "enum.playerType.0": "Człowiek",
   "enum.playerType.1": "Sztuczna Inteligencja",
-  "enum.difficulty.0": "Łatwy",
-  "enum.difficulty.1": "Średni",
-  "enum.difficulty.2": "Trudny",
+  "enum.difficulty.0": "Bezmyślny",
+  "enum.difficulty.1": "Łatwy",
+  "enum.difficulty.2": "Średni",
+  "enum.difficulty.3": "Trudny",
 
   "mainMenu.options": "Opcje rozgrywki",
   "mainMenu.btn.start": "Rozpocznij nową grę",
@@ -29,7 +30,7 @@
   "mainMenu.settings.boardSize.10": "10x10",
   "mainMenu.settings.hint": "Pokaż podpowiedzi",
 
-  "game.status.currentPlayer": "Aktualny gracz",
+  "game.status.player": "Gracz",
   "game.status.currStatus.stop": "Gra jest zatrzymana z powodu błędu.",
   "game.status.currStatus.pending": "Gra oczekuje na start...",
   "game.status.currStatus.inProgress.human": "Oczekuje na ruch gracza...",
@@ -48,6 +49,9 @@
   "game.statistics.playerScore": "Punktacja",
   "game.statistics.playerWins": "Wygrane",
   "game.statistics.playerWinsInRow": "Wygrane pod rząd",
+
+  "game.debug.title": "Dane debugowe",
+  "game.debug.evaluation": "Wynik ewaluacji",
 
   "game.history.title": "Historia",
   "game.history.start": "Początek gry",

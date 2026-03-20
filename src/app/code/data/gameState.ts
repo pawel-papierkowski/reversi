@@ -1,5 +1,5 @@
 import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState, EnViewMode } from '@/code/data/enums';
-import { defDebugMode, defDebugHint } from '@/code/data/const';
+import { defDebugMode, defDebugPanel, defDebugHint } from '@/code/data/const';
 
 // ////////////////////////////////////////////////////////////////////////////
 // FULL GAME STATE                                                           //
@@ -48,18 +48,20 @@ export function createGameSettings(): GameSettings {
 }
 
 // ///////////////
-// Debug settings.
+// Debug.
 // ///////////////
 
 // Settable only in code.
 export type DebugSettings = {
-  debugMode: boolean;
+  debugMode: boolean; // general debug mode switch
+  debugPanel: boolean; // if true, show separate debug panel
 };
 
 /** Debug settings for development: get values from constants. */
 export function createDebugSettingsForDev(): DebugSettings {
   return {
     debugMode: defDebugMode,
+    debugPanel: defDebugPanel,
   };
 }
 
@@ -67,6 +69,18 @@ export function createDebugSettingsForDev(): DebugSettings {
 export function createDebugSettingsForProd(): DebugSettings {
   return {
     debugMode: false,
+    debugPanel: false,
+  };
+}
+
+export type DebugData = {
+  evaluationScore: number; // evaluation score for current board state
+}
+
+/** Debug data. */
+export function createDebugData(): DebugData {
+  return {
+    evaluationScore: 0,
   };
 }
 
@@ -116,8 +130,10 @@ export function createGameStatistics(): GameStatistics {
 
 export type Cell = {
   state: EnCellState;
-  potentialMove: EnCellState; // used only when defDebugShowMove === true
-  weight: number; // weight of cell for AI
+  potentialMove: EnCellState; // Used only when defDebugShowMove === true.
+  weight: number; // Weight of cell for AI.
+  // NOTE: if we implement changing weights, we will need separate weights for each player,
+  // as they will start to differ.
 }
 
 export function createCell(weight: number): Cell {
@@ -142,20 +158,22 @@ export function updateCellFull(cell: Cell, state: EnCellState, potentialMove: En
 //
 
 export type Player = {
+  ix: number,
   type: EnPlayerType;
   piece: EnCellState.B | EnCellState.W;
   name: string;
 }
 
-export function createPlayer(piece: EnCellState.B | EnCellState.W): Player {
+export function createPlayer(ix: number, piece: EnCellState.B | EnCellState.W): Player {
   return {
+    ix: ix,
     type: EnPlayerType.Human,
     piece: piece,
     name: '',
   };
 }
 export function createPlayers(): Player[] {
-  return [createPlayer(EnCellState.B), createPlayer(EnCellState.W)];
+  return [createPlayer(0, EnCellState.B), createPlayer(1, EnCellState.W)];
 }
 
 //
@@ -233,7 +251,9 @@ export type GameState = {
   players: Player[]; // players: reset for new game
   board: ReversiBoard; // data about board state: reset for new game and every round
   view: GameView; // what should be shown on screen: updated when needed
+
   debugSettings: DebugSettings; // debug settings: reset for new game
+  debugData: DebugData; // debug data: updated when needed
 };
 
 /** Create default game state. */
@@ -245,5 +265,6 @@ export function createGameState(): GameState {
     board: createGameBoard(),
     view: createGameView(),
     debugSettings: createDebugSettingsForDev(),
+    debugData: createDebugData(),
   };
 }

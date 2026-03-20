@@ -2,12 +2,11 @@ import { TestBed } from '@angular/core/testing';
 
 import { EnCellState } from '@/code/data/enums';
 import { GameState } from '@/code/data/gameState';
-import type { MiniMaxArgs } from '@/code/data/aiState';
-import { createMiniMaxArgs } from '@/code/data/aiState';
+import type { EvaluateArgs } from '@/code/data/aiState';
 
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 
-import { genStartState } from '@/code/services/gameState/gameState.test-setup';
+import { genStartState, setCells, setBoard } from '@/code/services/gameState/gameState.test-setup';
 
 describe('MiniMax evaluation', () => {
   let miniMaxService: MiniMaxService;
@@ -18,9 +17,15 @@ describe('MiniMax evaluation', () => {
 
   //
 
-  function setMiniMaxArgs(gameState: GameState, piece: EnCellState, isYou: boolean): MiniMaxArgs {
+  /**
+   * Creates instance of MiniMaxArgs.
+   * @param gameState Game state.
+   * @param piece Piece.
+   * @param isYou Is this you?
+   * @returns Instance of MiniMaxArgs.
+   */
+  function setEvaluateArgs(gameState: GameState, piece: EnCellState, isYou: boolean): EvaluateArgs {
     return {
-      ...createMiniMaxArgs(), // some fields do not matter for evaluator
       piece: piece,
       isYou: isYou,
       cells: gameState.board.cells,
@@ -33,50 +38,123 @@ describe('MiniMax evaluation', () => {
     it('starting board', () => {
       const gameState = genStartState(4);
 
-      const args: MiniMaxArgs = setMiniMaxArgs(gameState, EnCellState.B, true);
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
-      const expectedScore = 0;
+      const expectedScore = 0; // everything sums up to 0
       expect(actualScore, 'Score should be same').toEqual(expectedScore);
     });
 
-    it('2 moves in', () => {
+    it('on edges', () => {
       const gameState = genStartState(6);
-      const cells = gameState.board.cells;
-      cells[2][1].state = EnCellState.B; // emulate first move
-      cells[2][2].state = EnCellState.B;
-      cells[3][1].state = EnCellState.W; // emulate second move
-      cells[3][2].state = EnCellState.W;
+      setCells(gameState, EnCellState.B, [{x:0,y:2},{x:0,y:3},{x:2,y:5},{x:3,y:5}]);
 
-      const args: MiniMaxArgs = setMiniMaxArgs(gameState, EnCellState.B, true);
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = 40; // center sums up to 0, edges sum to 40
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('wipeout', () => {
+      const gameState = genStartState(6);
+      setCells(gameState, EnCellState.B, [{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}]);
+
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = -4;
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('empty board', () => {
+      const gameState = genStartState(6);
+      setCells(gameState, EnCellState.Empty, [{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}]);
+
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
       const expectedScore = 0;
       expect(actualScore, 'Score should be same').toEqual(expectedScore);
     });
-
-    // TODO more eval checks:
-    // - on edge away from corners
-    // - wipeout (only one color)
   });
 
   describe('game position', () => {
-    it('early game', () => {
-      const gameState = genStartState(8);
-      // TODO fill board some more and finish this test
+    it('2 moves in', () => {
+      const gameState = genStartState(6);
+      setCells(gameState, EnCellState.B, [{x:2,y:1},{x:2,y:2}]); // emulate first move
+      setCells(gameState, EnCellState.W, [{x:3,y:1},{x:3,y:2}]); // emulate second move
 
-      const args: MiniMaxArgs = setMiniMaxArgs(gameState, EnCellState.B, true);
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
-      const expectedScore = 0;
+      const expectedScore = 0; // uses weights, everything sums up to 0
       expect(actualScore, 'Score should be same').toEqual(expectedScore);
     });
 
-    // TODO
-    // - early game position (only few moves)
-    // - middle game position (half of cells empty)
-    // - late game position (few cells empty): note it should use basic scoring instead of weights
-    // - filled board (zero cells empty): note it should use basic scoring instead of weights
+    it('early game', () => {
+      const gameState = genStartState(8);
+      setCells(gameState, EnCellState.B, [{x:5,y:4},{x:2,y:5},{x:5,y:6}]);
+      setCells(gameState, EnCellState.W, [{x:3,y:5},{x:5,y:5},{x:6,y:6}]);
+      // note these moves break symmetry, causing non-zero score
+
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = 48; // uses weights
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('middle game', () => {
+      const gameState = genStartState(8);
+      const boardStr = "WB______"+
+                       "_W______"+
+                       "BBBBBB__"+
+                       "BBWBBB__"+
+                       "BWBBBBW_"+
+                       "WWWWWW__"+
+                       "__B_WBW_"+
+                       "________";
+      setBoard(gameState, boardStr);
+
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = -12; // uses weights
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('late game', () => {
+      const gameState = genStartState(8);
+      const boardStr = "__W_WWWW"+
+                       "BWWWWWWW"+
+                       "_WBBWWWW"+
+                       "_WBBWWWW"+
+                       "BWBBBWWB"+
+                       "_BWBWBWW"+
+                       "BBWWBB__"+
+                       "_WWBBBB_";
+      setBoard(gameState, boardStr);
+
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = -60; // uses weights
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('filled board', () => {
+      const gameState = genStartState(8);
+      const boardStr = "BBBWWWWW"+
+                       "BBBWWBWW"+
+                       "BWBBBWWW"+
+                       "BBWWBWWB"+
+                       "BBBWWBWB"+
+                       "BWWWWWBB"+
+                       "WBWWWBBB"+
+                       "BWWWWWWW";
+      setBoard(gameState, boardStr);
+
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = -50; // uses weights
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
   });
 
-  describe('player handling', () => {
+  describe('different player handling', () => {
     it('corner for black and you are black', () => {
       const gameState = genStartState(6);
       const cells = gameState.board.cells;
@@ -84,7 +162,7 @@ describe('MiniMax evaluation', () => {
       cells[1][0].state = EnCellState.W; // +20
       cells[2][0].state = EnCellState.W; // -10
 
-      const args: MiniMaxArgs = setMiniMaxArgs(gameState, EnCellState.B, true);
+      const args = setEvaluateArgs(gameState, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
       const expectedScore = 110;
       expect(actualScore, 'Score should be same').toEqual(expectedScore);
@@ -97,7 +175,7 @@ describe('MiniMax evaluation', () => {
       cells[5][4].state = EnCellState.W; // +20
       cells[5][3].state = EnCellState.W; // -10
 
-      const args: MiniMaxArgs = setMiniMaxArgs(gameState, EnCellState.B, false);
+      const args = setEvaluateArgs(gameState, EnCellState.B, false);
       const actualScore = miniMaxService.evaluate(args);
       const expectedScore = -110;
       expect(actualScore, 'Score should be same').toEqual(expectedScore);
@@ -110,7 +188,7 @@ describe('MiniMax evaluation', () => {
       cells[4][5].state = EnCellState.W; // -20
       cells[3][5].state = EnCellState.W; // 10
 
-      const args: MiniMaxArgs = setMiniMaxArgs(gameState, EnCellState.W, true);
+      const args = setEvaluateArgs(gameState, EnCellState.W, true);
       const actualScore = miniMaxService.evaluate(args);
       const expectedScore = -110;
       expect(actualScore, 'Score should be same').toEqual(expectedScore);
@@ -123,7 +201,7 @@ describe('MiniMax evaluation', () => {
       cells[0][1].state = EnCellState.W; // -20
       cells[0][2].state = EnCellState.W; // 10
 
-      const args: MiniMaxArgs = setMiniMaxArgs(gameState, EnCellState.W, false);
+      const args = setEvaluateArgs(gameState, EnCellState.W, false);
       const actualScore = miniMaxService.evaluate(args);
       const expectedScore = 110;
       expect(actualScore, 'Score should be same').toEqual(expectedScore);

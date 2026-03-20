@@ -12,9 +12,10 @@
   "enum.mode.2": "AI vs AI",
   "enum.playerType.0": "Human",
   "enum.playerType.1": "AI",
-  "enum.difficulty.0": "Easy",
-  "enum.difficulty.1": "Medium",
-  "enum.difficulty.2": "Hard",
+  "enum.difficulty.0": "Mindless",
+  "enum.difficulty.1": "Easy",
+  "enum.difficulty.2": "Medium",
+  "enum.difficulty.3": "Hard",
 
   "mainMenu.options": "Game options",
   "mainMenu.btn.start": "Start new game",
@@ -29,7 +30,7 @@
   "mainMenu.settings.boardSize.10": "10x10",
   "mainMenu.settings.hint": "Show hints",
 
-  "game.status.currentPlayer": "Current player",
+  "game.status.player": "Player",
   "game.status.currStatus.stop": "Game is halted due to bug.",
   "game.status.currStatus.pending": "Game is pending...",
   "game.status.currStatus.inProgress.human": "Waiting for player move...",
@@ -48,6 +49,9 @@
   "game.statistics.playerScore": "Score",
   "game.statistics.playerWins": "Wins",
   "game.statistics.playerWinsInRow": "Wins in row",
+
+  "game.debug.title": "Debug data",
+  "game.debug.evaluation": "Evaluated score",
 
   "game.history.title": "History",
   "game.history.start": "Start of game",

@@ -49,7 +49,14 @@ export class GameStateService {
   /** Change current player. There are only two players in Reversi. */
   public changePlayer() {
     const playerIx = this.gameState().board.currPlayerIx;
-    this.gameState().board.currPlayerIx = playerIx === 0 ? 1 : 0;
+
+    this.gameState.update(state => ({
+      ...state, // duplicates rest of state
+      board: {
+        ...state.board, // duplicates rest of board
+        currPlayerIx: playerIx === 0 ? 1 : 0,
+      }
+    }));
   }
 
   // //////////////////////////////////////////////////////////////////////////
@@ -357,9 +364,10 @@ export class GameStateService {
   private generatePlayer(first : boolean) : Player {
     if (first) this.usedName = '';
     return {
-      type : this.generatePlayerType(first),
+      ix: first ? 0 : 1,
+      type: this.generatePlayerType(first),
       piece: first ? EnCellState.B : EnCellState.W,
-      name : this.generatePlayerName(first)
+      name: this.generatePlayerName(first)
     };
   }
 

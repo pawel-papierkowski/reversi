@@ -4,7 +4,7 @@ import { aiProp } from '@/code/data/const';
 import { getOppPiece } from '@/code/data/dirCoord';
 import type { Cell, ReversiMove } from "@/code/data/gameState";
 
-import type { MiniMaxReq, MiniMaxResp, MiniMaxResult, MiniMaxArgs } from "@/code/data/aiState";
+import type { MiniMaxReq, MiniMaxResp, MiniMaxResult, MiniMaxArgs, EvaluateArgs } from "@/code/data/aiState";
 import { createMiniMaxResult } from "@/code/data/aiState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
@@ -77,19 +77,13 @@ export class MiniMaxService {
     const currPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, args.piece);
     const nextPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, otherPiece);
 
-    // First check states that stops recursive call:
-    // neither player can make legal moves for current state of board. That can happen in two cases:
-    // - board is completely filled (we do not have to check for it separately)
-    // - double pass happened
-    // We also stop if we hit max depth.
+    // First check states that stops recursive call (terminal state):
+    // - Neither player can make legal moves for current state of board (double pass).
+    //   Happens also when board is completely filled, so we do not have to check for it separately.
+    // - We also stop if we hit max depth.
     let terminalResult : MiniMaxResult | null = null;
-    if (currPlayerMoves.length === 0 && nextPlayerMoves.length === 0) {
-      terminalResult = {
-        score: this.evaluate(args),
-        depth: args.currDepth,
-        moves: [...args.moves],
-      };
-    } else if (args.currDepth === args.maxDepth) { // hit max depth
+    if ((currPlayerMoves.length === 0 && nextPlayerMoves.length === 0) ||
+        (args.currDepth === args.maxDepth)) {
       terminalResult = {
         score: this.evaluate(args),
         depth: args.currDepth,
@@ -104,7 +98,7 @@ export class MiniMaxService {
 
     // Handle skip case here.
     if (currPlayerMoves.length === 0) {
-      // switch players and continue, if we are here, we know next player must have at least one legal move
+      // Switch players and continue. If we are here, we know next player must have at least one legal move.
       const newArgs: MiniMaxArgs = {
         ...args,
         piece: otherPiece,
@@ -181,20 +175,21 @@ export class MiniMaxService {
     return isYou ? newResult.score > currBestResult.score : newResult.score < currBestResult.score;
   }
 
-  //
+  // //////////////////////////////////////////////////////////////////////////
+  // EVALUATION CODE
 
   /**
    * Evaluate state of board and calculate score.
    * @param args Data for evaluation.
    * @returns Summary score for all cells.
    */
-  public evaluate(args: MiniMaxArgs): number {
+  public evaluate(args: EvaluateArgs): number {
     let score = 0;
     for (let x=0; x<args.cells.length; x++) { // columns
       const row = args.cells[x];
       for (let y=0; y<row.length; y++) { // rows
         const cell = row[y];
-        score += this.evaluateCell(x, y, cell, true, args);
+        score += this.evaluateCell(cell, true, args);
       }
     }
     return score;
@@ -202,14 +197,12 @@ export class MiniMaxService {
 
   /**
    * Evaluates score for single cell.
-   * @param x X coordinate.
-   * @param y Y coordinate.
    * @param cell Cell data.
    * @param useWeights If true, use weights.
    * @param args Arguments.
    * @returns Score for single cell.
    */
-  private evaluateCell(x:number, y: number, cell: Cell, useWeights: boolean, args: MiniMaxArgs): number {
+  private evaluateCell(cell: Cell, useWeights: boolean, args: EvaluateArgs): number {
     let mul = 1;
     switch (cell.state) {
       case EnCellState.B:

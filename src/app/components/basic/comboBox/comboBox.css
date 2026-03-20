@@ -47,6 +47,8 @@
 .arrow {
   width: 0;
   height: 0;
+  margin-left: 5px;
+  
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
   border-top: 6px solid var(--combobox-text);
