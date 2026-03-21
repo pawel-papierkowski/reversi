@@ -130,6 +130,7 @@ export function setCells(gameState: GameState, piece: EnCellState, coords:Coordi
  * @param gameState Game state.
  * @param piece Piece.
  * @param boardStr Board as string. B is black, W is white, _ is empty cell.
+ * @param recalcLegalMoves If true, recalculate legal moves.
  */
 export function setBoard(gameState: GameState, boardStr:string) {
   const boardSize = gameState.settings.boardSize;
@@ -166,15 +167,21 @@ export function setBoard(gameState: GameState, boardStr:string) {
     }
 
     // actually add to history
-    const nextId = gameState.board.history.moves.length;
+    const nextNo = gameState.board.history.moves.length;
     const historyEntry: GameHistoryEntry = {
-      id: nextId,
+      ix: 0,
+      num: nextNo,
       playerIx: playerIx,
       move: moves.length === 0 ? null : {x:moves[0].x, y:moves[0].y},
       cells: structuredClone(gameState.board.cells)
     };
     clearPotentialMoves(gameState, historyEntry.cells);
+    // ensure latest history entry is first on list
     gameState.board.history.moves.unshift(historyEntry);
+    // update rest of history to reflect correct index
+    for (let ix=0; ix<nextNo+1; ix++) {
+      gameState.board.history.moves[ix].ix = ix;
+    }
   }
 
 // ////////////////////////////////////////////////////////////////////////////

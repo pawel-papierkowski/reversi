@@ -60,6 +60,7 @@ export class GameService {
       const historyBoard = this.gameStateService.gameState().board.history.moves[historyIx];
       piece = this.gameStateService.getPlayer(historyBoard.playerIx).piece;
       cells = historyBoard.cells;
+      console.info(`historyIx: ${historyIx}, history player ix: ${historyBoard.playerIx}`);
     }
 
     const args: EvaluateArgs = {
@@ -118,9 +119,10 @@ export class GameService {
    * @param move Move that lead to this state of board. Null if it is initial state of board.
    */
   private addToHistory(playerIx: number, move: ReversiMove | null) {
-    const nextId = this.gameStateService.gameState().board.history.moves.length;
+    const nextNo = this.gameStateService.gameState().board.history.moves.length;
     const moveEntry: GameHistoryEntry = {
-      id: nextId,
+      ix: 0,
+      num: nextNo,
       playerIx: playerIx,
       move: move,
       cells: structuredClone(this.gameStateService.gameState().board.cells),
@@ -128,6 +130,10 @@ export class GameService {
     this.legalMoveService.clearPotentialMoves(moveEntry.cells);
     // ensure latest history entry is first on list
     this.gameStateService.gameState().board.history.moves.unshift(moveEntry);
+    // update rest of history to reflect correct index
+    for (let ix=0; ix<nextNo+1; ix++) {
+      this.gameStateService.gameState().board.history.moves[ix].ix = ix;
+    }
   }
 
   /**
@@ -224,10 +230,12 @@ export class GameService {
       ...state,
       view: {
         viewMode: EnViewMode.History,
-        viewMove: historyEntry.id,
+        viewMove: historyEntry.ix,
         cells: historyEntry.cells,
       }
     }));
+
+    this.updateDebugData();
   }
 
   /**
@@ -255,6 +263,8 @@ export class GameService {
         cells: this.gameStateService.gameState().board.cells, // current board
       }
     }));
+
+    this.updateDebugData();
   }
 
   // VARIOUS

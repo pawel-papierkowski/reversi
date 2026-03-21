@@ -1,5 +1,5 @@
 <div [class]="cssClasses()" (click)="jumpToEntry()">
   <reversi-piece [state]="getPiece()" mode="inline" [anim]="false" />
-  {{ entry().id }}.
+  {{ entry().num }}.
   {{ getText() | translate:{col:getCol(), row:getRow()} }}
 </div>

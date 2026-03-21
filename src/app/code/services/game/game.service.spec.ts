@@ -17,7 +17,7 @@ describe('GameService', () => {
 
   beforeEach(async () => {
     localStorage.clear(); // Reset local storage before every test to avoid pollution.
-    
+
     gameStateService = TestBed.inject(GameStateService);
     legalMoveService = TestBed.inject(LegalMoveService);
     gameService = TestBed.inject(GameService);
@@ -41,7 +41,8 @@ describe('GameService', () => {
       updateCellState(expectedGameState.board.cells[3][3], EnCellState.B); // flipped white piece
 
       const historyEntry: GameHistoryEntry = {
-        id: 0,
+        ix: 0,
+        num: 0,
         playerIx: 0,
         move: {x:2, y:3},
         cells: structuredClone(expectedGameState.board.cells)
@@ -69,7 +70,8 @@ describe('GameService', () => {
       gameService.makeMove(0, 3);
 
       const historyEntry: GameHistoryEntry = {
-        id: 0,
+        ix: 0,
+        num: 0,
         playerIx: 0,
         move: {x:0, y:3},
         cells: structuredClone(gameStateService.gameState().board.cells)

@@ -553,7 +553,7 @@ describe('App (logic)', () => {
       expectedGameState.board.currPlayerIx = 1;
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.viewMode = EnViewMode.History;
-      expectedGameState.view.viewMove = 2;
+      expectedGameState.view.viewMove = 3;
       expectedGameState.view.cells = expectedGameState.board.history.moves[3].cells;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
