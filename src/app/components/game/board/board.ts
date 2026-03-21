@@ -16,6 +16,8 @@ import { EnGameStatus, EnViewMode } from '@/code/data/enums';
 })
 export class ReversiBoardCmp {
   public readonly gameStateService = inject(GameStateService);
+  // Needed because Angular's @for loop cannot into simple looping over number.
+  public readonly boardSize = computed(() => Array.from({ length: this.gameStateService.gameState().settings.boardSize }, (_, i) => i));
 
   // Computed signal to generate letters: ['a', 'b', 'c' ...]
   public readonly columns = computed(() => {

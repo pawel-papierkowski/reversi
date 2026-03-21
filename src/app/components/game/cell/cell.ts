@@ -1,4 +1,4 @@
-import { Component, input, inject } from '@angular/core';
+import { Component, input, inject, computed } from '@angular/core';
 
 import { EnCellState, EnPlayerType } from '@/code/data/enums';
 import type { Cell } from "@/code/data/gameState";
@@ -19,9 +19,9 @@ export class ReversiCellCmp {
   private readonly gameStateService = inject(GameStateService);
   private readonly gameService = inject(GameService);
 
-  public readonly cell = input.required<Cell>();
   public readonly x = input.required<number>();
   public readonly y = input.required<number>();
+  public readonly cell = computed<Cell>(() => this.gameStateService.gameState().board.cells[this.x()][this.y()]);
   public EnCellState = EnCellState;
 
   //

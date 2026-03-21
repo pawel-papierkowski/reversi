@@ -48,13 +48,13 @@ export class HistoryEntryCmp {
 
   public getCol(): string {
     if (this.entry().move === null) return "";
-    const offset: number = this.entry().move?.y || 0;
+    const offset: number = this.entry().move?.x || 0;
     return String.fromCharCode(97 + offset);
   }
 
   public getRow(): string {
     if (this.entry().move === null) return "";
-    const offset: number = this.entry().move?.x || 0;
+    const offset: number = this.entry().move?.y || 0;
     return '' + (offset+1);
   }
 

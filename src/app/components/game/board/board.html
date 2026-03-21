@@ -1,42 +1,44 @@
 <div [class]="boardCss()">
-  <!-- TOP ROW: Empty corner + Letters. -->
+  <!-- TOP ROW: Empty corners + letters. -->
   <div class="label empty"></div> <!-- Top-left empty corner -->
   @for (letter of columns(); track $index) {
     <div class="label letter">{{ letter }}</div>
   }
   <div class="label empty"></div> <!-- Top-right empty corner -->
 
-  <!-- Iterate over the rows in the 2D array -->
-  @for (row of gameStateService.gameState().view.cells; track rowIndex;
-        let rowIndex = $index, rowLast = $last, rowOdd = $odd) {
+  <!-- Iterating directly over cells looks confusing, so we did away with that. -->
+
+  <!-- Iterate over the rows and columns in the 2D array. -->
+  @for (x of boardSize(); track rowCoord;
+        let rowCoord = $index, rowLast = $last, rowOdd = $odd) {
     <div class="row">
       <!-- LEFT COLUMN: Number label for the row. -->
-      <!-- Adding +1 so it starts at 1 instead of 0 -->
-      <div class="label number">{{ rowIndex + 1 }}</div>
+      <!-- Adding +1 so it starts at 1 instead of 0. -->
+      <div class="label number">{{ rowCoord + 1 }}</div>
 
       <!-- ACTUAL BOARD CELLS: Iterate over the individual cells in each row. -->
-      @for (cell of row; track colIndex;
-            let colIndex = $index, colLast = $last, colOdd = $odd) {
+      @for (y of boardSize(); track colCoord;
+            let colCoord = $index, colLast = $last, colOdd = $odd) {
         <div class="cell"
-          [class.top-edge]="rowIndex === 0"
-          [class.left-edge]="colIndex === 0"
+          [class.top-edge]="rowCoord === 0"
+          [class.left-edge]="colCoord === 0"
           [class.bottom-edge]="rowLast"
           [class.right-edge]="colLast"
           [class.dark]="(colOdd && !rowOdd) || (!colOdd && rowOdd)">
-          <reversi-board-cell [cell]="cell" [x]="rowIndex" [y]="colIndex"/>
+          <reversi-board-cell [x]="colCoord" [y]="rowCoord"/>
         </div>
       }
 
       <!-- RIGHT COLUMN: Number label for the row. -->
-      <!-- Adding +1 so it starts at 1 instead of 0 -->
-      <div class="label number">{{ rowIndex + 1 }}</div>
+      <!-- Adding +1 so it starts at 1 instead of 0. -->
+      <div class="label number">{{ rowCoord + 1 }}</div>
     </div>
   }
 
-  <!-- BOTTOM ROW: Empty corner + Letters. -->
-  <div class="label empty"></div> <!-- Bottom-left empty corner -->
+  <!-- BOTTOM ROW: Empty corners + letters. -->
+  <div class="label empty"></div> <!-- Bottom-left empty corner. -->
   @for (letter of columns(); track $index) {
     <div class="label letter">{{ letter }}</div>
   }
-  <div class="label empty"></div> <!-- Bottom-right empty corner -->
+  <div class="label empty"></div> <!-- Bottom-right empty corner. -->
 </div>

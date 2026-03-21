@@ -42,7 +42,7 @@ export class LegalMoveService {
 
     // detect double pass
     if (currPlayerMoves.length === 0) {
-      const oppPlayerPiece = playerPiece === EnCellState.B ? EnCellState.W : EnCellState.B;
+      const oppPlayerPiece = getOppPiece(playerPiece);
       const nextPlayerMoves = this.resolveMovesCustom(cells, oppPlayerPiece);
       if (nextPlayerMoves.length === 0) this.gameStateService.gameState().board.doublePass = true;
     }

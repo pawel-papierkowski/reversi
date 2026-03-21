@@ -72,10 +72,10 @@ function genState(boardSize: number): GameState {
 function genCells(boardSize: number): Cell[][] {
   const currentWeights = weights[boardSize];
 
-  const cells : Cell[][] = Array.from({ length: boardSize }, (_, rowIndex) =>
-    Array.from({ length: boardSize }, (_, colIndex) => {
+  const cells : Cell[][] = Array.from({ length: boardSize }, (_, x) =>
+    Array.from({ length: boardSize }, (_, y) => {
       // Lookup the predefined weight, falling back to 0 if the size isn't mapped.
-      const weight = currentWeights ? currentWeights[rowIndex][colIndex] : 0;
+      const weight = currentWeights ? currentWeights[x][y] : 0;
       return createCell(weight);
     })
   );
