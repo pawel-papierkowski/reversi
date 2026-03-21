@@ -15,4 +15,11 @@
          to handle both states so we can see flipping. -->
     <reversi-piece [state]="cell().state" />
   }
+
+  @if (canShowDebug()) {
+    <div class="debug-overlay">
+      <p>X: {{ x() }}, Y: {{ y() }}</p>
+      <p>W: {{ cell().weight }}</p>
+    </div>
+  }
 </div>

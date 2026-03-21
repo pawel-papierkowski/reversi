@@ -12,7 +12,8 @@ import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { EnCellState } from '@/code/data/enums';
 
 /**
- * MiniMax algorithm for Reversi. It is recursive algorithm.
+ * MiniMax algorithm for Reversi.
+ * It is recursive algorithm, though 0 depth is handled separately.
  */
 @Injectable({providedIn: 'root'})
 export class MiniMaxService {
@@ -21,6 +22,8 @@ export class MiniMaxService {
 
   /**
    * Resolve best moves for current state of board.
+   * Note: 0 max depth means we are scoring for every legal move available at this
+   * time without going deeper.
    * @param req Request.
    * @returns Response: list of minimax results.
    */
@@ -33,7 +36,7 @@ export class MiniMaxService {
       response.results.push(result);
     }
 
-    // Sort descending by score. If scores are tied (results in 0), sort ascending by depth.
+    // Sort descending by score. If scores are tied, sort ascending by depth.
     response.results.sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score; // high score = better
       return a.depth - b.depth; // smaller depth = better
@@ -45,24 +48,37 @@ export class MiniMaxService {
    * Begin evaluating given move.
    * @param req Request.
    * @param legalMove Legal move to evaluate.
-   * @returns
+   * @returns MiniMax result.
    */
   private executeSearch(req: MiniMaxReq, legalMove: ReversiMove) : MiniMaxResult {
-    const otherPiece = getOppPiece(req.piece);
-    // Starting data for beginning of recursive chain. This has given legal move already baked in.
-    const updatedCells = structuredClone(req.cells);
     // Make move as CURRENT player.
+    const updatedCells = structuredClone(req.cells);
     this.gameStateService.executeMoveCustom(updatedCells, req.piece, legalMove);
 
-    const args: MiniMaxArgs = {
-      piece: otherPiece, // go as NEXT player
+    if (req.maxDepth === 0) {
+      // return immediately, evaluating score as CURRENT player
+      const evalArgs: EvaluateArgs = {
+        piece: req.piece,
+        isYou: true,
+        cells: updatedCells,
+      };
+      return {
+        score: this.evaluate(evalArgs),
+        depth: 0,
+        moves: [ {x: legalMove.x, y: legalMove.y} ],
+      };
+    }
+
+    // Start going deep for real. This is where recursion starts.
+    const miniMaxArgs: MiniMaxArgs = {
+      piece: getOppPiece(req.piece), // go as NEXT player
       isYou: false,
-      currDepth: 0,
+      currDepth: 0, // yes, that's correct value
       maxDepth: req.maxDepth,
       cells: updatedCells,
-      moves: [{x: legalMove.x, y: legalMove.y}],
+      moves: [ {x: legalMove.x, y: legalMove.y} ],
     };
-    return this.recursiveMiniMax(args);
+    return this.recursiveMiniMax(miniMaxArgs);
   }
 
   /**
@@ -92,13 +108,14 @@ export class MiniMaxService {
     }
 
     if (terminalResult !== null) {
-      console.log("Terminal result: ", terminalResult);
+      //console.log("Terminal result: ", terminalResult);
       return terminalResult;
     }
 
     // Handle skip case here.
     if (currPlayerMoves.length === 0) {
-      // Switch players and continue. If we are here, we know next player must have at least one legal move.
+      // Switch players and continue. If we are here, we know next player must have
+      // at least one legal move.
       const newArgs: MiniMaxArgs = {
         ...args,
         piece: otherPiece,
@@ -110,6 +127,7 @@ export class MiniMaxService {
     // Now process all legal moves.
     const results : MiniMaxResult[] = [];
     for (const legalMove of currPlayerMoves) {
+      // We persist move history, as we can revert these easily.
       args.moves.push({x: legalMove.x, y: legalMove.y}); // Remember that move.
 
       // We need to clone board, as we cannot easily revert state of cells.
@@ -122,9 +140,8 @@ export class MiniMaxService {
         ...args,
         piece: otherPiece,
         isYou: !args.isYou,
-        currDepth: args.currDepth + 1,
+        currDepth: args.currDepth + 1, // we are going even deeper
         cells: updatedCells, // copy of previous board
-        // we persist moves, as we can revert these easily
       }
       const result = this.recursiveMiniMax(newArgs);
       results.push(result);
@@ -134,7 +151,7 @@ export class MiniMaxService {
 
     // Find best result.
     const bestResult = this.findBestResult(results, args.isYou, args.currDepth);
-    console.log("Best (non-terminal) result: ", bestResult);
+    //console.log("Best (non-terminal) result: ", bestResult);
     return bestResult;
   }
 

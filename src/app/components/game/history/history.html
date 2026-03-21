@@ -1,7 +1,7 @@
 <div class="sidepanel-right">
   <div class="history">
     <h2>{{'game.history.title' | translate}}</h2>
-    @for (entry of getHistoryEntries(); track entry.id) {
+    @for (entry of getHistoryEntries(); track entry.num) {
       <app-game-history-entry [entry]="entry" />
     }
   </div>

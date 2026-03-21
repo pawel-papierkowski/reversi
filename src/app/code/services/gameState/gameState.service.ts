@@ -38,6 +38,7 @@ export class GameStateService {
    * @returns Player.
    */
   public getPlayer(playerIx: number) : Player {
+    if (playerIx < 0 || playerIx >= this.gameState().players.length) playerIx = 0;
     const player = this.gameState().players[playerIx];
     return player;
   }

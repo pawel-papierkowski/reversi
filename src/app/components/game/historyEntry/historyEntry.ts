@@ -23,7 +23,7 @@ export class HistoryEntryCmp {
   cssClasses = computed<string[]>(() => {
     const cssClasses: string[] = [];
     cssClasses.push('historyEntry');
-    if (this.entry().id === this.gameStateService.gameState().view.viewMove) cssClasses.push('selected');
+    if (this.entry().ix === this.gameStateService.gameState().view.viewMove) cssClasses.push('selected');
     return cssClasses;
   });
 

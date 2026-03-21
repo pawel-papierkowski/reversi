@@ -52,4 +52,14 @@ export class ReversiCellCmp {
     if (this.gameStateService.getCurrPlayer().type !== EnPlayerType.Human) return false;
     return true;
   }
+
+  // DEBUG
+
+  /**
+   * Check if can show debug data.
+   * @returns True if can show debug data, otherwise false.
+   */
+  public canShowDebug(): boolean {
+    return this.gameStateService.gameState().debugSettings.debugMode;
+  }
 }

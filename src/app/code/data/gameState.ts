@@ -181,7 +181,8 @@ export function createPlayers(): Player[] {
 //
 
 export type GameHistoryEntry = {
-  id: number; // for track
+  ix: number; // For tracking.
+  num: number; // Move number.
   playerIx: number; // Which player did that move.
   move: ReversiMove | null; // Move itself. Null indicates no move (initial state of board or pass).
   cells: Cell[][]; // Board state as copy of main board at that moment.
@@ -189,7 +190,8 @@ export type GameHistoryEntry = {
 
 export function createGameHistoryEntry(): GameHistoryEntry {
   return {
-    id: 0,
+    ix: 0,
+    num: 0,
     playerIx: -1,
     move: null,
     cells: [],

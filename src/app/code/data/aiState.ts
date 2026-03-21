@@ -50,17 +50,6 @@ export type MiniMaxArgs = {
   moves: Coordinate[]; // Moves made so far.
 }
 
-export function createMiniMaxArgs(): MiniMaxArgs {
-  return {
-    piece: EnCellState.B,
-    isYou: true,
-    currDepth: 0,
-    maxDepth: 0,
-    cells: [],
-    moves: [],
-  };
-}
-
 /** Arguments for evaluation code. */
 export type EvaluateArgs = {
   piece: EnCellState; // Piece of current player.
