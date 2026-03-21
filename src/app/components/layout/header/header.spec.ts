@@ -2,6 +2,8 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { vi } from 'vitest';
 
+import { storageKeys } from "@/code/data/const";
+
 import { HeaderCmp } from './header';
 
 describe('Header', () => {
@@ -48,7 +50,7 @@ describe('Header', () => {
     // Assert side effects
     const expectedLanguage = component.languages[1];
     expect(expectedLanguage).toBe('pl');
-    expect(localStorageSpy).toHaveBeenCalledWith('app.language', expectedLanguage);
+    expect(localStorageSpy).toHaveBeenCalledWith(storageKeys.language, expectedLanguage);
     expect(translateUseSpy).toHaveBeenCalledWith(expectedLanguage);
   });
 });

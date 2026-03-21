@@ -4,6 +4,7 @@ import { EnGameStatus, EnCellState, EnPlayerType, EnViewMode } from '@/code/data
 import type { GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
 import type { EvaluateArgs } from "@/code/data/aiState";
 
+import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
@@ -13,6 +14,7 @@ import { MiniMaxService } from '@/code/services/ai/miniMax.service';
  */
 @Injectable({providedIn: 'root'})
 export class GameService {
+  private readonly gameStorageService = inject(GameStorageService);
   private readonly gameStateService = inject(GameStateService);
   private readonly legalMoveService = inject(LegalMoveService);
   private readonly miniMaxService = inject(MiniMaxService);
@@ -25,6 +27,8 @@ export class GameService {
     this.gameStateService.applySettings(); // use settings from main menu options form
     this.gameStateService.initializeGame();
     this.nextRound();
+
+    this.gameStorageService.saveGameState(this.gameStateService.gameState);
   }
 
   /**
@@ -37,6 +41,8 @@ export class GameService {
     this.legalMoveService.showHints();
     this.gameStateService.recalcScoring();
     this.updateDebugData();
+
+    this.gameStorageService.updateGameState(this.gameStateService.gameState);
   }
 
   /** Update debug data. */
@@ -90,6 +96,8 @@ export class GameService {
     this.updateSideData();
 
     if (this.canEndRound()) this.endRound();
+
+    this.gameStorageService.saveGameState(this.gameStateService.gameState); // save after every move
   }
 
   /**
@@ -161,8 +169,8 @@ export class GameService {
         statistics.player2WinInRow++;
       }
     }
-    // propetly update game state
-    this.gameStateService.gameState.update(state => ({
+    // properly update game state
+    this.gameStateService.gameState.update(state => ({ // end round
       ...state,
       board: {
         ...state.board,
@@ -184,6 +192,8 @@ export class GameService {
     this.gameStateService.changePlayer();
     this.gameStateService.gameState().statistics.moveCount++;
     this.updateSideData();
+
+    this.gameStorageService.saveGameState(this.gameStateService.gameState); // save after every move
   }
 
   /**
@@ -207,10 +217,10 @@ export class GameService {
    * Show historical state of board for selected history entry.
    * @param historyEntry History entry to show.
    */
-  public jumpToEntry(historyEntry: GameHistoryEntry) {
-    if (!this.canJumpToEntry()) return;
+  public jumpToHistoryEntry(historyEntry: GameHistoryEntry) {
+    if (!this.canJumpToHistoryEntry()) return;
 
-    this.gameStateService.gameState.update(state => ({
+    this.gameStateService.gameState.update(state => ({ // jump to history entry
       ...state,
       view: {
         viewMode: EnViewMode.History,
@@ -224,7 +234,7 @@ export class GameService {
    * Check if can jump to history entry.
    * @returns True if can, otherwise false.
    */
-  private canJumpToEntry(): boolean {
+  private canJumpToHistoryEntry(): boolean {
     // not when AI is thinking on move
     if (this.gameStateService.getCurrPlayer().type === EnPlayerType.AI) return false;
     return true;
@@ -234,10 +244,10 @@ export class GameService {
    * Exits history mode.
    */
   public exitHistory() {
-    // already out of history mode
+    // already out of history mode?
     if (this.gameStateService.gameState().view.viewMode === EnViewMode.CurrentBoard) return;
 
-    this.gameStateService.gameState.update(state => ({
+    this.gameStateService.gameState.update(state => ({ // exit history
       ...state,
       view: {
         viewMode: EnViewMode.CurrentBoard,
@@ -261,8 +271,11 @@ export class GameService {
   public nextRound() {
     this.gameStateService.initializeRound();
 
-    this.updateSideData();
     this.addToHistory(-1, null); // initial board state as first entry in history
+
+    this.updateSideData();
+
+    this.gameStorageService.saveGameState(this.gameStateService.gameState); // save after every move
   }
 
   // //////////////////////////////////////////////////////////////////////////

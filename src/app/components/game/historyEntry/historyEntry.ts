@@ -61,9 +61,9 @@ export class HistoryEntryCmp {
   //
 
   /**
-   * Show historical state of board for selected move.
+   * Show historical state of board for selected move on screen.
    */
   public jumpToEntry() {
-    this.gameService.jumpToEntry(this.entry());
+    this.gameService.jumpToHistoryEntry(this.entry());
   }
 }

@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 
 import {TranslateService} from "@ngx-translate/core";
 
-import { languages, fallbackLang } from "@/code/data/const";
+import { languages, fallbackLang, storageKeys } from "@/code/data/const";
 
 import { HeaderCmp } from '@/components/layout/header/header';
 import { FooterCmp } from '@/components/layout/footer/footer';
@@ -28,7 +28,7 @@ export class App implements OnInit {
   /** Setup language-related stuff. */
   private setupLang() {
     this.translateService.setFallbackLang(fallbackLang);
-    const storedLang = localStorage.getItem('app.language'); // get current language from storage
+    const storedLang = localStorage.getItem(storageKeys.language); // get current language from storage
     if (storedLang) { // stored language exists: just use it
       const currLang = this.verifyLang(storedLang) ? storedLang : fallbackLang;
       this.translateService.use(currLang);
@@ -36,7 +36,7 @@ export class App implements OnInit {
       const browserLang = this.translateService.getBrowserLang() || fallbackLang;
        // if unknown language, fall back to english
       const currLang = this.verifyLang(browserLang) ? browserLang : fallbackLang;
-      localStorage.setItem('app.language', currLang);
+      localStorage.setItem(storageKeys.language, currLang);
       this.translateService.use(currLang);
     }
   }

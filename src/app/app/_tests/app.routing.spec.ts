@@ -19,6 +19,7 @@ describe('App (routing)', () => {
   let location: Location;
 
   beforeEach(async () => {
+    localStorage.clear(); // Reset local storage before every test to avoid pollution.
     vi.clearAllMocks(); // Clear state of mocks.
 
     fixture = await setupTestBed([
