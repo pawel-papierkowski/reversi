@@ -52,6 +52,7 @@
 
   "game.debug.title": "Dane debugowe",
   "game.debug.evaluation": "Wynik ewaluacji",
+  "game.debug.potentialMoves": "Dozwolone posunięcia",
 
   "game.history.title": "Historia",
   "game.history.start": "Początek gry",

@@ -77,12 +77,14 @@ export function createDebugSettingsForProd(): DebugSettings {
 
 export type DebugData = {
   evaluationScore: number; // evaluation score for current board state
+  potentialMoves: string; // list of potential moves
 }
 
 /** Debug data. */
 export function createDebugData(): DebugData {
   return {
     evaluationScore: 0,
+    potentialMoves: '',
   };
 }
 

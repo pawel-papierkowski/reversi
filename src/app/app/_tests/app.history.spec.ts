@@ -1,0 +1,136 @@
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { Router } from '@angular/router';
+
+import { setupTestBedTranslate, startGame, clickOnCellMoves, clickOnPass } from './app.test-setup';
+import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
+import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
+
+import { App } from '../app';
+import { EnCellState, EnViewMode } from '@/code/data/enums';
+
+import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
+
+describe('App (history)', () => {
+  let fixture: ComponentFixture<App>;
+  let router: Router;
+  let gameStateService: GameStateService;
+  let legalMoveService: LegalMoveService;
+
+  beforeEach(async () => {
+    localStorage.clear(); // Reset local storage before every test to avoid pollution.
+
+    fixture = await setupTestBedTranslate([]);
+    router = TestBed.inject(Router);
+    gameStateService = TestBed.inject(GameStateService);
+    legalMoveService = TestBed.inject(LegalMoveService);
+
+    // Trigger initial navigation to load the '' (MainMenu) route.
+    router.initialNavigation();
+    await fixture.whenStable(); // ensure everything is fully loaded on page before continuing
+    fixture.detectChanges();
+  });
+
+  // //////////////////////////////////////////////////////////////////////////
+  // History handling.
+
+  it('verify content of history panel', async () => {
+    const expectedGameState = genStartState(4);
+    // board 4x4, moves: b1 c1 d3 a1 pass
+    selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
+    await startGame(fixture);
+
+    await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
+    await clickOnCellMoves(fixture, expectedGameState, 1, "c1 c2"); // white c1
+    await clickOnCellMoves(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
+    await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b1"); // white a1
+    await clickOnPass(fixture, expectedGameState, 0); // black pass
+    
+    // Board state:
+    // WWW_
+    // _BB_
+    // _BBB
+    // ____
+
+    // CHECKING WEBPAGE
+    // Currently there should be 6 entries in history panel: initial state, 4 moves and pass.
+    const historyEntries = fixture.nativeElement.querySelectorAll('.historyEntry');
+    expect(historyEntries.length, 'Amount of history entries is different').toEqual(6);
+
+    expect(historyEntries[0]?.textContent, 'History entry [0] is different').toContain("5. Pass");
+    expect(historyEntries[1]?.textContent, 'History entry [1] is different').toContain("4. a1");
+    expect(historyEntries[2]?.textContent, 'History entry [2] is different').toContain("3. d3");
+    expect(historyEntries[3]?.textContent, 'History entry [3] is different').toContain("2. c1");
+    expect(historyEntries[4]?.textContent, 'History entry [4] is different').toContain("1. b1");
+    expect(historyEntries[5]?.textContent, 'History entry [5] is different').toContain("0. Start of game");
+  });
+
+  it('click on history entry and exit', async () => {
+    const expectedGameState = genStartState(4);
+    // board 4x4, moves: b1 c1 d3 a1 pass
+    selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
+    await startGame(fixture);
+
+    await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
+    await clickOnCellMoves(fixture, expectedGameState, 1, "c1 c2"); // white c1
+    await clickOnCellMoves(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
+    await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b1"); // white a1
+    await clickOnPass(fixture, expectedGameState, 0); // black pass
+
+    // Board state:
+    // WWW_
+    // _BB_
+    // _BBB
+    // ____
+
+    // CHECKING WEBPAGE
+    // Currently there should be 6 entries in history panel: initial state, 4 moves and pass.
+    const historyEntries = fixture.nativeElement.querySelectorAll('.historyEntry');
+    expect(historyEntries.length, 'Amount of history entries is different').toEqual(6);
+
+    // entering history at id 3
+    const historyEntry = historyEntries[3] as HTMLElement;
+    historyEntry.click();
+    await fixture.whenStable();
+
+    // Now we check game state when we are in history.
+    expectedGameState.statistics.moveCount = 5;
+    expectedGameState.statistics.emptyCells = 8;
+    expectedGameState.statistics.player1Score = 5;
+    expectedGameState.statistics.player2Score = 3;
+    expectedGameState.board.currPlayerIx = 1;
+    expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
+    expectedGameState.view.viewMode = EnViewMode.History;
+    expectedGameState.view.viewMove = 3;
+    expectedGameState.view.cells = expectedGameState.board.history.moves[3].cells;
+
+    expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
+    legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+
+    const actualGameStateHist = gameStateService.gameState();
+    assertGameState(actualGameStateHist, expectedGameState);
+
+    // Button to exit history should be visible.
+    const exitHistoryButton = fixture.nativeElement.querySelector('[data-testid="btn-exitHistory"]') as HTMLButtonElement;
+    expect(exitHistoryButton, 'Exit history button must exist').not.toBeNullable();
+    exitHistoryButton.click();
+    await fixture.whenStable();
+
+    // Now we check game state after returning from history.
+    expectedGameState.statistics.moveCount = 5;
+    expectedGameState.statistics.emptyCells = 8;
+    expectedGameState.statistics.player1Score = 5;
+    expectedGameState.statistics.player2Score = 3;
+    expectedGameState.board.currPlayerIx = 1;
+    expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
+    expectedGameState.view.viewMode = EnViewMode.CurrentBoard;
+    expectedGameState.view.viewMove = -1;
+    expectedGameState.view.cells = expectedGameState.board.cells;
+
+    expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
+    legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+
+    const actualGameState = gameStateService.gameState();
+    assertGameState(actualGameState, expectedGameState);
+  });
+});

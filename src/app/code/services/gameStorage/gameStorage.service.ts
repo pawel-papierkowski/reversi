@@ -6,7 +6,7 @@ import { EnViewMode } from '@/code/data/enums';
 
 /**
  * Game storage service.
- * Handles save/load of game data.
+ * Handles save/load/update of game data.
  */
 @Injectable({providedIn: 'root'})
 export class GameStorageService {

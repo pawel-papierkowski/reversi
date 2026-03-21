@@ -49,6 +49,7 @@ export class GameService {
   private updateDebugData() {
     if (!this.gameStateService.gameState().debugSettings.debugMode) return;
     this.updateDebugEvaluation();
+    this.updateDebugPotentialMoves();
   }
 
   private updateDebugEvaluation() {
@@ -60,7 +61,6 @@ export class GameService {
       const historyBoard = this.gameStateService.gameState().board.history.moves[historyIx];
       piece = this.gameStateService.getPlayer(historyBoard.playerIx).piece;
       cells = historyBoard.cells;
-      console.info(`historyIx: ${historyIx}, history player ix: ${historyBoard.playerIx}`);
     }
 
     const args: EvaluateArgs = {
@@ -69,6 +69,17 @@ export class GameService {
       cells: cells,
     };
     this.gameStateService.gameState().debugData.evaluationScore = this.miniMaxService.evaluate(args);
+  }
+
+  private updateDebugPotentialMoves() {
+    let potentialMovesStr = "";
+    if (this.gameStateService.gameState().view.viewMode === EnViewMode.CurrentBoard) {
+      const potentialMoves = this.gameStateService.gameState().board.legalMoves;
+      for (const potentialMove of potentialMoves) {
+        potentialMovesStr += `<p>X: ${potentialMove.x}, Y: ${potentialMove.y}</p>`;
+      }
+    }
+    this.gameStateService.gameState().debugData.potentialMoves = potentialMovesStr;
   }
 
   // PLAYER ACTIONS

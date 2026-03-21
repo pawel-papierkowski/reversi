@@ -52,6 +52,7 @@
 
   "game.debug.title": "Debug data",
   "game.debug.evaluation": "Evaluated score",
+  "game.debug.potentialMoves": "Legal moves",
 
   "game.history.title": "History",
   "game.history.start": "Start of game",
