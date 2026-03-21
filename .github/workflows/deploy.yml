@@ -34,6 +34,9 @@ jobs: # Define jobs to run. They will be executed in parallel by default unless 
       - name: Build # Builds your Angular app for production. This typically runs ng build as defined in your package.json scripts, outputting static files to dist/.
         run: npm run build
 
+      - name: Generate 404 fallback for GitHub Pages # Otherwise Single Page Apps wont work properly when using different path
+        run: cp ./dist/reversi-angular/browser/index.html ./dist/reversi-angular/browser/404.html
+
       - name: Setup Pages # Configures Pages environment (handles base path, etc.).
         uses: actions/configure-pages@v5
 
