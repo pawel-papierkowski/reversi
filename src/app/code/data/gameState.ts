@@ -13,7 +13,9 @@ import { defDebugMode, defDebugPanel, defDebugHint } from '@/code/data/const';
 type GameView = {
   viewMode: EnViewMode; // View mode - either real board or state from history.
   viewMove: number; // Id of move in history. If -1, no move is viewed.
+  // IMPORTANT NOTE:
   // Actually points to current board or board from history entry.
+  // That means you need to properly set it if loaded from storage.
   cells: Cell[][];
 };
 

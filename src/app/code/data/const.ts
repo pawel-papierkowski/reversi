@@ -19,6 +19,13 @@ export const projectProp: ProjectProp = {
   build: environment.production ? "PROD" : "DEV",
 };
 
+/** Storage keys. */
+export const storageKeys = {
+  gameState: 'reversi.gameState', // complete game state
+  menuSettings: 'reversi.menuSettings', // settings from main menu
+  language: 'app.language', // currently set language
+};
+
 /** Fallback language. */
 export const fallbackLang = 'en';
 

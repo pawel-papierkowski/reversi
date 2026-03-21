@@ -1,21 +1,36 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
-import { playerNames, projectProp, weights } from '@/code/data/const';
+import { playerNames, projectProp, weights, storageKeys } from '@/code/data/const';
 import type { DirCoord } from '@/code/data/dirCoord';
 import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
 import type { GameState, GameSettings, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForDev, createDebugSettingsForProd } from "@/code/data/gameState";
 
-/** Game state service.
+import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
+
+/**
+ * Game state service.
  * Provides convenient functions to handle game state like initialization of game or round.
  */
 @Injectable({providedIn: 'root'})
 export class GameStateService {
+  private readonly gameStorageService = inject(GameStorageService);
+
   /** Actual game state. */
   readonly gameState = signal<GameState>(createGameState());
   /** Temporary settings used in main menu options. */
   readonly menuSettings = signal<GameSettings>(createGameSettings());
+
+  constructor() {
+    this.gameStorageService.loadMenuSettings(this.menuSettings);
+    this.gameStorageService.loadGameState(this.gameState);
+    // We save menu settings only on game start.
+    // We save game state on game start and after every move.
+    //effect(() => this.saveGameState());
+  }
+
+  // //////////////////////////////////////////////////////////////////////////
 
   /**
    * Resolves player with given index.
@@ -49,14 +64,7 @@ export class GameStateService {
   /** Change current player. There are only two players in Reversi. */
   public changePlayer() {
     const playerIx = this.gameState().board.currPlayerIx;
-
-    this.gameState.update(state => ({
-      ...state, // duplicates rest of state
-      board: {
-        ...state.board, // duplicates rest of board
-        currPlayerIx: playerIx === 0 ? 1 : 0,
-      }
-    }));
+    this.gameState().board.currPlayerIx = playerIx === 0 ? 1 : 0;
   }
 
   // //////////////////////////////////////////////////////////////////////////
@@ -209,8 +217,12 @@ export class GameStateService {
 
   /** Use temporary settings as actual settings. */
   public applySettings() {
-    this.gameState.update(state => ({
-      ...state, // duplicates rest of state
+    // Note: This is only place we update/save menu settings, that's intentional.
+    this.gameStorageService.updateMenuSettings(this.menuSettings);
+    this.gameStorageService.saveMenuSettings(this.menuSettings);
+
+    this.gameState.update(state => ({ // apply settings
+      ...state, // duplicates rest of game state
       settings: structuredClone(this.menuSettings()) // make sure we use copy of settings
     }));
   }
@@ -247,7 +259,7 @@ export class GameStateService {
   public initializeGame() {
     // Reset game state that needs to be reset for new game.
     // Note that means settings are untouched, as they are determined before initializing new game.
-    this.gameState.update(state => ({
+    this.gameState.update(state => ({ // initialize game
       ...state, // duplicates rest of state
       statistics: createGameStatistics(),
       players: this.generatePlayers(),
@@ -271,7 +283,7 @@ export class GameStateService {
     const boardSize = this.gameState().settings.boardSize;
     const newCells = this.generateCells(boardSize);
 
-    this.gameState.update(state => ({
+    this.gameState.update(state => ({ // initialize round
       ...state, // duplicates rest of state
       board: {
         status: EnGameStatus.InProgress,

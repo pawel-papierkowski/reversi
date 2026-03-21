@@ -24,6 +24,8 @@ describe('MainMenuOptions', () => {
   let gameStateService: MockGameStateService;
 
   beforeEach(async () => {
+    localStorage.clear(); // Reset local storage before every test to avoid pollution.
+    
     await TestBed.configureTestingModule({
       imports: [
         MainMenuOptionsCmp,

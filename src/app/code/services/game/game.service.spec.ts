@@ -16,6 +16,8 @@ describe('GameService', () => {
   let gameService: GameService;
 
   beforeEach(async () => {
+    localStorage.clear(); // Reset local storage before every test to avoid pollution.
+    
     gameStateService = TestBed.inject(GameStateService);
     legalMoveService = TestBed.inject(LegalMoveService);
     gameService = TestBed.inject(GameService);
