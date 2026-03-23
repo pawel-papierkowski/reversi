@@ -38,7 +38,7 @@
   "game.status.currStatus.inProgress.ai": "Waiting for AI move...",
   "game.status.currStatus.playerWon": "Winning player:",
   "game.status.currStatus.tie": "Game finished in draw.",
-  "game.status.showsHistory": "Viewing board for move {{moveId}}.",
+  "game.status.showsHistory": "Viewing board for move {{moveNum}}.",
 
   "game.statistics.basic": "Basic data",
   "game.statistics.stats": "Statistics",

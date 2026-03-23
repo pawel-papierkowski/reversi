@@ -29,7 +29,7 @@ export type MiniMaxResp = {
 export type MiniMaxResult = {
   score: number; // Best score found.
   depth: number; // Depth.
-  moves: Coordinate[]; // Moves that lead to this result.
+  moves: Coordinate[]; // Moves that lead to this result. Note: {x:-1, y:-1} is pass.
 };
 
 export function createMiniMaxResult(): MiniMaxResult {

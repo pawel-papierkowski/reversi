@@ -8,7 +8,7 @@ import { GameService } from '@/code/services/game/game.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 
-import { genStartState, setBoard } from '@/code/services/gameState/gameState.test-setup';
+import { setBoard } from '@/code/services/gameState/gameState.test-setup';
 
 describe('MiniMaxService', () => {
   let gameStateService: GameStateService;
@@ -166,18 +166,24 @@ describe('MiniMaxService', () => {
     it('proper handling of pass', () => {
       gameStateService.menuSettings().boardSize = 4; // 4x4
       gameService.startGame();
-
-      // TODO set up board so in one move we will have pass for certain potential move
+      const gameState = gameStateService.gameState();
+      const boardStr = "_BW_"+ // white a1 will cause pass for black
+                       "_BB_"+
+                       "_BBB"+
+                       "____";
+      setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
-        piece: EnCellState.B,
+        piece: EnCellState.W,
         maxDepth: 2,
-        legalMoves: gameStateService.gameState().board.legalMoves,
-        cells: gameStateService.gameState().board.cells,
+        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
+        cells: gameState.board.cells,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -120, depth: 2, moves: [{x:0, y:0},{x:0, y:0},{x:0, y:0}]},
+        {score: 0, depth: 2, moves: [{x:0, y:0},{x:-1, y:-1},{x:0, y:0}]},
+        {score: 0, depth: 2, moves: [{x:0, y:2},{x:0, y:0},{x:0, y:0}]},
+        {score: 0, depth: 2, moves: [{x:2, y:3},{x:0, y:0},{x:0, y:0}]},
       ]};
       // TODO
       //expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
@@ -195,7 +201,7 @@ describe('MiniMaxService', () => {
       setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
-        piece: EnCellState.B,
+        piece: EnCellState.W,
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,

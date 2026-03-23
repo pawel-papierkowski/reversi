@@ -38,7 +38,7 @@
   "game.status.currStatus.inProgress.ai": "Oczekuje na ruch SI...",
   "game.status.currStatus.playerWon": "Wygrał gracz",
   "game.status.currStatus.tie": "Rozgrywka zakończyła się remisem.",
-  "game.status.showsHistory": "Przeglądanie planszy dla ruchu nr {{moveId}}.",
+  "game.status.showsHistory": "Przeglądanie planszy dla ruchu nr {{moveNum}}.",
 
   "game.statistics.basic": "Podstawowe dane",
   "game.statistics.stats": "Statystyki",

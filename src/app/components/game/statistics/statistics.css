@@ -21,7 +21,7 @@
 
 .statistics {
   display: grid;
-  grid-template-columns: 8fr 1fr;
+  grid-template-columns: 6fr 1fr;
   align-items: center;
   gap: 5px;
 
@@ -46,7 +46,7 @@
 
 .debugPanel {
   display: grid;
-  grid-template-columns: 8fr 1fr;
+  grid-template-columns: 6fr 1fr;
   align-items: center;
   gap: 5px;
 
