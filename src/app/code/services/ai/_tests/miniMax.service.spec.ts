@@ -157,14 +157,13 @@ describe('MiniMaxService', () => {
 
     // TODO additional tests:
     // - different, asymmetric starting point
-    // - proper handling of pass
     // - proper handling of endgame:
     //   - board filled up
     //   - double pass when board still have empty cells
 
 
-    it('proper handling of pass', () => {
-      gameStateService.menuSettings().boardSize = 4; // 4x4
+    it('proper handling of single pass', () => {
+      gameStateService.menuSettings().boardSize = 4; // 4x4, moves: b1 c1 d3
       gameService.startGame();
       const gameState = gameStateService.gameState();
       const boardStr = "_BW_"+ // white a1 will cause pass for black
@@ -181,17 +180,16 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 0, depth: 2, moves: [{x:0, y:0},{x:-1, y:-1},{x:0, y:0}]},
-        {score: 0, depth: 2, moves: [{x:0, y:2},{x:0, y:0},{x:0, y:0}]},
-        {score: 0, depth: 2, moves: [{x:2, y:3},{x:0, y:0},{x:0, y:0}]},
+        {score: 180, depth: 2, moves: [{x:0, y:0},{x:-1, y:-1},{x:3, y:3}]}, // pass
+        {score: 40, depth: 2, moves: [{x:2, y:3},{x:3, y:0},{x:0, y:0}]},
+        {score: -120, depth: 2, moves: [{x:0, y:2},{x:0, y:0},{x:2, y:3}]},
       ]};
-      // TODO
-      //expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
     });
 
 
     it('double pass while there are still empty cells', () => {
-      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameStateService.menuSettings().boardSize = 4; // 4x4, moves: c4 d4 d3 b4 a4 d2 d1 a2 pass
       gameService.startGame();
       const gameState = gameStateService.gameState();
       const boardStr = "___B"+ // b1 will cause double pass
@@ -208,10 +206,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 460, depth: 2, moves: [{x:2, y:0},{x:1, y:0},{x:0, y:0}]}, // WRONG WRONG WRONG
-        {score: 340, depth: 0, moves: [{x:1, y:0}]}, // double pass
+        {score: -360, depth: 2, moves: [{x:2, y:0},{x:1, y:0},{x:-1, y:-1}]},
+        {score: -420, depth: 0, moves: [{x:1, y:0}]}, // double pass
       ]};
-      //expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
     });
   });
 

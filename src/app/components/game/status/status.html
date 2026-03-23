@@ -3,7 +3,7 @@
   <app-player-box [playerIx]="1" />
 
   <!-- Game state. -->
-  <div class="doubleColumn">
+  <div data-testid="div-status" class="doubleColumn">
   @if (gameStateService.gameState().view.viewMode === EnViewMode.History) {
     {{'game.status.showsHistory' | translate:{moveNum:getMoveNumber()} }}
     <button data-testid="btn-exitHistory" (click)="exitHistory()">

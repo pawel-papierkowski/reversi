@@ -143,7 +143,13 @@ export async function clickOnPass(fixture: ComponentFixture<App>, gameState: Gam
 
 //
 
-export function assertPassButton(fixture: ComponentFixture<App>, exists: boolean, comment:string) {
+/**
+ * Assert state of pass button.
+ * @param fixture App fixture.
+ * @param exists If true, pass button should exist. If false, pass button should not exist.
+ * @param comment Comment for error message.
+ */
+export function assertPassButton(fixture: ComponentFixture<App>, exists: boolean, comment: string) {
   if (exists) {
     const passButton = fixture.nativeElement.querySelector('[data-testid="btn-pass"]') as HTMLButtonElement;
     expect(passButton, 'Pass button must exist for this board state: '+comment).not.toBeNullable(); // make sure it exists
@@ -153,4 +159,82 @@ export function assertPassButton(fixture: ComponentFixture<App>, exists: boolean
   }
 }
 
+/**
+ * Assert state of cells in browser window. Verifies if cell is empty, contains black piece or white piece.
+ * Format of boardStr:
+ * - _: empty cell
+ * - B: black piece cell
+ * - b: potential move for black
+ * - W: white piece cell
+ * - w: potential move for white
+ * Example of use for 4x4 board:
+ * const boardStr = "_b__"+ // expected board state
+ *                  "bWB_"+
+ *                  "_BWb"+
+ *                  "__b_";
+ * assertDomBoard(fixture, boardStr, true);
+ *
+ * @param fixture App fixture.
+ * @param boardStr Expected state of board as string.
+ * @param testHints If true, test for presence of hints too.
+ */
+export function assertDomBoard(fixture: ComponentFixture<App>, boardStr: string, testHints: boolean=false, comment:string='') {
+  const board = boardStr.replace(/\s/g, ''); // remove any whitespace/newlines
+  const N = Math.sqrt(board.length);
+  if (!Number.isInteger(N)) {
+    throw new Error(`Board string length ${board.length} is not a perfect square.`);
+  }
 
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const expected = board[y * N + x];
+      const cellCoord = `${x}x${y}`;
+      const cellTestId = `cell-${cellCoord}`;
+      const cell = fixture.nativeElement.querySelector(`[data-testid="${cellTestId}"]`);
+      expect(cell, `${comment}: Cell ${cellTestId} must exist`).not.toBeNullable();
+
+      const piece = cell.querySelector('reversi-piece') as HTMLElement | null; // null if cell is empty
+      const isHint = checkHint(piece);
+      const flipper = piece?.querySelector('.flipper');
+      const isBlack = flipper?.classList.contains('flipped'); // white is not flipped, black is flipped
+
+      if (expected === '_') { // Empty cell.
+        if (testHints) {
+          expect(piece, `${comment}: Cell ${cellCoord} should be completely empty (no piece/hint)`).toBeNullable();
+        } else { // ignore hints (treat them as empty cell)
+          const hasRealPiece = piece !== null && !isHint;
+          expect(hasRealPiece, `${comment}: Cell ${cellCoord} should have no real piece`).toBe(false);
+        }
+      } else if (expected === 'B') { // Black piece.
+        expect(piece, `${comment}: Cell ${cellCoord} should have a piece (B)`).not.toBeNullable();
+        expect(isHint, `${comment}: Piece at ${cellCoord} should be real, not a hint`).toBe(false);
+        expect(isBlack, `${comment}: Piece at ${cellCoord} should be Black (flipped)`).toBe(true);
+      } else if (expected === 'W') { // White piece.
+        expect(piece, `${comment}: Cell ${cellCoord} should have a piece (W)`).not.toBeNullable();
+        expect(isHint, `${comment}: Piece at ${cellCoord} should be real, not a hint`).toBe(false);
+        expect(isBlack, `${comment}: Piece at ${cellCoord} should be White (not flipped)`).toBe(false);
+      } else if (expected === 'b') { // Potential move for black.
+        expect(piece, `${comment}: Cell ${cellCoord} should have a hint (b)`).not.toBeNullable();
+        expect(isHint, `${comment}: Piece at ${cellCoord} should be a hint (low opacity)`).toBe(true);
+        expect(isBlack, `${comment}: Hint at ${cellCoord} should be Black (flipped)`).toBe(true);
+      } else if (expected === 'w') { // Potential move for white.
+        expect(piece, `${comment}: Cell ${cellCoord} should have a hint (w)`).not.toBeNullable();
+        expect(isHint, `${comment}: Piece at ${cellCoord} should be a hint (low opacity)`).toBe(true);
+        expect(isBlack, `${comment}: Hint at ${cellCoord} should be White (not flipped)`).toBe(false);
+      }
+    }
+  }
+}
+
+/**
+ * Check if this piece is a hint (potential move).
+ * Hints have opacity set to 50 in cell.html using [style.opacity.%]="50".
+ * @param piece Piece to check.
+ * @returns True if it is hint, otherwise false.
+ */
+function checkHint(piece: HTMLElement | null): boolean {
+  if (piece === null) return false; // no piece, no hint
+  const opacity = piece.style.opacity; // we recognize hint by opaqueness
+  if (opacity === '1' || opacity === '100%') return false; // not a hint
+  return true; // anything that is not fully opaque is hint
+}

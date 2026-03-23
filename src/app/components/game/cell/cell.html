@@ -4,7 +4,7 @@
   }
 
   @if (cell().state === EnCellState.Empty) {
-    <!-- Potential moves show only when defDebugShowMove === true -->
+    <!-- Potential moves show only when gameState.settings.showHints is true -->
     @if (cell().potentialMove !== EnCellState.Empty) {
       <reversi-piece [state]="cell().potentialMove" [opacity]="50" />
     }

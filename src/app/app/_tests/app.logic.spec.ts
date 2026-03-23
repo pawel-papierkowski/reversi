@@ -1,7 +1,7 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
-import { setupTestBedTranslate, startGame, clickOnCellMoves, clickOnPass, assertPassButton } from './app.test-setup';
+import { setupTestBedTranslate, startGame, clickOnCellMoves, clickOnPass, assertPassButton, assertDomBoard } from './app.test-setup';
 import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
 import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
 
@@ -38,7 +38,17 @@ describe('App (logic)', () => {
     it('with default settings', async () => {
       await startGame(fixture);
 
-      // Now we check game state.
+      const boardStr = "________"+ // Expected board state.
+                       "________"+
+                       "________"+
+                       "___WB___"+
+                       "___BW___"+
+                       "________"+
+                       "________"+
+                       "________";
+      assertDomBoard(fixture, boardStr); // Check state of board in browser.
+
+      // Check game state.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(8);
       assertGameState(actualGameState, expectedGameState);
@@ -51,13 +61,18 @@ describe('App (logic)', () => {
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0);
       await startGame(fixture);
 
-      // Now we check game state.
+      const boardStr = "_b__"+ // Expected board state.
+                       "bWB_"+
+                       "_BWb"+
+                       "__b_";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
+
+      // Check game state.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(4);
       expectedGameState.settings.mode = EnMode.HumanVsAi;
       expectedGameState.settings.whoFirst = EnPlayerType.AI;
       expectedGameState.players[0].type = EnPlayerType.AI;
-
       assertGameState(actualGameState, expectedGameState);
     });
 
@@ -66,13 +81,22 @@ describe('App (logic)', () => {
       selectComboboxOption(fixture, 'cb-mainMenu-mode', 2);
       await startGame(fixture);
 
-      // Now we check game state.
+      const boardStr = "________"+ // Expected board state.
+                       "________"+
+                       "________"+
+                       "___WB___"+
+                       "___BW___"+
+                       "________"+
+                       "________"+
+                       "________";
+      assertDomBoard(fixture, boardStr); // Check state of board in browser.
+
+      // Check game state.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(8);
       expectedGameState.settings.mode = EnMode.AiVsAi;
       expectedGameState.players[0].type = EnPlayerType.AI;
       expectedGameState.players[1].type = EnPlayerType.AI;
-
       assertGameState(actualGameState, expectedGameState);
     });
   });
@@ -88,10 +112,15 @@ describe('App (logic)', () => {
       cell.click();
       await fixture.whenStable();
 
-      // Now we check game state. Nothing should change.
+      const boardStr = "____"+ // Expected board state.
+                       "_WB_"+
+                       "_BW_"+
+                       "____";
+      assertDomBoard(fixture, boardStr); // Check state of board in browser.
+
+      // Check game state. Nothing should change.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(4);
-
       assertGameState(actualGameState, expectedGameState);
     });
 
@@ -103,7 +132,15 @@ describe('App (logic)', () => {
 
       await clickOnCellMoves(fixture, expectedGameState, 0, "e4 d4"); // black e4
 
-      // Now we check game state.
+      const boardStr = "______"+ // Expected board state.
+                       "______"+
+                       "__WBw_"+
+                       "__BBB_"+
+                       "__w_w_"+
+                       "______";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
+
+      // Check game state.
       expectedGameState.statistics.moveCount = 1;
       expectedGameState.statistics.emptyCells = 31;
       expectedGameState.statistics.player1Score = 4;
@@ -128,7 +165,13 @@ describe('App (logic)', () => {
       await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
       await clickOnCellMoves(fixture, expectedGameState, 1, "a3 b3"); // white a3
 
-      // Now we check game state.
+      const boardStr = "_B__"+ // Expected board state.
+                       "_BB_"+
+                       "WWW_"+
+                       "bbbb";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
+
+      // Check game state.
       expectedGameState.statistics.moveCount = 2;
       expectedGameState.statistics.emptyCells = 10;
       expectedGameState.statistics.player1Score = 3;
@@ -161,16 +204,21 @@ describe('App (logic)', () => {
       await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b1"); // white a1
       assertPassButton(fixture, true, 'after a1');
 
-      // state of board:
-      // WWW_
-      // _BB_
-      // _BBB
-      // ____
-      // Black has no legal moves available.
+      const boardPassStr = "WWW_"+ // Expected board state.
+                           "_BB_"+ // Black has no legal moves available.
+                           "_BBB"+
+                           "____";
+      assertDomBoard(fixture, boardPassStr, true); // Check state of board in browser.
 
       await clickOnPass(fixture, expectedGameState, 0); // black pass
 
-      // Now we check game state after 4 moves and pass.
+      const boardStr = "WWW_"+ // Expected board state.
+                       "_BB_"+ // After pass, whites now have some legal moves available.
+                       "wBBB"+
+                       "_www";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
+
+      // Check game state after 4 moves and pass.
       expectedGameState.statistics.moveCount = 5; // would be 4 without pass
       expectedGameState.statistics.emptyCells = 8;
       expectedGameState.statistics.player1Score = 5;
@@ -208,17 +256,13 @@ describe('App (logic)', () => {
       await clickOnCellMoves(fixture, expectedGameState, 0, "c4 b4"); // black c4
       await clickOnCellMoves(fixture, expectedGameState, 1, "d4 c3"); // white d4
 
-      // Resulting board:
-      // WWWB
-      // WWWB
-      // WWWB
-      // BBBW
+      const boardStr = "WWWB"+ // Expected board state.
+                       "WWWB"+
+                       "WWWB"+
+                       "BBBW";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
 
-      // next round button should be present
-      const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
-      expect(nextRoundButton, 'Next round button must exist').not.toBeNullable();
-
-      // now we check game state at end of game
+      // Check game state at end of game.
       expectedGameState.statistics.moveCount = 12;
       expectedGameState.statistics.emptyCells = 0;
       expectedGameState.statistics.player1Score = 6;
@@ -237,11 +281,19 @@ describe('App (logic)', () => {
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
 
-      // and now we start next round
+      // Now we start next round. Next round button should be present.
+      const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
+      expect(nextRoundButton, 'Next round button must exist').not.toBeNullable();
       nextRoundButton.click();
       await fixture.whenStable();
 
-      // ensure state of game is correct after starting next round
+      const boardNewStr = "_b__"+ // Expected board state.
+                          "bWB_"+
+                          "_BWb"+
+                          "__b_";
+      assertDomBoard(fixture, boardNewStr, true); // Check state of board in browser.
+
+      // Ensure state of game is correct after starting next round.
       const actualGameStateNewRound = gameStateService.gameState();
       const expectedGameStateNewRound = genStartState(4);
       expectedGameStateNewRound.statistics.round = 2;
@@ -272,17 +324,13 @@ describe('App (logic)', () => {
       await clickOnCellMoves(fixture, expectedGameState, 0, "c1 b2"); // black c1
       assertPassButton(fixture, false, 'after board fill');
 
-      // Resulting board:
-      // BBBB
-      // BBWW
-      // BWWW
-      // BWWW
+      const boardStr = "BBBB"+ // Expected board state.
+                       "BBWW"+
+                       "BWWW"+
+                       "BWWW";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
 
-      // next round button should be present
-      const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
-      expect(nextRoundButton, 'Next round button must exist').not.toBeNullable();
-
-      // now we check game state at end of game
+      // Check game state at end of game.
       expectedGameState.statistics.moveCount = 13;
       expectedGameState.statistics.emptyCells = 0;
       expectedGameState.statistics.player1Score = 8;
@@ -301,11 +349,13 @@ describe('App (logic)', () => {
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
 
-      // and now we start next round
+      // Now we start next round. Next round button should be present.
+      const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
+      expect(nextRoundButton, 'Next round button must exist').not.toBeNullable();
       nextRoundButton.click();
       await fixture.whenStable();
 
-      // ensure state of game is correct after starting next round
+      // Ensure state of game is correct after starting next round.
       const actualGameStateNewRound = gameStateService.gameState();
       const expectedGameStateNewRound = genStartState(4);
       expectedGameStateNewRound.statistics.round = 2;
@@ -332,18 +382,13 @@ describe('App (logic)', () => {
       await clickOnPass(fixture, expectedGameState, 0); // black pass
       await clickOnCellMoves(fixture, expectedGameState, 1, "b1 c2"); // white b1
 
-      // Resulting board:
-      // _W_B
-      // WWWW
-      // _WWW
-      // BWWW
-      // Neither player has legal moves, so game ends.
+      const boardStr = "_W_B"+ // Expected board state.
+                       "WWWW"+ // Neither player has legal moves, so game ends.
+                       "_WWW"+
+                       "BWWW";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
 
-      // next round button should be present
-      const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
-      expect(nextRoundButton, 'Next round button must exist').not.toBeNullable();
-
-      // now we check game state at end of game
+      // Check game state at end of game.
       expectedGameState.statistics.moveCount = 10;
       expectedGameState.statistics.emptyCells = 3;
       expectedGameState.statistics.player1Score = 2;
@@ -362,11 +407,13 @@ describe('App (logic)', () => {
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
 
-      // and now we start next round
+      // Now we start next round. Next round button should be present.
+      const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
+      expect(nextRoundButton, 'Next round button must exist').not.toBeNullable();
       nextRoundButton.click();
       await fixture.whenStable();
 
-      // ensure state of game is correct after starting next round
+      // Ensure state of game is correct after starting next round.
       const actualGameStateNewRound = gameStateService.gameState();
       const expectedGameStateNewRound = genStartState(4);
       expectedGameStateNewRound.statistics.round = 2;
@@ -393,20 +440,15 @@ describe('App (logic)', () => {
       await clickOnCellMoves(fixture, expectedGameState, 1, "e4 d4"); // white e4
       await clickOnCellMoves(fixture, expectedGameState, 0, "b4 c3 c4 c5 d4 e4"); // black b4
 
-      // Resulting board:
-      // ______
-      // ___B__
-      // __BBB_
-      // _BBBBB
-      // __BBB_
-      // ___B__
-      // Wipeout happened. Black wins.
+      const boardStr = "______"+ // Expected board state.
+                       "___B__"+ // Wipeout happened. Black wins.
+                       "__BBB_"+
+                       "_BBBBB"+
+                       "__BBB_"+
+                       "___B__";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
 
-      // next round button should be present
-      const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
-      expect(nextRoundButton, 'Next round button must exist').not.toBeNullable();
-
-      // now we check game state at end of game
+      // Check game state at end of game.
       expectedGameState.statistics.moveCount = 9;
       expectedGameState.statistics.emptyCells = 23;
       expectedGameState.statistics.player1Score = 13;
@@ -425,11 +467,13 @@ describe('App (logic)', () => {
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
 
-      // and now we start next round
+      // Now we start next round. Next round button should be present.
+      const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
+      expect(nextRoundButton, 'Next round button must exist').not.toBeNullable();
       nextRoundButton.click();
       await fixture.whenStable();
 
-      // ensure state of game is correct after starting next round
+      // Ensure state of game is correct after starting next round.
       const actualGameStateNewRound = gameStateService.gameState();
       const expectedGameStateNewRound = genStartState(6);
       expectedGameStateNewRound.statistics.round = 2;

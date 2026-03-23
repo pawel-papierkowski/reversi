@@ -1,7 +1,7 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
-import { setupTestBedTranslate, startGame, clickOnCellMoves, clickOnPass } from './app.test-setup';
+import { setupTestBedTranslate, startGame, clickOnCellMoves, clickOnPass, assertDomBoard } from './app.test-setup';
 import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
 import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
 
@@ -45,18 +45,13 @@ describe('App (history)', () => {
     await clickOnCellMoves(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
     await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b1"); // white a1
     await clickOnPass(fixture, expectedGameState, 0); // black pass
-    
-    // Board state:
-    // WWW_
-    // _BB_
-    // _BBB
-    // ____
 
     // CHECKING WEBPAGE
     // Currently there should be 6 entries in history panel: initial state, 4 moves and pass.
     const historyEntries = fixture.nativeElement.querySelectorAll('.historyEntry');
     expect(historyEntries.length, 'Amount of history entries is different').toEqual(6);
 
+    // Moves are in reverse order - newest move first.
     expect(historyEntries[0]?.textContent, 'History entry [0] is different').toContain("5. Pass");
     expect(historyEntries[1]?.textContent, 'History entry [1] is different').toContain("4. a1");
     expect(historyEntries[2]?.textContent, 'History entry [2] is different').toContain("3. d3");
@@ -77,21 +72,34 @@ describe('App (history)', () => {
     await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b1"); // white a1
     await clickOnPass(fixture, expectedGameState, 0); // black pass
 
-    // Board state:
-    // WWW_
-    // _BB_
-    // _BBB
-    // ____
+    const boardStr = "WWW_"+ // Expected board state.
+                     "_BB_"+
+                     "wBBB"+
+                     "_www";
+    assertDomBoard(fixture, boardStr, true, 'Before going to history'); // Check state of board in browser.
 
     // CHECKING WEBPAGE
     // Currently there should be 6 entries in history panel: initial state, 4 moves and pass.
     const historyEntries = fixture.nativeElement.querySelectorAll('.historyEntry');
     expect(historyEntries.length, 'Amount of history entries is different').toEqual(6);
 
-    // entering history at id 3
+    // Entering history at index 3.
+    // Keep in mind history entries are in reversed order (oldest move at bottom, newest at top).
+    // So index 0 will always point to newest move.
     const historyEntry = historyEntries[3] as HTMLElement;
     historyEntry.click();
     await fixture.whenStable();
+
+    // Make sure status is correct.
+    const div = fixture.nativeElement.querySelector('[data-testid="div-status"]') as HTMLElement;
+    expect(div.textContent).toContain('Viewing board for move 2.');
+
+    // Make sure historical state of board on screen is correct.
+    const boardHistoryStr = "_BW_"+ // Expected board state.
+                            "_BW_"+ // This is from history, move 2 (ix 3 in history.moves array).
+                            "_BW_"+
+                            "____";
+    assertDomBoard(fixture, boardHistoryStr, true, 'Viewing board for move 2'); // Check state of board in browser.
 
     // Now we check game state when we are in history.
     expectedGameState.statistics.moveCount = 5;
@@ -115,6 +123,9 @@ describe('App (history)', () => {
     expect(exitHistoryButton, 'Exit history button must exist').not.toBeNullable();
     exitHistoryButton.click();
     await fixture.whenStable();
+
+    // Make sure state of board on screen is correct after return from history.
+    assertDomBoard(fixture, boardStr, true, 'After return from history'); // Check state of board in browser.
 
     // Now we check game state after returning from history.
     expectedGameState.statistics.moveCount = 5;
