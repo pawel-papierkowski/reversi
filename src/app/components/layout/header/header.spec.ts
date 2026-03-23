@@ -2,7 +2,7 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { vi } from 'vitest';
 
-import { storageKeys } from "@/code/data/const";
+import { storageKeys } from "@/code/data/gameConst";
 
 import { HeaderCmp } from './header';
 

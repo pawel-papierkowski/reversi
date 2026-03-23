@@ -3,7 +3,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 
 import {TranslateService, TranslatePipe} from '@ngx-translate/core';
 
-import { languages, storageKeys } from "@/code/data/const";
+import { languages, storageKeys } from "@/code/data/gameConst";
 
 @Component({
   selector: 'app-header',

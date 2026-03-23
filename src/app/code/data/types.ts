@@ -25,8 +25,16 @@ export type GameConfig = {
 
 /** Properties for AI. */
 export type AiProp = {
-  maxScore: number;
-  weights: Record<number, number[][]>;
+  wait: number; // in milliseconds
+  maxScore: number; // value for maximum possible score
+  weights: Record<number, number[][]>; // weights for different sizes of board
+  difficulties: Record<EnDifficulty, DifficultyProp>; // properties for difficulty levels
+};
+
+/** Properties for difficulty. */
+export type DifficultyProp = {
+  miniMax: boolean; // If false, pick move randomly instead of using MiniMax.
+  maxDepth: number; // How deep is MiniMax search.
 };
 
 // OTHER

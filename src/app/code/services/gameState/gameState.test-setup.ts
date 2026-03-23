@@ -1,13 +1,14 @@
 import { expect } from 'vitest';
 
-import { EnGameStatus, EnCellState } from '@/code/data/enums';
-import { weights } from '@/code/data/const';
+import { EnGameStatus, EnCellState, EnMode, EnPlayerType } from '@/code/data/enums';
+import { weights } from '@/code/data/aiConst';
 import type { Coordinate } from "@/code/data/types";
 import type { GameState, Cell, ReversiBoard, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createCell, updateCellState, updateCellFull, createGameHistoryEntry, createReversiMove } from "@/code/data/gameState";
 
 /**
  * Generate game state after start of game, but with empty board.
+ * @param boardSize Size of board.
  */
 export function genEmptyState(boardSize: number): GameState {
   const startGameState = genState(boardSize);
@@ -17,8 +18,9 @@ export function genEmptyState(boardSize: number): GameState {
 
 /**
  * Generate game state after start of game. Four pieces in center of board are already placed.
+ * @param boardSize Size of board.
  */
-export function genStartState(boardSize: number): GameState {
+export function genStartState(boardSize: number, whoFirst: EnPlayerType=EnPlayerType.Human, mode: EnMode=EnMode.HumanVsHuman): GameState {
   const startGameState = genState(boardSize);
 
   const ix = boardSize/2 - 1; // for size 8 it will be 3
@@ -47,7 +49,32 @@ export function genStartState(boardSize: number): GameState {
   startGameState.statistics.player2Score = 2;
 
   genDataFromBoard(startGameState);
+  startGameState.settings.whoFirst = whoFirst;
+  setupMode(startGameState, mode);
   return startGameState;
+}
+
+function setupMode(gameState: GameState, mode: EnMode) {
+  gameState.settings.mode = mode;
+  switch (mode) {
+    case EnMode.HumanVsHuman:
+      gameState.players[0].type = EnPlayerType.Human;
+      gameState.players[1].type = EnPlayerType.Human;
+      break;
+    case EnMode.HumanVsAi:
+      if (gameState.settings.whoFirst === EnPlayerType.Human) {
+        gameState.players[0].type = EnPlayerType.Human;
+        gameState.players[1].type = EnPlayerType.AI;
+      } else {
+        gameState.players[0].type = EnPlayerType.AI;
+        gameState.players[1].type = EnPlayerType.Human;
+      }
+      break;
+    case EnMode.AiVsAi:
+      gameState.players[0].type = EnPlayerType.AI;
+      gameState.players[1].type = EnPlayerType.AI;
+      break;
+  }
 }
 
 //

@@ -1,5 +1,5 @@
 import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState, EnViewMode } from '@/code/data/enums';
-import { defDebugMode, defDebugPanel, defDebugHint } from '@/code/data/const';
+import { defDebugMode, defDebugPanel, defDebugHint } from '@/code/data/gameConst';
 
 // ////////////////////////////////////////////////////////////////////////////
 // FULL GAME STATE                                                           //

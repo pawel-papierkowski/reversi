@@ -37,6 +37,7 @@ describe('App (history)', () => {
   it('verify content of history panel', async () => {
     const expectedGameState = genStartState(4);
     // board 4x4, moves: b1 c1 d3 a1 pass
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
     selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
     await startGame(fixture);
 
@@ -63,6 +64,7 @@ describe('App (history)', () => {
   it('click on history entry and exit', async () => {
     const expectedGameState = genStartState(4);
     // board 4x4, moves: b1 c1 d3 a1 pass
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
     selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
     await startGame(fixture);
 

@@ -1,7 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
-import { playerNames, projectProp, weights, storageKeys } from '@/code/data/const';
+import { weights } from '@/code/data/aiConst';
+import { playerNames, projectProp } from '@/code/data/gameConst';
 import type { DirCoord } from '@/code/data/dirCoord';
 import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
 import type { GameState, GameSettings, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";

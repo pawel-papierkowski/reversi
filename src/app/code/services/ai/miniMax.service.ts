@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { aiProp } from '@/code/data/const';
+import { aiProp } from '@/code/data/aiConst';
 import { getOppPiece } from '@/code/data/dirCoord';
 import type { Cell, ReversiMove } from "@/code/data/gameState";
 
