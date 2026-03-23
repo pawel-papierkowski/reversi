@@ -41,9 +41,9 @@ export type GameSettings = {
 
 export function createGameSettings(): GameSettings {
   return {
-    mode: EnMode.HumanVsHuman, // will be HumanVsAi
+    mode: EnMode.HumanVsAi,
     whoFirst: EnPlayerType.Human,
-    difficulty: EnDifficulty.Easy,
+    difficulty: EnDifficulty.Mindless,
     boardSize: 8,
     showHints: defDebugHint,
   };
