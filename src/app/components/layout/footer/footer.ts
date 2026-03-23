@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 
-import { projectProp } from "@/code/data/const";
+import { projectProp } from "@/code/data/gameConst";
 
 @Component({
   selector: 'app-footer',

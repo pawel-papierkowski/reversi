@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EnCellState } from '@/code/data/enums';
+import { EnCellState, EnMode, EnPlayerType } from '@/code/data/enums';
 import type { GameHistoryEntry } from "@/code/data/gameState";
 import { updateCellState } from "@/code/data/gameState";
 
@@ -27,6 +27,7 @@ describe('GameService', () => {
 
   describe('make move', () => {
     it('on starting board', () => {
+      gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameService.startGame();
       gameService.makeMove(2, 3);
 
@@ -57,6 +58,7 @@ describe('GameService', () => {
     });
 
     it('that flips many pieces', () => {
+      gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameService.startGame();
       // manually add pieces
       gameService.debugSetPiece(1, 3, EnCellState.W);
@@ -104,6 +106,7 @@ describe('GameService', () => {
     });
 
     it('unsuccessfully (invalid move)', () => {
+      gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameService.startGame();
 
       gameService.makeMove(1, 1); // invalid move, nothing should change
@@ -115,6 +118,7 @@ describe('GameService', () => {
 
     it('- unsuccessful pass', () => {
     // see app.logic.spec.ts for test on actual pass
+      gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameStateService.menuSettings().boardSize = 4; // 4x4
       gameService.startGame();
 
@@ -131,7 +135,7 @@ describe('GameService', () => {
     it('nothing happens', () => {
       gameService.startGame();
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(8);
+      const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.HumanVsAi);
       assertGameState(actualGameState, expectedGameState);
     });
 
@@ -140,7 +144,7 @@ describe('GameService', () => {
       gameService.debugSetPiece(0, 0, EnCellState.B);
 
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(8);
+      const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.HumanVsAi);
       expectedGameState.statistics.emptyCells = 59;
       expectedGameState.statistics.player1Score = 3;
       expectedGameState.statistics.player2Score = 2;
@@ -158,7 +162,7 @@ describe('GameService', () => {
       gameService.debugSetPiece(3, 3, EnCellState.Empty); // white piece was here
 
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(8);
+      const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.HumanVsAi);
       expectedGameState.statistics.emptyCells = 61;
       expectedGameState.statistics.player1Score = 2;
       expectedGameState.statistics.player2Score = 1;
@@ -176,7 +180,7 @@ describe('GameService', () => {
       gameService.debugSwapPiece(2, 3);
 
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(8);
+      const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.HumanVsAi);
       expectedGameState.statistics.emptyCells = 59;
       expectedGameState.statistics.player1Score = 3;
       expectedGameState.statistics.player2Score = 2;
@@ -193,7 +197,7 @@ describe('GameService', () => {
       gameService.debugSwapPiece(4, 3);
 
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(8);
+      const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.HumanVsAi);
       expectedGameState.statistics.emptyCells = 60;
       expectedGameState.statistics.player1Score = 1;
       expectedGameState.statistics.player2Score = 3;
@@ -210,7 +214,7 @@ describe('GameService', () => {
       gameService.debugSwapPiece(4, 4);
 
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(8);
+      const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.HumanVsAi);
       expectedGameState.statistics.emptyCells = 61;
       expectedGameState.statistics.player1Score = 2;
       expectedGameState.statistics.player2Score = 1;

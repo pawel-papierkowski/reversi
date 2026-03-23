@@ -7,11 +7,10 @@ import { GameService } from '@/code/services/game/game.service';
 
 import { PlayerBoxCmp } from '@/components/common/playerBox/playerBox';
 import { PlayerNameCmp } from '@/components/common/playerName/playerName';
-import { SpinnerCmp } from '@/components/assets/basic/spinner/spinner';
 
 @Component({
   selector: 'app-game-status',
-  imports: [TranslatePipe, PlayerBoxCmp, PlayerNameCmp, SpinnerCmp],
+  imports: [TranslatePipe, PlayerBoxCmp, PlayerNameCmp],
   templateUrl: './status.html',
   styleUrl: './status.css'
 })
@@ -40,6 +39,8 @@ export class StatusCmp {
    * @returns True if can pass move, otherwise false.
    */
   public canPassMove(): boolean {
+    // must be human player's turn
+    if (this.gameStateService.getCurrPlayer().type !== EnPlayerType.Human) return false;
     return this.gameService.canPassMove();
   }
 

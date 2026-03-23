@@ -1,7 +1,7 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { TranslateService } from "@ngx-translate/core";
 
-import { storageKeys } from "@/code/data/const";
+import { storageKeys } from "@/code/data/gameConst";
 
 import { setupTestBedTranslate } from './app.test-setup';
 

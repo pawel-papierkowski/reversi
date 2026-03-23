@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import {TranslatePipe} from '@ngx-translate/core';
 
 import { modeDescr, playerTypeDescr, difficultyDescr, EnMode } from '@/code/data/enums';
-import { gameConfig } from '@/code/data/const';
+import { gameConfig } from '@/code/data/gameConst';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 

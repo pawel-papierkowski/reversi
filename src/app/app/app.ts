@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 
 import {TranslateService} from "@ngx-translate/core";
 
-import { languages, fallbackLang, storageKeys } from "@/code/data/const";
+import { languages, fallbackLang, storageKeys } from "@/code/data/gameConst";
 
 import { HeaderCmp } from '@/components/layout/header/header';
 import { FooterCmp } from '@/components/layout/footer/footer';

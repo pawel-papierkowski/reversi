@@ -50,13 +50,12 @@ describe('App (logic)', () => {
 
       // Check game state.
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(8);
+      const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.HumanVsAi);
       assertGameState(actualGameState, expectedGameState);
     });
 
     it('with changed settings', async () => {
-      // Change mode to Human vs AI, set AI as first and set 4x4 board.
-      selectComboboxOption(fixture, 'cb-mainMenu-mode', 1);
+      // Set AI as first and set 4x4 board.
       selectComboboxOption(fixture, 'cb-mainMenu-whoFirst', 1);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0);
       await startGame(fixture);
@@ -69,10 +68,26 @@ describe('App (logic)', () => {
 
       // Check game state.
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(4);
-      expectedGameState.settings.mode = EnMode.HumanVsAi;
-      expectedGameState.settings.whoFirst = EnPlayerType.AI;
-      expectedGameState.players[0].type = EnPlayerType.AI;
+      const expectedGameState = genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('with HumanVsHuman', async () => {
+      // Change mode to Human vs Human and try to set AI as first.
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0); // Human vs Human will disable whoFirst
+      selectComboboxOption(fixture, 'cb-mainMenu-whoFirst', 1); // Combobox is disabled.
+      selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0);
+      await startGame(fixture);
+
+      const boardStr = "_b__"+ // Expected board state.
+                       "bWB_"+
+                       "_BWb"+
+                       "__b_";
+      assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
+
+      // Check game state.
+      const actualGameState = gameStateService.gameState();
+      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.HumanVsHuman);
       assertGameState(actualGameState, expectedGameState);
     });
 
@@ -93,10 +108,7 @@ describe('App (logic)', () => {
 
       // Check game state.
       const actualGameState = gameStateService.gameState();
-      const expectedGameState = genStartState(8);
-      expectedGameState.settings.mode = EnMode.AiVsAi;
-      expectedGameState.players[0].type = EnPlayerType.AI;
-      expectedGameState.players[1].type = EnPlayerType.AI;
+      const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.AiVsAi);
       assertGameState(actualGameState, expectedGameState);
     });
   });
@@ -104,6 +116,7 @@ describe('App (logic)', () => {
   describe('clicking', () => {
     it('on invalid cell should not change anything', async () => {
       // board 4x4, moves: b2
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
       await startGame(fixture);
 
@@ -127,6 +140,7 @@ describe('App (logic)', () => {
     it('on valid cell should add piece and flip piece', async () => {
       // board 6x6, moves: e4
       const expectedGameState = genStartState(6);
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 1); // 6x6
       await startGame(fixture);
 
@@ -159,6 +173,7 @@ describe('App (logic)', () => {
     it('on two valid cells should add and flip pieces for both players', async () => {
       // board 4x4, moves: b1 a3
       const expectedGameState = genStartState(4);
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
       await startGame(fixture);
 
@@ -191,6 +206,7 @@ describe('App (logic)', () => {
     it('one of players cannot make legal move and has to pass move', async () => {
       const expectedGameState = genStartState(4);
       // board 4x4, moves: b1 c1 d3 a1 pass
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
@@ -239,6 +255,7 @@ describe('App (logic)', () => {
     it('board is filled completely', async () => {
       const expectedGameState = genStartState(4);
       // board 4x4, moves: b1 a1 a2 c1 d1 a3 a4 d2 d3 b4 c4 d4
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
@@ -305,6 +322,7 @@ describe('App (logic)', () => {
     it('draw happens', async () => {
       const expectedGameState = genStartState(4);
       // board 4x4, moves: c4 d4 d3 b4 a4 d2 b1 a3 d1 a2 a1 pass c1
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
@@ -367,6 +385,7 @@ describe('App (logic)', () => {
     it('double pass happens', async () => {
       const expectedGameState = genStartState(4);
       // board 4x4, moves: c4 d4 d3 b4 a4 d2 d1 a2 pass b1
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
@@ -426,6 +445,7 @@ describe('App (logic)', () => {
       // wipeout means one of player loses all pieces
       const expectedGameState = genStartState(6);
       // board 6x6, moves: d5 e3 d2 e5 f4 c5 d6 e4 b4
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 1); // 6x6
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');

@@ -41,11 +41,12 @@ export class ReversiCellCmp {
    */
   public cellClick() {
     if (!this.canCellClick()) return;
+    // Human player makes move manually, by clicking on cell with potential move.
     this.gameService.makeMove(this.x(), this.y());
     //this.gameService.debugSwapPiece(this.x(), this.y());
   }
 
-    /**
+  /**
    * Check if can make click on cell.
    * @returns True if click is allowed, otherwise false.
    */

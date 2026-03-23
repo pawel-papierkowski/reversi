@@ -1,6 +1,6 @@
 import { Injectable, WritableSignal } from '@angular/core';
 
-import { storageKeys } from '@/code/data/const';
+import { storageKeys } from '@/code/data/gameConst';
 import type { GameState, GameSettings } from "@/code/data/gameState";
 import { EnViewMode } from '@/code/data/enums';
 

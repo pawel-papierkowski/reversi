@@ -11,8 +11,8 @@
   }
 
   @if (cell().state === EnCellState.B || cell().state === EnCellState.W) {
-    <!-- Black or white piece. This condition must exists, since we need single element
-         to handle both states so we can see flipping. -->
+    <!-- Black or white piece. This condition must exist. Why?
+         We need single element to handle both states so we can see flipping. -->
     <reversi-piece [state]="cell().state" />
   }
 
