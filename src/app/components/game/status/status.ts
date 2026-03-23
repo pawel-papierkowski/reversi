@@ -25,6 +25,17 @@ export class StatusCmp {
   //
 
   /**
+   * Retrieve move number. It is in opposite order from move id.
+   * @returns Move number.
+   */
+  public getMoveNumber(): number {
+    const moveIx = this.gameStateService.gameState().view.viewMove;
+    return this.gameStateService.gameState().board.history.moves[moveIx].num;
+  }
+
+  //
+
+  /**
    * Check if current player can pass move.
    * @returns True if can pass move, otherwise false.
    */

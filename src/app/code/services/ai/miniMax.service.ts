@@ -114,14 +114,13 @@ export class MiniMaxService {
 
     // Handle skip case here.
     if (currPlayerMoves.length === 0) {
+      args.moves.push({x: -1, y: -1}); // Remember pass.
       // Switch players and continue. If we are here, we know next player must have
       // at least one legal move.
-      const newArgs: MiniMaxArgs = {
-        ...args,
-        piece: otherPiece,
-        isYou: !args.isYou,
-      }
-      return this.recursiveMiniMax(newArgs);
+      const newArgs = this.createNewArgs(args, otherPiece, args.cells);
+      const result = this.recursiveMiniMax(newArgs);
+      args.moves.pop(); // Unmake that move.
+      return result;
     }
 
     // Now process all legal moves.
@@ -136,13 +135,7 @@ export class MiniMaxService {
       this.gameStateService.executeMoveCustom(updatedCells, args.piece, legalMove);
 
       // Swap to NEXT player and find deeper moves.
-      const newArgs: MiniMaxArgs = {
-        ...args,
-        piece: otherPiece,
-        isYou: !args.isYou,
-        currDepth: args.currDepth + 1, // we are going even deeper
-        cells: updatedCells, // copy of previous board
-      }
+      const newArgs = this.createNewArgs(args, otherPiece, updatedCells);
       const result = this.recursiveMiniMax(newArgs);
       results.push(result);
 
@@ -153,6 +146,17 @@ export class MiniMaxService {
     const bestResult = this.findBestResult(results, args.isYou, args.currDepth);
     //console.log("Best (non-terminal) result: ", bestResult);
     return bestResult;
+  }
+
+  private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState, cells: Cell[][]): MiniMaxArgs {
+    const newArgs: MiniMaxArgs = {
+      ...args,
+      piece: otherPiece,
+      isYou: !args.isYou,
+      currDepth: args.currDepth + 1, // we are going even deeper
+      cells: cells,
+    }
+    return newArgs;
   }
 
   //
