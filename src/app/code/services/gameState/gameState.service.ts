@@ -19,9 +19,9 @@ export class GameStateService {
   private readonly gameStorageService = inject(GameStorageService);
 
   /** Actual game state. */
-  readonly gameState = signal<GameState>(createGameState());
+  public readonly gameState = signal<GameState>(createGameState());
   /** Temporary settings used in main menu options. */
-  readonly menuSettings = signal<GameSettings>(createGameSettings());
+  public readonly menuSettings = signal<GameSettings>(createGameSettings());
 
   constructor() {
     this.gameStorageService.loadMenuSettings(this.menuSettings);
