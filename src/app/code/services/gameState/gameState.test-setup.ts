@@ -179,12 +179,39 @@ export function setBoard(gameState: GameState, boardStr:string) {
 // ////////////////////////////////////////////////////////////////////////////
 // HELPERS
 
+/**
+ * Convert moves as string to moves as array of coordinates.
+ * String contains move sequence using standard grid coordinates
+ * (columns are a, b, c... and rows are 1, 2, 3...).
+ * Example of movesStr: "d5 e3 a1".
+ * Expected result: [{3, 4}, {4, 2}, {0, 0}]
+ *
+ * @param moves String containing moves in standard grid coordinates.
+ * @returns Moves as array of coordinates (zero-based).
+ */
+function movesStrToMovesCoord(movesStr: string): {x:number, y: number}[] {
+  if (!movesStr || movesStr === '') return [];
+
+  const base = 'a'.charCodeAt(0);
+  return movesStr.split(' ').map(move => {
+    const x = move.charCodeAt(0) - base;
+    const y = parseInt(move.substring(1)) - 1;
+    return { x, y };
+  });
+}
+
   /**
    * Add move to history entry. Note it also affects main board.
    * @param playerIx Player index.
-   * @param moves Moves. First entry is actual move, others are flipped pieces. Empty array means no change to board.
+   * @param movesAny First entry is actual move, others are flipped pieces. Empty string/array means no change to board (pass).
+   * @returns Moves as array of coordinates.
    */
-  export function addToHistory(gameState: GameState, playerIx: number, moves: {x:number, y: number}[]) {
+  export function addToHistory(gameState: GameState, playerIx: number, movesAny: {x:number, y: number}[]|string): {x:number, y: number}[] {
+    let moves: {x:number, y: number}[] = [];
+    if (typeof movesAny === 'string') {
+      moves = movesStrToMovesCoord(movesAny);
+    }
+
     if (moves.length > 0) {
       const piece = playerIx === 0 ? EnCellState.B: EnCellState.W;
       for (let i=0; i<moves.length; i++) {
@@ -209,6 +236,8 @@ export function setBoard(gameState: GameState, boardStr:string) {
     for (let ix=0; ix<nextNo+1; ix++) {
       gameState.board.history.moves[ix].ix = ix;
     }
+
+    return moves;
   }
 
 // ////////////////////////////////////////////////////////////////////////////

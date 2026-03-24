@@ -3,12 +3,12 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
+import { GameService } from '@/code/services/game/game.service';
+import { GameStateService } from '@/code/services/gameState/gameState.service';
+
 import { setupTestBed } from './app.test-setup';
 
 import { App } from '../app';
-
-import { GameService } from '@/code/services/game/game.service';
-import { GameStateService } from '@/code/services/gameState/gameState.service';
 
 describe('App (routing)', () => {
   let gameService: GameService;

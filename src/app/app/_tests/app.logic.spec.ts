@@ -1,15 +1,16 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
-import { setupTestBedTranslate, startGame, clickOnCellMoves, clickOnPass, assertPassButton, assertDomBoard } from './app.test-setup';
+import { EnCellState, EnDifficulty, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
+
+import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
+
+import { setupTestBedTranslate, startGame, clickOnCell, clickOnPass, assertPassButton, assertDomBoard } from './app.test-setup';
 import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
 import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
 
 import { App } from '../app';
-import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
-
-import { GameStateService } from '@/code/services/gameState/gameState.service';
-import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 
 describe('App (logic)', () => {
   let fixture: ComponentFixture<App>;
@@ -24,6 +25,8 @@ describe('App (logic)', () => {
     router = TestBed.inject(Router);
     gameStateService = TestBed.inject(GameStateService);
     legalMoveService = TestBed.inject(LegalMoveService);
+
+    gameStateService.gameState().debugSettings.disableAutoAi = true;
 
     // Trigger initial navigation to load the '' (MainMenu) route.
     router.initialNavigation();
@@ -51,10 +54,11 @@ describe('App (logic)', () => {
       // Check game state.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.HumanVsAi);
+      expectedGameState.debugSettings.disableAutoAi = true;
       assertGameState(actualGameState, expectedGameState);
     });
 
-    it('with changed settings', async () => {
+    it('with changed settings', async () => { // AI IS TRIGGERED
       // Set AI as first and set 4x4 board.
       selectComboboxOption(fixture, 'cb-mainMenu-whoFirst', 1);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0);
@@ -69,6 +73,7 @@ describe('App (logic)', () => {
       // Check game state.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
+      expectedGameState.debugSettings.disableAutoAi = true;
       assertGameState(actualGameState, expectedGameState);
     });
 
@@ -88,12 +93,13 @@ describe('App (logic)', () => {
       // Check game state.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.HumanVsHuman);
+      expectedGameState.debugSettings.disableAutoAi = true;
       assertGameState(actualGameState, expectedGameState);
     });
 
-    it('in AI vs AI mode', async () => {
-      // Change mode to AI vs AI
-      selectComboboxOption(fixture, 'cb-mainMenu-mode', 2);
+    it('in AI vs AI mode', async () => { // AI IS TRIGGERED
+      selectComboboxOption(fixture, 'cb-mainMenu-mode', 2); // AI vs AI
+      selectComboboxOption(fixture, 'cb-mainMenu-difficulty', 3); // hard difficulty
       await startGame(fixture);
 
       const boardStr = "________"+ // Expected board state.
@@ -109,6 +115,8 @@ describe('App (logic)', () => {
       // Check game state.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(8, EnPlayerType.Human, EnMode.AiVsAi);
+      expectedGameState.settings.difficulty = EnDifficulty.Hard;
+      expectedGameState.debugSettings.disableAutoAi = true;
       assertGameState(actualGameState, expectedGameState);
     });
   });
@@ -134,6 +142,7 @@ describe('App (logic)', () => {
       // Check game state. Nothing should change.
       const actualGameState = gameStateService.gameState();
       const expectedGameState = genStartState(4);
+      expectedGameState.debugSettings.disableAutoAi = true;
       assertGameState(actualGameState, expectedGameState);
     });
 
@@ -144,7 +153,7 @@ describe('App (logic)', () => {
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 1); // 6x6
       await startGame(fixture);
 
-      await clickOnCellMoves(fixture, expectedGameState, 0, "e4 d4"); // black e4
+      await clickOnCell(fixture, expectedGameState, 0, "e4 d4"); // black e4
 
       const boardStr = "______"+ // Expected board state.
                        "______"+
@@ -162,6 +171,7 @@ describe('App (logic)', () => {
       expectedGameState.board.currPlayerIx = 1;
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
+      expectedGameState.debugSettings.disableAutoAi = true;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
@@ -177,8 +187,8 @@ describe('App (logic)', () => {
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
       await startGame(fixture);
 
-      await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
-      await clickOnCellMoves(fixture, expectedGameState, 1, "a3 b3"); // white a3
+      await clickOnCell(fixture, expectedGameState, 0, "b1 b2"); // black b1
+      await clickOnCell(fixture, expectedGameState, 1, "a3 b3"); // white a3
 
       const boardStr = "_B__"+ // Expected board state.
                        "_BB_"+
@@ -193,6 +203,7 @@ describe('App (logic)', () => {
       expectedGameState.statistics.player2Score = 3;
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
+      expectedGameState.debugSettings.disableAutoAi = true;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
@@ -211,13 +222,13 @@ describe('App (logic)', () => {
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
 
-      await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
+      await clickOnCell(fixture, expectedGameState, 0, "b1 b2"); // black b1
       assertPassButton(fixture, false, 'after b1');
-      await clickOnCellMoves(fixture, expectedGameState, 1, "c1 c2"); // white c1
+      await clickOnCell(fixture, expectedGameState, 1, "c1 c2"); // white c1
       assertPassButton(fixture, false, 'after c1');
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
+      await clickOnCell(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
       assertPassButton(fixture, false, 'after d3');
-      await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b1"); // white a1
+      await clickOnCell(fixture, expectedGameState, 1, "a1 b1"); // white a1
       assertPassButton(fixture, true, 'after a1');
 
       const boardPassStr = "WWW_"+ // Expected board state.
@@ -242,6 +253,7 @@ describe('App (logic)', () => {
       expectedGameState.board.currPlayerIx = 1; // would be 0 without pass
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
+      expectedGameState.debugSettings.disableAutoAi = true;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
@@ -260,18 +272,18 @@ describe('App (logic)', () => {
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
 
-      await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
-      await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b2"); // white a1
-      await clickOnCellMoves(fixture, expectedGameState, 0, "a2 b2"); // black a2
-      await clickOnCellMoves(fixture, expectedGameState, 1, "c1 b1 c2"); // white c1
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d1 c2"); // black d1
-      await clickOnCellMoves(fixture, expectedGameState, 1, "a3 a2 b2 b3"); // white a3
-      await clickOnCellMoves(fixture, expectedGameState, 0, "a4 b3"); // black a4
-      await clickOnCellMoves(fixture, expectedGameState, 1, "d2 c2"); // white d2
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d3 d2 c3"); // black d3
-      await clickOnCellMoves(fixture, expectedGameState, 1, "b4 b3"); // white b4
-      await clickOnCellMoves(fixture, expectedGameState, 0, "c4 b4"); // black c4
-      await clickOnCellMoves(fixture, expectedGameState, 1, "d4 c3"); // white d4
+      await clickOnCell(fixture, expectedGameState, 0, "b1 b2"); // black b1
+      await clickOnCell(fixture, expectedGameState, 1, "a1 b2"); // white a1
+      await clickOnCell(fixture, expectedGameState, 0, "a2 b2"); // black a2
+      await clickOnCell(fixture, expectedGameState, 1, "c1 b1 c2"); // white c1
+      await clickOnCell(fixture, expectedGameState, 0, "d1 c2"); // black d1
+      await clickOnCell(fixture, expectedGameState, 1, "a3 a2 b2 b3"); // white a3
+      await clickOnCell(fixture, expectedGameState, 0, "a4 b3"); // black a4
+      await clickOnCell(fixture, expectedGameState, 1, "d2 c2"); // white d2
+      await clickOnCell(fixture, expectedGameState, 0, "d3 d2 c3"); // black d3
+      await clickOnCell(fixture, expectedGameState, 1, "b4 b3"); // white b4
+      await clickOnCell(fixture, expectedGameState, 0, "c4 b4"); // black c4
+      await clickOnCell(fixture, expectedGameState, 1, "d4 c3"); // white d4
 
       const boardStr = "WWWB"+ // Expected board state.
                        "WWWB"+
@@ -291,6 +303,7 @@ describe('App (logic)', () => {
       expectedGameState.board.currPlayerIx = 0;
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
+      expectedGameState.debugSettings.disableAutoAi = true;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
@@ -316,6 +329,7 @@ describe('App (logic)', () => {
       expectedGameStateNewRound.statistics.round = 2;
       expectedGameStateNewRound.statistics.player2Win = 1;
       expectedGameStateNewRound.statistics.player2WinInRow = 1;
+      expectedGameStateNewRound.debugSettings.disableAutoAi = true;
       assertGameState(actualGameStateNewRound, expectedGameStateNewRound);
     });
 
@@ -327,19 +341,19 @@ describe('App (logic)', () => {
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
 
-      await clickOnCellMoves(fixture, expectedGameState, 0, "c4 c3"); // black c4
-      await clickOnCellMoves(fixture, expectedGameState, 1, "d4 c3"); // white d4
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d3 c3"); // black d3
-      await clickOnCellMoves(fixture, expectedGameState, 1, "b4 b3 c4"); // white b4
-      await clickOnCellMoves(fixture, expectedGameState, 0, "a4 b3"); // black a4
-      await clickOnCellMoves(fixture, expectedGameState, 1, "d2 c2 c3 d3"); // white d2
-      await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
-      await clickOnCellMoves(fixture, expectedGameState, 1, "a3 b3"); // white a3
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d1 c2 b3"); // black d1
-      await clickOnCellMoves(fixture, expectedGameState, 1, "a2 b2 c2 b3"); // white a2
-      await clickOnCellMoves(fixture, expectedGameState, 0, "a1 a2 a3"); // black a1
+      await clickOnCell(fixture, expectedGameState, 0, "c4 c3"); // black c4
+      await clickOnCell(fixture, expectedGameState, 1, "d4 c3"); // white d4
+      await clickOnCell(fixture, expectedGameState, 0, "d3 c3"); // black d3
+      await clickOnCell(fixture, expectedGameState, 1, "b4 b3 c4"); // white b4
+      await clickOnCell(fixture, expectedGameState, 0, "a4 b3"); // black a4
+      await clickOnCell(fixture, expectedGameState, 1, "d2 c2 c3 d3"); // white d2
+      await clickOnCell(fixture, expectedGameState, 0, "b1 b2"); // black b1
+      await clickOnCell(fixture, expectedGameState, 1, "a3 b3"); // white a3
+      await clickOnCell(fixture, expectedGameState, 0, "d1 c2 b3"); // black d1
+      await clickOnCell(fixture, expectedGameState, 1, "a2 b2 c2 b3"); // white a2
+      await clickOnCell(fixture, expectedGameState, 0, "a1 a2 a3"); // black a1
       await clickOnPass(fixture, expectedGameState, 1); // white pass
-      await clickOnCellMoves(fixture, expectedGameState, 0, "c1 b2"); // black c1
+      await clickOnCell(fixture, expectedGameState, 0, "c1 b2"); // black c1
       assertPassButton(fixture, false, 'after board fill');
 
       const boardStr = "BBBB"+ // Expected board state.
@@ -360,6 +374,7 @@ describe('App (logic)', () => {
       expectedGameState.board.currPlayerIx = 1;
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
+      expectedGameState.debugSettings.disableAutoAi = true;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
@@ -379,6 +394,7 @@ describe('App (logic)', () => {
       expectedGameStateNewRound.statistics.round = 2;
       expectedGameStateNewRound.statistics.ties = 1;
       expectedGameStateNewRound.statistics.tiesInRow = 1;
+      expectedGameStateNewRound.debugSettings.disableAutoAi = true;
       assertGameState(actualGameStateNewRound, expectedGameStateNewRound);
     });
 
@@ -390,16 +406,16 @@ describe('App (logic)', () => {
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
 
-      await clickOnCellMoves(fixture, expectedGameState, 0, "c4 c3"); // black c4
-      await clickOnCellMoves(fixture, expectedGameState, 1, "d4 c3"); // white d4
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d3 c3"); // black d3
-      await clickOnCellMoves(fixture, expectedGameState, 1, "b4 b3 c4"); // white b4
-      await clickOnCellMoves(fixture, expectedGameState, 0, "a4 b3"); // black a4
-      await clickOnCellMoves(fixture, expectedGameState, 1, "d2 c2 c3 d3"); // white d2 ---
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d1 c2"); // black d1
-      await clickOnCellMoves(fixture, expectedGameState, 1, "a2 b3"); // white a2
+      await clickOnCell(fixture, expectedGameState, 0, "c4 c3"); // black c4
+      await clickOnCell(fixture, expectedGameState, 1, "d4 c3"); // white d4
+      await clickOnCell(fixture, expectedGameState, 0, "d3 c3"); // black d3
+      await clickOnCell(fixture, expectedGameState, 1, "b4 b3 c4"); // white b4
+      await clickOnCell(fixture, expectedGameState, 0, "a4 b3"); // black a4
+      await clickOnCell(fixture, expectedGameState, 1, "d2 c2 c3 d3"); // white d2 ---
+      await clickOnCell(fixture, expectedGameState, 0, "d1 c2"); // black d1
+      await clickOnCell(fixture, expectedGameState, 1, "a2 b3"); // white a2
       await clickOnPass(fixture, expectedGameState, 0); // black pass
-      await clickOnCellMoves(fixture, expectedGameState, 1, "b1 c2"); // white b1
+      await clickOnCell(fixture, expectedGameState, 1, "b1 c2"); // white b1
 
       const boardStr = "_W_B"+ // Expected board state.
                        "WWWW"+ // Neither player has legal moves, so game ends.
@@ -419,6 +435,7 @@ describe('App (logic)', () => {
       expectedGameState.board.currPlayerIx = 0;
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
+      expectedGameState.debugSettings.disableAutoAi = true;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
@@ -438,6 +455,7 @@ describe('App (logic)', () => {
       expectedGameStateNewRound.statistics.round = 2;
       expectedGameStateNewRound.statistics.player2Win = 1;
       expectedGameStateNewRound.statistics.player2WinInRow = 1;
+      expectedGameStateNewRound.debugSettings.disableAutoAi = true;
       assertGameState(actualGameStateNewRound, expectedGameStateNewRound);
     });
 
@@ -450,15 +468,15 @@ describe('App (logic)', () => {
       await startGame(fixture);
       assertPassButton(fixture, false, 'after start');
 
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d5 d4"); // black d5
-      await clickOnCellMoves(fixture, expectedGameState, 1, "e3 d3"); // white e3
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d2 d3"); // black d2
-      await clickOnCellMoves(fixture, expectedGameState, 1, "e5 d4"); // white e5
-      await clickOnCellMoves(fixture, expectedGameState, 0, "f4 e3"); // black f4
-      await clickOnCellMoves(fixture, expectedGameState, 1, "c5 c4 d5"); // white c5
-      await clickOnCellMoves(fixture, expectedGameState, 0, "d6 d4 d5 e5"); // black d6
-      await clickOnCellMoves(fixture, expectedGameState, 1, "e4 d4"); // white e4
-      await clickOnCellMoves(fixture, expectedGameState, 0, "b4 c3 c4 c5 d4 e4"); // black b4
+      await clickOnCell(fixture, expectedGameState, 0, "d5 d4"); // black d5
+      await clickOnCell(fixture, expectedGameState, 1, "e3 d3"); // white e3
+      await clickOnCell(fixture, expectedGameState, 0, "d2 d3"); // black d2
+      await clickOnCell(fixture, expectedGameState, 1, "e5 d4"); // white e5
+      await clickOnCell(fixture, expectedGameState, 0, "f4 e3"); // black f4
+      await clickOnCell(fixture, expectedGameState, 1, "c5 c4 d5"); // white c5
+      await clickOnCell(fixture, expectedGameState, 0, "d6 d4 d5 e5"); // black d6
+      await clickOnCell(fixture, expectedGameState, 1, "e4 d4"); // white e4
+      await clickOnCell(fixture, expectedGameState, 0, "b4 c3 c4 c5 d4 e4"); // black b4
 
       const boardStr = "______"+ // Expected board state.
                        "___B__"+ // Wipeout happened. Black wins.
@@ -480,6 +498,7 @@ describe('App (logic)', () => {
       expectedGameState.board.currPlayerIx = 1;
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;
+      expectedGameState.debugSettings.disableAutoAi = true;
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
@@ -499,6 +518,7 @@ describe('App (logic)', () => {
       expectedGameStateNewRound.statistics.round = 2;
       expectedGameStateNewRound.statistics.player1Win = 1;
       expectedGameStateNewRound.statistics.player1WinInRow = 1;
+      expectedGameStateNewRound.debugSettings.disableAutoAi = true;
       assertGameState(actualGameStateNewRound, expectedGameStateNewRound);
     });
   });
