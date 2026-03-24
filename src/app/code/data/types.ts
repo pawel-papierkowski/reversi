@@ -29,12 +29,15 @@ export type AiProp = {
   maxScore: number; // value for maximum possible score
   weights: Record<number, number[][]>; // weights for different sizes of board
   difficulties: Record<EnDifficulty, DifficultyProp>; // properties for difficulty levels
+  customDifficulty: DifficultyProp|null;
 };
 
 /** Properties for difficulty. */
 export type DifficultyProp = {
-  miniMax: boolean; // If false, pick move randomly instead of using MiniMax.
+  canMiniMax: boolean; // If false, pick move randomly instead of using MiniMax.
   maxDepth: number; // How deep is MiniMax search.
+  dynamicWeights: boolean; // If true, AI edits its weights dynamically.
+  scoringThreshold: number; // 0.0 - 1.0, if board is filled up more than this fraction, use straight scoring instead of weights
 };
 
 // OTHER

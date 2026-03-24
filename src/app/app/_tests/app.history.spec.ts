@@ -1,15 +1,16 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
-import { setupTestBedTranslate, startGame, clickOnCellMoves, clickOnPass, assertDomBoard } from './app.test-setup';
-import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
-import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
-
-import { App } from '../app';
 import { EnCellState, EnViewMode } from '@/code/data/enums';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
+
+import { setupTestBedTranslate, startGame, clickOnCell, clickOnPass, assertDomBoard } from './app.test-setup';
+import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
+import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
+
+import { App } from '../app';
 
 describe('App (history)', () => {
   let fixture: ComponentFixture<App>;
@@ -41,10 +42,10 @@ describe('App (history)', () => {
     selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
     await startGame(fixture);
 
-    await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
-    await clickOnCellMoves(fixture, expectedGameState, 1, "c1 c2"); // white c1
-    await clickOnCellMoves(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
-    await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b1"); // white a1
+    await clickOnCell(fixture, expectedGameState, 0, "b1 b2"); // black b1
+    await clickOnCell(fixture, expectedGameState, 1, "c1 c2"); // white c1
+    await clickOnCell(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
+    await clickOnCell(fixture, expectedGameState, 1, "a1 b1"); // white a1
     await clickOnPass(fixture, expectedGameState, 0); // black pass
 
     // CHECKING WEBPAGE
@@ -68,10 +69,10 @@ describe('App (history)', () => {
     selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
     await startGame(fixture);
 
-    await clickOnCellMoves(fixture, expectedGameState, 0, "b1 b2"); // black b1
-    await clickOnCellMoves(fixture, expectedGameState, 1, "c1 c2"); // white c1
-    await clickOnCellMoves(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
-    await clickOnCellMoves(fixture, expectedGameState, 1, "a1 b1"); // white a1
+    await clickOnCell(fixture, expectedGameState, 0, "b1 b2"); // black b1
+    await clickOnCell(fixture, expectedGameState, 1, "c1 c2"); // white c1
+    await clickOnCell(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
+    await clickOnCell(fixture, expectedGameState, 1, "a1 b1"); // white a1
     await clickOnPass(fixture, expectedGameState, 0); // black pass
 
     const boardStr = "WWW_"+ // Expected board state.

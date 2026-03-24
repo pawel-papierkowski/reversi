@@ -256,6 +256,6 @@ describe('MiniMaxService', () => {
     });
 
   // TODO: testing for high difficulty level:
-  // - scoring system change when board is mostly filled (over 3/4 of cells not empty)
+  // - scoring system change when board is mostly filled (over 80% of cells not empty)
   // - dynamic weighting tests
 });

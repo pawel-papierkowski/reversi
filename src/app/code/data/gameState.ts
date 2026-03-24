@@ -55,8 +55,9 @@ export function createGameSettings(): GameSettings {
 
 // Settable only in code.
 export type DebugSettings = {
-  debugMode: boolean; // general debug mode switch
-  debugPanel: boolean; // if true, show separate debug panel
+  debugMode: boolean; // General debug mode switch.
+  debugPanel: boolean; // If true, show separate debug panel.
+  disableAutoAi: boolean; // If true, do not run AI automatically. Used in unit tests.
 };
 
 /** Debug settings for development: get values from constants. */
@@ -64,6 +65,7 @@ export function createDebugSettingsForDev(): DebugSettings {
   return {
     debugMode: defDebugMode,
     debugPanel: defDebugPanel,
+    disableAutoAi: false,
   };
 }
 
@@ -72,6 +74,7 @@ export function createDebugSettingsForProd(): DebugSettings {
   return {
     debugMode: false,
     debugPanel: false,
+    disableAutoAi: false,
   };
 }
 

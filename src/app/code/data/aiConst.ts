@@ -4,23 +4,31 @@ import type { AiProp, DifficultyProp } from '@/code/data/types';
 // DIFFICULTIES
 
 const difficultyMindless: DifficultyProp = {
-  miniMax: false,
+  canMiniMax: false, // pick legal move randomly
   maxDepth: 0, // does not matter on mindless
+  dynamicWeights: false, // no dynamic weights
+  scoringThreshold: 1, // no scoring change
 };
 
-const difficultyEasy: DifficultyProp = {
-  miniMax: true,
+export const difficultyEasy: DifficultyProp = {
+  canMiniMax: true,
   maxDepth: 5,
+  dynamicWeights: false, // no dynamic weights
+  scoringThreshold: 1, // no scoring change
 };
 
 const difficultyMedium: DifficultyProp = {
-  miniMax: true,
+  canMiniMax: true,
   maxDepth: 7,
+  dynamicWeights: false, // no dynamic weights
+  scoringThreshold: 1, // no scoring change
 };
 
 const difficultyHard: DifficultyProp = {
-  miniMax: true,
+  canMiniMax: true,
   maxDepth: 9,
+  dynamicWeights: true, // dynamic weights
+  scoringThreshold: 0.8, // scoring changes when board is filled in 80%
 };
 
 /** All difficulties in map. */
@@ -93,4 +101,5 @@ export const aiProp: AiProp = {
   maxScore: 100000,
   weights: weights,
   difficulties: difficulties,
+  customDifficulty: null, // used in debug and unit tests, normally should stay null
 };

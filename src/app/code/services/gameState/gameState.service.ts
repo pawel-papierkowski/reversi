@@ -1,5 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import { XORShift128Plus } from 'random-seedable';
+
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
 import { weights } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
@@ -22,13 +24,14 @@ export class GameStateService {
   public readonly gameState = signal<GameState>(createGameState());
   /** Temporary settings used in main menu options. */
   public readonly menuSettings = signal<GameSettings>(createGameSettings());
+  /** RNG used in game. Also needed for seeding in unit tests. */
+  public readonly rng = new XORShift128Plus();
 
   constructor() {
     this.gameStorageService.loadMenuSettings(this.menuSettings);
     this.gameStorageService.loadGameState(this.gameState);
     // We save menu settings only on game start.
-    // We save game state on game start and after every move.
-    //effect(() => this.saveGameState());
+    // We save game state on game start, next round and after every move.
   }
 
   // //////////////////////////////////////////////////////////////////////////
@@ -273,7 +276,7 @@ export class GameStateService {
   /** Generate debug settings. Ensures production always has debug turn off. */
   private generateDebugSettings(): DebugSettings {
     const debugMode = projectProp.build === "PROD" ? false : true;
-    return debugMode ? createDebugSettingsForDev() : createDebugSettingsForProd();
+    return debugMode ? this.gameState().debugSettings : createDebugSettingsForProd();
   }
 
   //
@@ -446,8 +449,7 @@ export class GameStateService {
 
     let foundName = '';
     do {
-      const index = Math.floor(Math.random() * names.length);
-      foundName = names[index];
+      foundName = this.rng.choice(names);
     } while (foundName === excludeName);
     return foundName;
   }
