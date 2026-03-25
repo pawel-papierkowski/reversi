@@ -51,6 +51,7 @@
   "game.statistics.playerWinsInRow": "Wygrane pod rząd",
 
   "game.debug.title": "Dane debugowe",
+  "game.debug.emptyCells": "Puste pola",
   "game.debug.evaluation": "Wynik ewaluacji",
   "game.debug.potentialMoves": "Dozwolone posunięcia",
 

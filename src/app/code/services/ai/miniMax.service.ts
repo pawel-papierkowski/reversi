@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
+import { EnCellState, EnScoringType } from '@/code/data/enums';
+import { BoardStats, ScoringSystem } from '@/code/data/types';
 import { aiProp } from '@/code/data/aiConst';
 import { getOppPiece } from '@/code/data/dirCoord';
 import type { Cell, ReversiMove } from "@/code/data/gameState";
@@ -9,7 +11,6 @@ import { createMiniMaxResult } from "@/code/data/aiState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
-import { EnCellState } from '@/code/data/enums';
 
 /**
  * MiniMax algorithm for Reversi.
@@ -21,28 +22,42 @@ export class MiniMaxService {
   private readonly legalMoveService = inject(LegalMoveService);
 
   /**
-   * Check if should use weighted or straight scoring.
-   * If amount of filled cells compared to all cells is above threshold, it should use straight scoring.
-   * Example: for 8x8 board and threshold 0.8, if amount of filled cells is above 52
-   * (so 12 or less empty cells), returns false.
+   * Find out what scoring system should be used for given board state.
    * @param cells Cells on board.
-   * @param scoringThreshold Scoring threshold.
-   * @returns True if weighted scoring, otherwise straight scoring.
+   * @param scoringSystems Scoring systems.
+   * @returns Scoring type to use.
    */
-  public shouldUseWeights(cells: Cell[][], scoringThreshold: number): boolean {
-    if (scoringThreshold <= 0) return false; // always straight scoring
-    if (scoringThreshold >= 1) return true; // always weighted scoring
+  public getCurrScoringSystem(cells: Cell[][], scoringSystems: ScoringSystem[]): ScoringSystem {
+    if (scoringSystems.length === 0) return {type: EnScoringType.Weighted, weight: 1}; // default
+    if (scoringSystems.length === 1) return scoringSystems[0]; // only one present, picking is easy
 
-    const size = cells.length;
-    let nonEmptyCells = 0; // count empty cells
-    for (let x = 0; x < size; x++) {
-      for (let y = 0; y < size; y++) {
-        if (cells[x][y].state !== EnCellState.Empty) nonEmptyCells++;
-      }
+    // We have at least two scoring systems active, pick which one to use...
+    const stats = this.gameStateService.calcCellStats(cells);
+    const pickedScoringSystem = this.pickScoringSystem(stats, scoringSystems);
+    return pickedScoringSystem;
+  }
+
+  /**
+   * Pick scoring system that should be used for current state of board.
+   * @param stats Stats about state of board.
+   * @param scoringSystems Scoring systems.
+   */
+  private pickScoringSystem(stats: BoardStats, scoringSystems: ScoringSystem[]): ScoringSystem {
+    const nonEmptyCells = stats.player1Score+stats.player2Score;
+
+    let totalWeight = 0;
+    for (const scoringSystem of scoringSystems) {
+      totalWeight += scoringSystem.weight;
     }
-    const totalCells = size*size;
-    const thresholdCells = Math.floor(totalCells*scoringThreshold); // round down
-    return nonEmptyCells < thresholdCells;
+
+    let currentWeight = 0;
+    for (const scoringSystem of scoringSystems) {
+      currentWeight += scoringSystem.weight;
+      const thresholdCells = Math.floor(stats.total*(currentWeight/totalWeight)); // round down
+      if (nonEmptyCells < thresholdCells) return scoringSystem;
+    }
+
+    return scoringSystems[scoringSystems.length-1];
   }
 
   //
@@ -85,10 +100,11 @@ export class MiniMaxService {
     if (req.maxDepth === 0) {
       // return immediately, evaluating score as CURRENT player
       const evalArgs: EvaluateArgs = {
+        playerIx: req.playerIx,
         piece: req.piece,
         isYou: true,
         cells: updatedCells,
-        useWeights: this.shouldUseWeights(req.cells, req.scoringThreshold),
+        scoringSystem: this.getCurrScoringSystem(req.cells, req.scoringSystems),
       };
       return {
         score: this.evaluate(evalArgs),
@@ -99,14 +115,15 @@ export class MiniMaxService {
 
     // Start going deep for real. This is where recursion starts.
     const miniMaxArgs: MiniMaxArgs = {
-      piece: getOppPiece(req.piece), // go as NEXT player
+      playerIx: req.playerIx === 0 ? 1 : 0, // go as NEXT player
+      piece: getOppPiece(req.piece),
       isYou: false,
       currDepth: 0, // yes, that's correct value
       maxDepth: req.maxDepth,
       cells: updatedCells,
       moves: [ {x: legalMove.x, y: legalMove.y} ],
-      useWeights: this.shouldUseWeights(updatedCells, req.scoringThreshold),
-      scoringThreshold: req.scoringThreshold,
+      scoringSystems: req.scoringSystems,
+      scoringSystem: this.getCurrScoringSystem(updatedCells, req.scoringSystems),
     };
     return this.recursiveMiniMax(miniMaxArgs);
   }
@@ -181,11 +198,12 @@ export class MiniMaxService {
   private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState, cells: Cell[][]): MiniMaxArgs {
     const newArgs: MiniMaxArgs = {
       ...args,
+      playerIx: args.playerIx === 0 ? 1 : 0,
       piece: otherPiece,
       isYou: !args.isYou,
       currDepth: args.currDepth + 1, // we are going even deeper
       cells: cells,
-      useWeights: this.shouldUseWeights(cells, args.scoringThreshold),
+      scoringSystem: this.getCurrScoringSystem(cells, args.scoringSystems),
     }
     return newArgs;
   }
@@ -254,8 +272,22 @@ export class MiniMaxService {
    * @returns Score for single cell.
    */
   private evaluateCell(cell: Cell, args: EvaluateArgs): number {
-    if (args.useWeights) return this.evaluateCellWeighted(cell, args);
-    return this.evaluateCellStraight(cell, args);
+    switch (args.scoringSystem.type) {
+      case EnScoringType.AvailableMoves: return this.evaluateCellMoves(cell, args);
+      case EnScoringType.Weighted: return this.evaluateCellWeighted(cell, args);
+      case EnScoringType.Straight: return this.evaluateCellStraight(cell, args);
+    }
+  }
+
+  /**
+   * Evaluates score for single cell: available moves scoring.
+   * @param cell Cell data.
+   * @param args Arguments.
+   * @returns Score for single cell.
+   */
+  private evaluateCellMoves(cell: Cell, args: EvaluateArgs): number {
+    // TODO: for now behaves same as weighted
+    return this.evaluateCellWeighted(cell, args);
   }
 
   /**
@@ -265,8 +297,8 @@ export class MiniMaxService {
    * @returns Score for single cell.
    */
   private evaluateCellWeighted(cell: Cell, args: EvaluateArgs): number {
-    let mul = this.findCellMultiplier(cell, args);
-    return cell.weight * mul;
+    const mul = this.findCellMultiplier(cell, args);
+    return cell.weight[args.playerIx] * mul;
   }
 
   /**
@@ -276,7 +308,7 @@ export class MiniMaxService {
    * @returns Score for single cell.
    */
   private evaluateCellStraight(cell: Cell, args: EvaluateArgs): number {
-    let mul = this.findCellMultiplier(cell, args);
+    const mul = this.findCellMultiplier(cell, args);
     return mul;
   }
 

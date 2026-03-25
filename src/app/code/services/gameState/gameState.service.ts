@@ -3,12 +3,13 @@ import { Injectable, inject, signal } from '@angular/core';
 import { XORShift128Plus } from 'random-seedable';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
+import { BoardStats } from '@/code/data/types';
 import { weights } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
 import type { DirCoord } from '@/code/data/dirCoord';
 import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
 import type { GameState, GameSettings, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
-import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForDev, createDebugSettingsForProd } from "@/code/data/gameState";
+import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForProd } from "@/code/data/gameState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
 
@@ -241,19 +242,29 @@ export class GameStateService {
     const boardSize = this.gameState().settings.boardSize;
     const cells = this.gameState().board.cells;
 
-    statistics.emptyCells = 0; // reset score first
-    statistics.player1Score = 0;
-    statistics.player2Score = 0;
+    const stats = this.calcCellStats(cells);
+    statistics.emptyCells = stats.empty;
+    statistics.player1Score = stats.player1Score;
+    statistics.player2Score = stats.player2Score;
+  }
+
+  public calcCellStats(cells: Cell[][]): BoardStats {
+    const size = cells.length;
+    const total = size*size;
+    let empty = 0;
+    let player1Score = 0;
+    let player2Score = 0;
 
     // Go over entire board and check every cell.
-    for (let x=0; x<boardSize; x++) {
-      for (let y=0; y<boardSize; y++) {
+    for (let x=0; x<size; x++) {
+      for (let y=0; y<size; y++) {
         const cell = cells[x][y];
-        if (cell.state == EnCellState.B) statistics.player1Score++;
-        else if (cell.state == EnCellState.W) statistics.player2Score++;
-        else if (cell.state == EnCellState.Empty) statistics.emptyCells++;
+        if (cell.state == EnCellState.B) player1Score++;
+        else if (cell.state == EnCellState.W) player2Score++;
+        else if (cell.state == EnCellState.Empty) empty++;
       }
     }
+    return {empty: empty, player1Score: player1Score, player2Score: player2Score, total: total};
   }
 
   // //////////////////////////////////////////////////////////////////////////
@@ -341,8 +352,8 @@ export class GameStateService {
     const cells : Cell[][] = Array.from({ length: boardSize }, (_, x) =>
       Array.from({ length: boardSize }, (_, y) => {
         // Lookup the predefined weight, falling back to 0 if the size isn't mapped.
-        const weight = currentWeights ? currentWeights[x][y] : 0;
-        return createCell(weight);
+        const weightVal = currentWeights ? currentWeights[x][y] : 0;
+        return createCell([weightVal, weightVal]);
       })
     );
     return cells;

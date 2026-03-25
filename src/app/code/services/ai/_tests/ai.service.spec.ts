@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EnDifficulty, EnMode, EnPlayerType, EnCellState } from '@/code/data/enums';
-import { aiProp, difficultyEasy } from '@/code/data/aiConst';
+import { EnDifficulty, EnMode, EnPlayerType, EnCellState, EnScoringType } from '@/code/data/enums';
+import { aiProp, difficulties } from '@/code/data/aiConst';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { GameService } from '@/code/services/game/game.service';
@@ -216,7 +216,7 @@ describe('AiService', () => {
     });
 
     it('four legal moves, two of them equally best', async () => {
-      aiProp.customDifficulty = { ...difficultyEasy, maxDepth: 1 };
+      aiProp.customDifficulty = { ...difficulties[EnDifficulty.Easy], maxDepth: 1 };
 
       gameStateService.menuSettings().mode = EnMode.HumanVsAi;
       gameStateService.menuSettings().whoFirst = EnPlayerType.AI;
@@ -298,9 +298,11 @@ describe('AiService', () => {
 
   describe('MiniMax with diff scoring', () => {
     it('late game with evaluation passing score threshold', async () => {
+      aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 8}, {type: EnScoringType.Straight, weight: 2}] };
       gameStateService.menuSettings().mode = EnMode.AiVsAi;
       gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
-      gameStateService.menuSettings().difficulty = EnDifficulty.Hard; // use minimax
+      gameStateService.menuSettings().difficulty = EnDifficulty.Hard;
       gameStateService.menuSettings().boardSize = 4; // 4x4
       gameService.startGame();
 
@@ -317,8 +319,8 @@ describe('AiService', () => {
       // White have two potential moves here: b4, d2 or d4. It chooses d4.
       await aiService.maybeMakeMove(); // move 6, white
 
-      expect(evaluateCellWeightedSpy).toBeCalled();
-      expect(evaluateCellStraightSpy).toBeCalled();
+      expect(evaluateCellWeightedSpy).toBeCalled(); // on shallower depth
+      expect(evaluateCellStraightSpy).toBeCalled(); // deeper
 
       // Verify game state after this call.
       const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
@@ -348,9 +350,11 @@ describe('AiService', () => {
     });
 
     it('late game with evaluation fully using straight scoring', async () => {
+      aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 8}, {type: EnScoringType.Straight, weight: 2}] };
       gameStateService.menuSettings().mode = EnMode.AiVsAi;
       gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
-      gameStateService.menuSettings().difficulty = EnDifficulty.Hard; // use minimax
+      gameStateService.menuSettings().difficulty = EnDifficulty.Hard;
       gameStateService.menuSettings().boardSize = 4; // 4x4
       gameService.startGame();
 
@@ -390,6 +394,53 @@ describe('AiService', () => {
       expectedGameState.statistics.emptyCells = 4;
       expectedGameState.statistics.player1Score = 7;
       expectedGameState.statistics.player2Score = 5;
+      expectedGameState.board.currPlayerIx = 0;
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
+      expectedGameState.view.cells = expectedGameState.board.cells;
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+
+      const actualGameState = gameStateService.gameState();
+      assertGameState(actualGameState, expectedGameState);
+    });
+  });
+
+  describe('MiniMax with dynamic weighting', () => {
+    it('corner changes weight', async () => {
+      // TODO finish this unit test: you need to make situation where weight change actually
+      // changes evaluation and picked move
+      aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: true,
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}] };
+      gameStateService.menuSettings().mode = EnMode.AiVsAi;
+      gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
+      gameStateService.menuSettings().difficulty = EnDifficulty.Hard;
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+
+      gameService.makeMove(0, 1); // a2
+      gameService.makeMove(0, 0); // a1, should change weights for this corner
+      gameService.makeMove(3, 2); // d3
+
+      // Evaluation will be impacted by changed weights.
+      // White have four potential moves here: a3, b4, d2 or d4. It chooses d4.
+      // Without weight change, all potential moves are equally bad.
+      await aiService.maybeMakeMove(); // move 4, white
+
+      // Verify game state after this call.
+      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
+      expectedGameState.settings.difficulty = EnDifficulty.Hard;
+
+      // Check game state.
+      addToHistory(expectedGameState, 0, "a2 b2");
+      addToHistory(expectedGameState, 1, "a1 b2");
+      addToHistory(expectedGameState, 0, "d3 c3");
+      addToHistory(expectedGameState, 1, "d2 c2"); // AI move
+
+      expectedGameState.statistics.moveCount = 4;
+      expectedGameState.statistics.emptyCells = 8;
+      expectedGameState.statistics.player1Score = 4;
+      expectedGameState.statistics.player2Score = 4;
       expectedGameState.board.currPlayerIx = 0;
       expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
       expectedGameState.view.cells = expectedGameState.board.cells;

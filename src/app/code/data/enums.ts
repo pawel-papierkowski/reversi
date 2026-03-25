@@ -90,6 +90,14 @@ export const cellStateDescr: Record<EnCellState, string> = {
 
 //
 
+export enum EnScoringType {
+  AvailableMoves, // prioritizes amount of available legal moves
+  Weighted, // scores according to weights on board
+  Straight, // scores according to amount of pieces on board
+}
+
+//
+
 export enum EnDir {
   N,  //  X, -Y
   NE, // +X, -Y

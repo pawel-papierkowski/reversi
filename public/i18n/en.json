@@ -51,6 +51,7 @@
   "game.statistics.playerWinsInRow": "Wins in row",
 
   "game.debug.title": "Debug data",
+  "game.debug.emptyCells": "Empty cells",
   "game.debug.evaluation": "Evaluated score",
   "game.debug.potentialMoves": "Legal moves",
 

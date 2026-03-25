@@ -1,5 +1,5 @@
 import { EnCellState } from '@/code/data/enums';
-import type { Coordinate } from "@/code/data/types";
+import type { Coordinate, ScoringSystem } from "@/code/data/types";
 import type { Cell, ReversiMove } from "@/code/data/gameState";
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -14,12 +14,13 @@ import type { Cell, ReversiMove } from "@/code/data/gameState";
 
 /** MiniMax algorithm request. */
 export type MiniMaxReq = {
-  piece: EnCellState; // start with these pieces
-  legalMoves: ReversiMove[]; // available legal moves
-  cells: Cell[][]; // cells from Reversi board
-  maxDepth: number; // maximum depth of search
+  playerIx: number; // Index of current player.
+  piece: EnCellState; // Start with this piece.
+  legalMoves: ReversiMove[]; // Available legal moves.
+  cells: Cell[][]; // Cells from Reversi board.
+  maxDepth: number; // Maximum depth of search.
   dynamicWeights: boolean; // If true, AI edits its weights dynamically.
-  scoringThreshold: number; // 0.0 - 1.0, if board is filled up more than this fraction, use straight scoring instead of weights.
+  scoringSystems: ScoringSystem[]; // Available scoring systems.
 }
 
 /** MiniMax algorithm response. */
@@ -44,20 +45,22 @@ export function createMiniMaxResult(): MiniMaxResult {
 
 /** Arguments for recursive call of MiniMax algorithm. */
 export type MiniMaxArgs = {
+  playerIx: number; // Index of current player.
   piece: EnCellState; // Piece of current player.
   isYou: boolean; // If true, this is you (so maximizing). Otherwise it is opponent (so minimizing).
   currDepth: number; // Current depth of search.
   maxDepth: number; // Maximum depth of search.
   cells: Cell[][]; // Current board state.
   moves: Coordinate[]; // Moves made so far.
-  useWeights: boolean; // If true, use weighted scoring, otherwise use straight scoring.
-  scoringThreshold: number; // 0.0 - 1.0, if board is filled up more than this fraction, use straight scoring instead of weights.
+  scoringSystems: ScoringSystem[]; // Available scoring systems.
+  scoringSystem: ScoringSystem; // Scoring system to use.
 }
 
-/** Arguments for evaluation code. */
+/** Arguments for evaluation code. It is subset of MiniMaxArgs. */
 export type EvaluateArgs = {
+  playerIx: number; // Index of current player.
   piece: EnCellState; // Piece of current player.
   isYou: boolean; // If true, this is you (so maximizing). Otherwise it is opponent (so minimizing).
   cells: Cell[][]; // Current board state.
-  useWeights: boolean; // If true, use weighted scoring, otherwise use straight scoring.
+  scoringSystem: ScoringSystem; // Scoring system to use.
 }

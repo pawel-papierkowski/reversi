@@ -56,7 +56,7 @@ export class AiService {
   }
 
   /**
-   * Find single move from availalble legal moves.
+   * Find single move from available legal moves.
    * @returns Found move or null if no move exist.
    */
   private findMove(): Coordinate|null {
@@ -91,12 +91,13 @@ export class AiService {
   private findMoveMiniMax(): Coordinate {
     const diffProp = this.gameService.resolveDifficulty();
     const req: MiniMaxReq = {
+      playerIx: this.gameStateService.getCurrPlayer().ix,
       piece: this.gameStateService.getCurrPlayer().piece,
       legalMoves: this.gameStateService.gameState().board.legalMoves,
       cells: this.gameStateService.gameState().board.cells,
       maxDepth: diffProp.maxDepth,
       dynamicWeights: diffProp.dynamicWeights,
-      scoringThreshold: diffProp.scoringThreshold,
+      scoringSystems: diffProp.scoringSystems,
     }
     const resp = this.miniMaxService.resolve(req); // this might be costly call
     return this.pickMove(resp.results);

@@ -51,6 +51,8 @@
   @if (gameStateService.gameState().debugSettings.debugPanel) {
   <div class="debugPanel">
     <h2>{{'game.debug.title' | translate}}</h2>
+    <div>{{'game.debug.emptyCells' | translate }}:</div>
+    <div>{{ gameStateService.gameState().debugData.emptyCells }}</div>
     <div>{{'game.debug.evaluation' | translate }}:</div>
     <div>{{ gameStateService.gameState().debugData.evaluationScore }}</div>
     <div class="doubleCol">{{'game.debug.potentialMoves' | translate }}:</div>

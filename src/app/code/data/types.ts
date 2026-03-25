@@ -1,4 +1,4 @@
-import { EnDifficulty, EnAiTactic } from '@/code/data/enums';
+import { EnDifficulty, EnAiTactic, EnScoringType } from '@/code/data/enums';
 
 /** Fundamental project properties. More or less constant. */
 export type ProjectProp = {
@@ -19,9 +19,17 @@ export type DifficultyConfig = {
 /** General configuration of game. */
 export type GameConfig = {
   aiWait: number; // how long AI is idling before making move in milliseconds
-  difficulties: DifficultyConfig[];
   boardSizes: number[];
 };
+
+// AI
+
+export type BoardStats = {
+  empty: number;
+  player1Score: number;
+  player2Score: number;
+  total: number;
+}
 
 /** Properties for AI. */
 export type AiProp = {
@@ -32,12 +40,18 @@ export type AiProp = {
   customDifficulty: DifficultyProp|null;
 };
 
+/** Scoring system. */
+export type ScoringSystem = {
+  type: EnScoringType; // Type of scoring.
+  weight: number; // How important this scoring is.
+};
+
 /** Properties for difficulty. */
 export type DifficultyProp = {
   canMiniMax: boolean; // If false, pick move randomly instead of using MiniMax.
   maxDepth: number; // How deep is MiniMax search.
   dynamicWeights: boolean; // If true, AI edits its weights dynamically.
-  scoringThreshold: number; // 0.0 - 1.0, if board is filled up more than this fraction, use straight scoring instead of weights.
+  scoringSystems: ScoringSystem[]; // defines scoring system
 };
 
 // OTHER
