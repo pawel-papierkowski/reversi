@@ -146,15 +146,13 @@ export function assertPassButton(fixture: ComponentFixture<App>, exists: boolean
  * @param testHints If true, test for presence of hints too.
  */
 export function assertDomBoard(fixture: ComponentFixture<App>, boardStr: string, testHints: boolean=false, comment:string='') {
-  const board = boardStr.replace(/\s/g, ''); // remove any whitespace/newlines
-  const N = Math.sqrt(board.length);
-  if (!Number.isInteger(N)) {
-    throw new Error(`Board string length ${board.length} is not a perfect square.`);
-  }
+  boardStr = boardStr.replace(/\s/g, ''); // remove any whitespace/newlines
+  const size = Math.sqrt(boardStr.length);
+  if (!Number.isInteger(size)) throw new Error(`Board string length ${boardStr.length} is not a perfect square.`);
 
-  for (let y = 0; y < N; y++) {
-    for (let x = 0; x < N; x++) {
-      const expected = board[y * N + x];
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const expected = boardStr[y * size + x];
       const cellCoord = `${x}x${y}`;
       const cellTestId = `cell-${cellCoord}`;
       const cell = fixture.nativeElement.querySelector(`[data-testid="${cellTestId}"]`);

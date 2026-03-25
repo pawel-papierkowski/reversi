@@ -38,7 +38,7 @@ export class GameScreenPage {
       // Only make move if game is in progress, not in history mode and it is AI's turn.
       if (!isInProgress || isHistoryMode || !isAiTurn) return;
 
-      console.info("AI is triggered");
+      // Note: not executed in unit tests.
       untracked(async () => {
         this.isThinking.set(true);
         try {

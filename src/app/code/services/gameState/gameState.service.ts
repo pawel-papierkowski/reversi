@@ -169,7 +169,7 @@ export class GameStateService {
    * @returns True if can use given coordinates, otherwise false.
    */
   private canUsePotentialMove(cells: Cell[][], dirCoord : DirCoord, oppPlayerPiece: EnCellState) : boolean {
-    const size = this.gameState().settings.boardSize;
+    const size = cells.length;
     if (dirCoord.x < 0 || dirCoord.x >= size) return false;
     if (dirCoord.y < 0 || dirCoord.y >= size) return false;
     const cell = cells[dirCoord.x][dirCoord.y];
@@ -187,6 +187,7 @@ export class GameStateService {
    * @returns Array of coordinates where opposing pieces are present. If empty, this is not legal move.
    */
   public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState): DirCoord[] {
+    const boardSize = cells.length;
     const opposingPieces: DirCoord[] = [];
     // we always are one step away from origin point
     //if (cells[dirCoord.x][dirCoord.y].state === oppPlayerPiece)
@@ -194,7 +195,7 @@ export class GameStateService {
 
     do {
       dirCoord = applyDir(dirCoord); // move coordinates
-      if (!this.hitEdge(dirCoord)) return []; // hit edge of board, can't be valid move
+      if (!this.hitEdge(dirCoord, boardSize)) return []; // hit edge of board, can't be valid move
       const cell = cells[dirCoord.x][dirCoord.y];
       if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return []; // can't be legal move!
       if (cell.state === oppPlayerPiece) {
@@ -209,10 +210,10 @@ export class GameStateService {
   /**
    * Check if we hit edge of board.
    * @param dirCoord Coordinates.
+   * @param size Size of board.
    * @returns True if edge was hit, otherwise false.
    */
-  private hitEdge(dirCoord : DirCoord): boolean {
-    const size = this.gameState().settings.boardSize;
+  private hitEdge(dirCoord : DirCoord, size: number): boolean {
     if (dirCoord.x < 0 || dirCoord.x >= size) return false;
     if (dirCoord.y < 0 || dirCoord.y >= size) return false;
     return true;

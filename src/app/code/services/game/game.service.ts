@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 
 import { EnGameStatus, EnCellState, EnPlayerType, EnViewMode } from '@/code/data/enums';
+import type { DifficultyProp } from "@/code/data/types";
+import { aiProp } from '@/code/data/aiConst';
 import type { GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
 import type { EvaluateArgs } from "@/code/data/aiState";
 
@@ -67,6 +69,7 @@ export class GameService {
       piece: piece,
       isYou: true,
       cells: cells,
+      useWeights: this.miniMaxService.shouldUseWeights(cells, this.resolveDifficulty().scoringThreshold),
     };
     this.gameStateService.gameState().debugData.evaluationScore = this.miniMaxService.evaluate(args);
   }
@@ -297,6 +300,17 @@ export class GameService {
     this.updateSideData();
 
     this.gameStorageService.saveGameState(this.gameStateService.gameState); // save after every move
+  }
+
+  // //////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Resolve properties for given difficulty.
+   * @returns Difficulty properties.
+   */
+  public resolveDifficulty(): DifficultyProp {
+    if (aiProp.customDifficulty !== null) return aiProp.customDifficulty;
+    return aiProp.difficulties[this.gameStateService.gameState().settings.difficulty];
   }
 
   // //////////////////////////////////////////////////////////////////////////

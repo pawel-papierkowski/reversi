@@ -152,28 +152,40 @@ export function setCells(gameState: GameState, piece: EnCellState, coords:Coordi
 }
 
 /**
- * Set cells on board for given player based on boardStr that contains human-readable
- * state of board.
+ * Set pieces on board based on boardStr that contains human-readable state of board.
  * @param gameState Game state.
  * @param piece Piece.
  * @param boardStr Board as string. B is black, W is white, _ is empty cell.
- * @param recalcLegalMoves If true, recalculate legal moves.
  */
 export function setBoard(gameState: GameState, boardStr:string) {
+  const size = Math.sqrt(boardStr.length);
+  if (!Number.isInteger(size)) throw new Error(`Board string length ${boardStr.length} is not a perfect square.`);
   const boardSize = gameState.settings.boardSize;
+  if (size !== boardSize) throw new Error(`Size of board from boardStr (${size}) does not match game board data (${boardSize}).`);
+
   const cells = gameState.board.cells;
   let ix = 0;
   while (ix < boardStr.length) {
     const char = boardStr[ix];
+    const state = char2state(char);
 
-    if (char === 'B' || char === 'W') {
-      const y = Math.floor(ix/boardSize);
-      const x = ix - y*boardSize;
-      cells[x][y].state = char === 'B' ? EnCellState.B : EnCellState.W;
-    }
-
+    const y = Math.floor(ix/boardSize);
+    const x = ix - y*boardSize;
+    cells[x][y].state = state;
     ix++;
   }
+}
+
+/**
+ * Converts character to cell state. Unknown character is considered empty cell.
+ * @param char Character representing cell state.
+ * @returns Enum for cell state.
+ */
+function char2state(char: string): EnCellState  {
+  if (char === '_') return EnCellState.Empty;
+  if (char === 'B') return EnCellState.B;
+  if (char === 'W') return EnCellState.W;
+  return EnCellState.Empty;
 }
 
 // ////////////////////////////////////////////////////////////////////////////
