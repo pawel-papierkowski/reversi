@@ -299,7 +299,7 @@ describe('AiService', () => {
   describe('MiniMax with diff scoring', () => {
     it('late game with evaluation passing score threshold', async () => {
       aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 8}, {type: EnScoringType.Straight, weight: 2}] };
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 2}, {type: EnScoringType.Weighted, weight: 6}, {type: EnScoringType.Straight, weight: 2}] };
       gameStateService.menuSettings().mode = EnMode.AiVsAi;
       gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
       gameStateService.menuSettings().difficulty = EnDifficulty.Hard;
@@ -312,15 +312,17 @@ describe('AiService', () => {
       gameService.makeMove(0, 0); // a1
       gameService.makeMove(3, 2); // d3
 
-      const evaluateCellWeightedSpy = vi.spyOn(miniMaxService as any, 'evaluateCellWeighted');
-      const evaluateCellStraightSpy = vi.spyOn(miniMaxService as any, 'evaluateCellStraight');
+      const evaluateScoringMovesSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringMoves');
+      const evaluateScoringWeightedSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringWeighted');
+      const evaluateScoringStraightSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringStraight');
 
       // Evaluation will pass threshold where scoring system changes.
       // White have two potential moves here: b4, d2 or d4. It chooses d4.
       await aiService.maybeMakeMove(); // move 6, white
 
-      expect(evaluateCellWeightedSpy).toBeCalled(); // on shallower depth
-      expect(evaluateCellStraightSpy).toBeCalled(); // deeper
+      expect(evaluateScoringMovesSpy).not.toBeCalled(); // never
+      expect(evaluateScoringWeightedSpy).toBeCalled(); // on shallower depth
+      expect(evaluateScoringStraightSpy).toBeCalled(); // deeper
 
       // Verify game state after this call.
       const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
@@ -351,7 +353,7 @@ describe('AiService', () => {
 
     it('late game with evaluation fully using straight scoring', async () => {
       aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 8}, {type: EnScoringType.Straight, weight: 2}] };
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 2}, {type: EnScoringType.Weighted, weight: 6}, {type: EnScoringType.Straight, weight: 2}] };
       gameStateService.menuSettings().mode = EnMode.AiVsAi;
       gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
       gameStateService.menuSettings().difficulty = EnDifficulty.Hard;
@@ -366,15 +368,17 @@ describe('AiService', () => {
       gameService.makeMove(3, 3); // d4
       gameService.makeMove(1, 0); // b1
 
-      const evaluateCellWeightedSpy = vi.spyOn(miniMaxService as any, 'evaluateCellWeighted');
-      const evaluateCellStraightSpy = vi.spyOn(miniMaxService as any, 'evaluateCellStraight');
+      const evaluateScoringMovesSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringMoves');
+      const evaluateScoringWeightedSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringWeighted');
+      const evaluateScoringStraightSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringStraight');
 
       // Evaluation uses only straight scoring system, as board is already filled enough.
       // White have two potential moves here: c1 or d2. It chooses d2.
       await aiService.maybeMakeMove(); // move 8, white
 
-      expect(evaluateCellWeightedSpy).not.toBeCalled();
-      expect(evaluateCellStraightSpy).toBeCalled();
+      expect(evaluateScoringMovesSpy).not.toBeCalled(); // never
+      expect(evaluateScoringWeightedSpy).not.toBeCalled();
+      expect(evaluateScoringStraightSpy).toBeCalled();
 
       // Verify game state after this call.
       const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
