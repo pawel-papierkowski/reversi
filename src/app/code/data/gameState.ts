@@ -79,6 +79,7 @@ export function createDebugSettingsForProd(): DebugSettings {
 }
 
 export type DebugData = {
+  emptyCells: number;
   evaluationScore: number; // evaluation score for current board state
   potentialMoves: string; // list of potential moves
 }
@@ -86,6 +87,7 @@ export type DebugData = {
 /** Debug data. */
 export function createDebugData(): DebugData {
   return {
+    emptyCells: 0,
     evaluationScore: 0,
     potentialMoves: '',
   };
@@ -138,12 +140,10 @@ export function createGameStatistics(): GameStatistics {
 export type Cell = {
   state: EnCellState;
   potentialMove: EnCellState; // Used only when defDebugShowMove === true.
-  weight: number; // Weight of cell for AI.
-  // NOTE: if we implement changing weights, we will need separate weights for each player,
-  // as they will start to differ.
+  weight: number[]; // Weight of cell for player AI.
 }
 
-export function createCell(weight: number): Cell {
+export function createCell(weight: number[]): Cell {
   return {
     state: EnCellState.Empty,
     potentialMove: EnCellState.Empty,

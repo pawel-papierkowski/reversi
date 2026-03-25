@@ -55,21 +55,25 @@ export class GameService {
   }
 
   private updateDebugEvaluation() {
+    let playerIx = this.gameStateService.getCurrPlayer().ix;
     let piece = this.gameStateService.getCurrPlayer().piece;
     let cells = this.gameStateService.gameState().board.cells;
     if (this.gameStateService.gameState().view.viewMode === EnViewMode.History) {
       // We are in history mode, evaluate for historical board state.
       const historyIx = this.gameStateService.gameState().view.viewMove;
       const historyBoard = this.gameStateService.gameState().board.history.moves[historyIx];
+      playerIx = this.gameStateService.getPlayer(historyBoard.playerIx).ix;
       piece = this.gameStateService.getPlayer(historyBoard.playerIx).piece;
       cells = historyBoard.cells;
     }
 
+    this.gameStateService.gameState().debugData.emptyCells = this.gameStateService.calcCellStats(cells).empty;
     const args: EvaluateArgs = {
+      playerIx: playerIx,
       piece: piece,
       isYou: true,
       cells: cells,
-      useWeights: this.miniMaxService.shouldUseWeights(cells, this.resolveDifficulty().scoringThreshold),
+      scoringSystem: this.miniMaxService.getCurrScoringSystem(cells, this.resolveDifficulty().scoringSystems),
     };
     this.gameStateService.gameState().debugData.evaluationScore = this.miniMaxService.evaluate(args);
   }

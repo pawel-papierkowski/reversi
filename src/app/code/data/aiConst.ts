@@ -1,4 +1,4 @@
-import { EnDifficulty } from '@/code/data/enums';
+import { EnDifficulty, EnScoringType } from '@/code/data/enums';
 import type { AiProp, DifficultyProp } from '@/code/data/types';
 
 // DIFFICULTIES
@@ -7,32 +7,32 @@ const difficultyMindless: DifficultyProp = {
   canMiniMax: false, // pick legal move randomly
   maxDepth: 0, // does not matter on mindless
   dynamicWeights: false, // no dynamic weights
-  scoringThreshold: 1, // no scoring change
+  scoringSystems: [{type: EnScoringType.Weighted, weight: 1}], // only weighted
 };
 
-export const difficultyEasy: DifficultyProp = {
+const difficultyEasy: DifficultyProp = {
   canMiniMax: true,
   maxDepth: 5,
   dynamicWeights: false, // no dynamic weights
-  scoringThreshold: 1, // no scoring change
+  scoringSystems: [{type: EnScoringType.Weighted, weight: 1}], // only weighted
 };
 
 const difficultyMedium: DifficultyProp = {
   canMiniMax: true,
   maxDepth: 7,
   dynamicWeights: false, // no dynamic weights
-  scoringThreshold: 1, // no scoring change
+  scoringSystems: [{type: EnScoringType.Weighted, weight: 1}], // only weighted
 };
 
 const difficultyHard: DifficultyProp = {
   canMiniMax: true,
   maxDepth: 9,
   dynamicWeights: true, // dynamic weights
-  scoringThreshold: 0.8, // scoring changes when board is filled in 80%
+  scoringSystems: [{type: EnScoringType.Weighted, weight: 8}, {type: EnScoringType.Straight, weight: 2}],
 };
 
 /** All difficulties in map. */
-const difficulties: Record<EnDifficulty, DifficultyProp> = {
+export const difficulties: Record<EnDifficulty, DifficultyProp> = {
   [EnDifficulty.Mindless]: difficultyMindless,
   [EnDifficulty.Easy]: difficultyEasy,
   [EnDifficulty.Medium]: difficultyMedium,

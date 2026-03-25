@@ -102,8 +102,8 @@ function genCells(boardSize: number): Cell[][] {
   const cells : Cell[][] = Array.from({ length: boardSize }, (_, x) =>
     Array.from({ length: boardSize }, (_, y) => {
       // Lookup the predefined weight, falling back to 0 if the size isn't mapped.
-      const weight = currentWeights ? currentWeights[x][y] : 0;
-      return createCell(weight);
+      const weightVal = currentWeights ? currentWeights[x][y] : 0;
+      return createCell([weightVal, weightVal]);
     })
   );
   return cells;
