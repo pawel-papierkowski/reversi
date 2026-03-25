@@ -105,6 +105,7 @@ export class MiniMaxService {
         isYou: true,
         cells: updatedCells,
         scoringSystem: this.getCurrScoringSystem(req.cells, req.scoringSystems),
+        moveCount: req.legalMoves.length,
       };
       return {
         score: this.evaluate(evalArgs),
@@ -147,8 +148,12 @@ export class MiniMaxService {
     let terminalResult : MiniMaxResult | null = null;
     if ((currPlayerMoves.length === 0 && nextPlayerMoves.length === 0) ||
         (args.currDepth === args.maxDepth)) {
+      const evalArgs: EvaluateArgs = {
+        ...args, // copy relevant properties from MiniMaxArgs
+        moveCount: currPlayerMoves.length,
+      };
       terminalResult = {
-        score: this.evaluate(args),
+        score: this.evaluate(evalArgs),
         depth: args.currDepth,
         moves: [...args.moves],
       };
@@ -254,6 +259,8 @@ export class MiniMaxService {
    * @returns Summary score for all cells.
    */
   public evaluate(args: EvaluateArgs): number {
+    if (args.scoringSystem.type === EnScoringType.AvailableMoves) return this.evaluateScoringMoves(args);
+
     const size = args.cells.length;
     let score = 0;
     for (let x=0; x<size; x++) { // columns
@@ -266,6 +273,20 @@ export class MiniMaxService {
   }
 
   /**
+   * Evaluates score: available moves scoring.
+   * @param cell Cell data.
+   * @param args Arguments.
+   * @returns Score for single cell.
+   */
+  private evaluateScoringMoves(args: EvaluateArgs): number {
+    let availableMoves = args.moveCount;
+    if (!args.isYou) availableMoves *= -1; // opponent
+    return availableMoves;
+  }
+
+  //
+
+  /**
    * Evaluates score for single cell.
    * @param cell Cell data.
    * @param args Arguments.
@@ -273,21 +294,10 @@ export class MiniMaxService {
    */
   private evaluateCell(cell: Cell, args: EvaluateArgs): number {
     switch (args.scoringSystem.type) {
-      case EnScoringType.AvailableMoves: return this.evaluateCellMoves(cell, args);
-      case EnScoringType.Weighted: return this.evaluateCellWeighted(cell, args);
-      case EnScoringType.Straight: return this.evaluateCellStraight(cell, args);
+      case EnScoringType.AvailableMoves: throw new Error("Scoring type AvailableMoves should not be used for each cell!"); // should not happen
+      case EnScoringType.Weighted: return this.evaluateScoringWeighted(cell, args);
+      case EnScoringType.Straight: return this.evaluateScoringStraight(cell, args);
     }
-  }
-
-  /**
-   * Evaluates score for single cell: available moves scoring.
-   * @param cell Cell data.
-   * @param args Arguments.
-   * @returns Score for single cell.
-   */
-  private evaluateCellMoves(cell: Cell, args: EvaluateArgs): number {
-    // TODO: for now behaves same as weighted
-    return this.evaluateCellWeighted(cell, args);
   }
 
   /**
@@ -296,7 +306,7 @@ export class MiniMaxService {
    * @param args Arguments.
    * @returns Score for single cell.
    */
-  private evaluateCellWeighted(cell: Cell, args: EvaluateArgs): number {
+  private evaluateScoringWeighted(cell: Cell, args: EvaluateArgs): number {
     const mul = this.findCellMultiplier(cell, args);
     return cell.weight[args.playerIx] * mul;
   }
@@ -307,7 +317,7 @@ export class MiniMaxService {
    * @param args Arguments.
    * @returns Score for single cell.
    */
-  private evaluateCellStraight(cell: Cell, args: EvaluateArgs): number {
+  private evaluateScoringStraight(cell: Cell, args: EvaluateArgs): number {
     const mul = this.findCellMultiplier(cell, args);
     return mul;
   }

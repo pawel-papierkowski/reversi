@@ -56,11 +56,12 @@ export type MiniMaxArgs = {
   scoringSystem: ScoringSystem; // Scoring system to use.
 }
 
-/** Arguments for evaluation code. It is subset of MiniMaxArgs. */
+/** Arguments for evaluation code. It has partially same fields as MiniMaxArgs. */
 export type EvaluateArgs = {
   playerIx: number; // Index of current player.
   piece: EnCellState; // Piece of current player.
   isYou: boolean; // If true, this is you (so maximizing). Otherwise it is opponent (so minimizing).
   cells: Cell[][]; // Current board state.
   scoringSystem: ScoringSystem; // Scoring system to use.
+  moveCount: number; // Count of available moves.
 }

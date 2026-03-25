@@ -74,6 +74,7 @@ export class GameService {
       isYou: true,
       cells: cells,
       scoringSystem: this.miniMaxService.getCurrScoringSystem(cells, this.resolveDifficulty().scoringSystems),
+      moveCount: this.legalMoveService.resolveMovesCustom(cells, piece).length,
     };
     this.gameStateService.gameState().debugData.evaluationScore = this.miniMaxService.evaluate(args);
   }

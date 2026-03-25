@@ -288,10 +288,6 @@ describe('MiniMaxService', () => {
   //
 
   describe('change in scoring system', () => {
-  // TODO: testing for high difficulty level:
-  // - scoring system change when board is mostly filled (over 80% of cells not empty)
-  // - dynamic weighting tests
-
     it('for weighted scoring', () => {
       gameStateService.menuSettings().boardSize = 6; // 6x6
       gameService.startGame();
@@ -350,5 +346,72 @@ describe('MiniMaxService', () => {
       ]};
       expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
     });
+
+    it('for available moves scoring', () => {
+      // state of board same as in 'for weighted scoring'
+      gameStateService.menuSettings().boardSize = 6; // 6x6
+      gameService.startGame();
+      const gameState = gameStateService.gameState();
+      const boardStr = "WB____"+ // artificial state of board
+                       "______"+ // it has two moves for white
+                       "______"+ // one will flip one piece
+                       "WBBBB_"+ // second will flip 4 pieces at once
+                       "______"+
+                       "______";
+      setBoard(gameState, boardStr);
+
+      const req: MiniMaxReq = {
+        playerIx: 1,
+        piece: EnCellState.W,
+        maxDepth: 0,
+        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
+        cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1}],
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [
+        {score: 2, depth: 0, moves: [{x:2, y:0}]},
+        {score: 2, depth: 0, moves: [{x:5, y:3}]},
+      ]};
+      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      // note for this scoring system all potential moves will have exactly same score on depth 0
+      // you need to go deeper
+    });
+
+    it('for available moves scoring, asymetric board', () => {
+      // TODO: make it asymmetric
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+      const gameState = gameStateService.gameState();
+      const boardStr = "____"+
+                       "_WB_"+
+                       "_BW_"+
+                       "____";
+      setBoard(gameState, boardStr);
+
+      const req: MiniMaxReq = {
+        playerIx: 0,
+        piece: EnCellState.B,
+        maxDepth: 3,
+        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
+        cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1}],
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [
+        {score: 4, depth: 3, moves: [{x:0, y:1}, {x:2, y:0}, {x:3, y:3}, {x:2, y:3}]},
+        {score: 4, depth: 3, moves: [{x:1, y:0}, {x:2, y:0}, {x:3, y:1}, {x:0, y:0}]},
+        {score: 4, depth: 3, moves: [{x:2, y:3}, {x:3, y:3}, {x:3, y:2}, {x:3, y:1}]},
+        {score: 4, depth: 3, moves: [{x:3, y:2}, {x:3, y:3}, {x:2, y:3}, {x:3, y:1}]},
+      ]};
+      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+    });
+
+    // TODO make realistic board for available moves scoring with more depth to ensure it works properly
   });
+
+  // TODO: testing for high difficulty level:
+  // - dynamic weighting tests
 });

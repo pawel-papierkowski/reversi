@@ -5,6 +5,7 @@ import { ScoringSystem } from '@/code/data/types';
 import { GameState } from '@/code/data/gameState';
 import type { EvaluateArgs } from '@/code/data/aiState';
 
+import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 
 import { genStartState, setCells, setBoard } from '@/code/services/gameState/gameState.test-setup';
@@ -12,9 +13,11 @@ import { genStartState, setCells, setBoard } from '@/code/services/gameState/gam
 const defScoringSystem: ScoringSystem = { type: EnScoringType.Weighted, weight: 1 };
 
 describe('MiniMax evaluation', () => {
+  let legalMoveService: LegalMoveService;
   let miniMaxService: MiniMaxService;
 
   beforeEach(async () => {
+    legalMoveService = TestBed.inject(LegalMoveService);
     miniMaxService = TestBed.inject(MiniMaxService);
   });
 
@@ -23,8 +26,10 @@ describe('MiniMax evaluation', () => {
   /**
    * Creates instance of MiniMaxArgs.
    * @param gameState Game state.
+   * @param playerIx Player index.
    * @param piece Piece.
    * @param isYou Is this you?
+   * @param scoringSystem Scoring system to use.
    * @returns Instance of MiniMaxArgs.
    */
   function setEvaluateArgs(gameState: GameState, playerIx: number, piece: EnCellState, isYou: boolean, scoringSystem: ScoringSystem=defScoringSystem): EvaluateArgs {
@@ -34,12 +39,13 @@ describe('MiniMax evaluation', () => {
       isYou: isYou,
       cells: gameState.board.cells,
       scoringSystem: scoringSystem,
+      moveCount: legalMoveService.resolveMovesCustom(gameState.board.cells, piece).length,
     }
   }
 
   //
 
-  describe('scoring for', () => {
+  describe('scoring (weighted) for', () => {
     it('starting board', () => {
       const gameState = genStartState(4);
 
@@ -80,7 +86,7 @@ describe('MiniMax evaluation', () => {
     });
   });
 
-  describe('game position', () => {
+  describe('game position (weighted)', () => {
     it('2 moves in', () => {
       const gameState = genStartState(6);
       setCells(gameState, EnCellState.B, [{x:2,y:1},{x:2,y:2}]); // emulate first move
@@ -159,7 +165,7 @@ describe('MiniMax evaluation', () => {
     });
   });
 
-  describe('different player handling', () => {
+  describe('different player handling (weighted)', () => {
     it('corner for black and you are black', () => {
       const gameState = genStartState(6);
       const cells = gameState.board.cells;
@@ -209,6 +215,86 @@ describe('MiniMax evaluation', () => {
       const args = setEvaluateArgs(gameState, 1, EnCellState.W, false);
       const actualScore = miniMaxService.evaluate(args);
       const expectedScore = 110;
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+  });
+
+  // all other tests use weighted score system, here we test other score systems
+
+  describe('straight scoring', () => {
+    it('for starting board', () => {
+      const gameState = genStartState(4);
+
+      const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.Straight, weight: 1 });
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = 0; // two black pieces (value: 2), two white pieces (value: -2), sums up to 0
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('for board with more white, PoV black', () => {
+      const gameState = genStartState(4);
+      const boardStr = "_WW_"+
+                       "_BBW"+
+                       "WBB_"+
+                       "_WW_";
+      setBoard(gameState, boardStr);
+
+      const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.Straight, weight: 1 });
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = -2; // from PoV of black
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('for board with more white, PoV white', () => {
+      const gameState = genStartState(4);
+      const boardStr = "_WW_"+
+                       "_BBW"+
+                       "WBB_"+
+                       "_WW_";
+      setBoard(gameState, boardStr);
+
+      const args = setEvaluateArgs(gameState, 1, EnCellState.W, true, { type: EnScoringType.Straight, weight: 1 });
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = 2; // from PoV of white
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+  });
+
+  describe('move amount scoring', () => {
+    it('for starting board for black', () => {
+      const gameState = genStartState(4);
+
+      const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.AvailableMoves, weight: 1 });
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = 4; // blacks have 4 available moves for this board and we are black
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('for board with zero moves for black', () => {
+      const gameState = genStartState(4);
+      const boardStr = "BB__"+
+                       "BWB_"+
+                       "_BB_"+
+                       "____";
+      setBoard(gameState, boardStr);
+
+      const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.AvailableMoves, weight: 1 });
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = 0; // blacks have no available moves for this board
+      expect(actualScore, 'Score should be same').toEqual(expectedScore);
+    });
+
+    it('for board with one move for black, PoV white', () => {
+      const gameState = genStartState(4);
+      const boardStr = "B___"+
+                       "BWB_"+
+                       "_BB_"+
+                       "____";
+      setBoard(gameState, boardStr);
+
+      const args = setEvaluateArgs(gameState, 0, EnCellState.B, false, { type: EnScoringType.AvailableMoves, weight: 1 });
+      const actualScore = miniMaxService.evaluate(args);
+      const expectedScore = -1; // blacks have 1 available moves for this board and we are white
       expect(actualScore, 'Score should be same').toEqual(expectedScore);
     });
   });

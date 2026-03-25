@@ -153,6 +153,7 @@ export function setCells(gameState: GameState, piece: EnCellState, coords:Coordi
 
 /**
  * Set pieces on board based on boardStr that contains human-readable state of board.
+ * Note that if you need to recalculate potential moves, do it after calling this.
  * @param gameState Game state.
  * @param piece Piece.
  * @param boardStr Board as string. B is black, W is white, _ is empty cell.
