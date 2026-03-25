@@ -56,7 +56,7 @@ export class LegalMoveService {
    */
   public resolveMovesCustom(cells: Cell[][], playerPiece: EnCellState) : ReversiMove[] {
     const foundMoves: ReversiMove[] = [];
-    const boardSize = this.gameStateService.gameState().settings.boardSize;
+    const boardSize = cells.length;
 
     // Go over entire board and check every cell for legal move.
     for (let x=0; x<boardSize; x++) {

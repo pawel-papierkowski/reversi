@@ -7,12 +7,13 @@ import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { GameService } from '@/code/services/game/game.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { AiService } from '@/code/services/ai/ai.service';
+import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 
 import { assertGameState, genStartState, addToHistory } from '@/code/services/gameState/gameState.test-setup';
 
 /**
  * Important notes:
- * - In unit tests automatic call to AI is disabled. We call AI service manually.
+ * - In unit tests we call AI service manually.
  * - In unit tests we use RNG seed to make sure we get same result every time.
  */
 describe('AiService', () => {
@@ -20,12 +21,14 @@ describe('AiService', () => {
   let gameService: GameService;
   let legalMoveService: LegalMoveService;
   let aiService: AiService;
+  let miniMaxService: MiniMaxService;
 
   beforeEach(async () => {
     gameStateService = TestBed.inject(GameStateService);
     gameService = TestBed.inject(GameService);
     legalMoveService = TestBed.inject(LegalMoveService);
     aiService = TestBed.inject(AiService);
+    miniMaxService = TestBed.inject(MiniMaxService);
 
     // set up rng seed
     gameStateService.rng.seed = 333333;
@@ -287,6 +290,112 @@ describe('AiService', () => {
 
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+
+      const actualGameState = gameStateService.gameState();
+      assertGameState(actualGameState, expectedGameState);
+    });
+  });
+
+  describe('MiniMax with diff scoring', () => {
+    it('late game with evaluation passing score threshold', async () => {
+      gameStateService.menuSettings().mode = EnMode.AiVsAi;
+      gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
+      gameStateService.menuSettings().difficulty = EnDifficulty.Hard; // use minimax
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+
+      gameService.makeMove(0, 1); // a2
+      gameService.makeMove(0, 2); // a3
+      gameService.makeMove(0, 3); // a4
+      gameService.makeMove(0, 0); // a1
+      gameService.makeMove(3, 2); // d3
+
+      const evaluateCellWeightedSpy = vi.spyOn(miniMaxService as any, 'evaluateCellWeighted');
+      const evaluateCellStraightSpy = vi.spyOn(miniMaxService as any, 'evaluateCellStraight');
+
+      // Evaluation will pass threshold where scoring system changes.
+      // White have two potential moves here: b4, d2 or d4. It chooses d4.
+      await aiService.maybeMakeMove(); // move 6, white
+
+      expect(evaluateCellWeightedSpy).toBeCalled();
+      expect(evaluateCellStraightSpy).toBeCalled();
+
+      // Verify game state after this call.
+      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
+      expectedGameState.settings.difficulty = EnDifficulty.Hard;
+
+      // Check game state.
+      addToHistory(expectedGameState, 0, "a2 b2");
+      addToHistory(expectedGameState, 1, "a3 b3");
+      addToHistory(expectedGameState, 0, "a4 a3 b3");
+      addToHistory(expectedGameState, 1, "a1 b2");
+      addToHistory(expectedGameState, 0, "d3 c3");
+      addToHistory(expectedGameState, 1, "d4 c3"); // AI move
+
+      expectedGameState.statistics.moveCount = 6;
+      expectedGameState.statistics.emptyCells = 6;
+      expectedGameState.statistics.player1Score = 6;
+      expectedGameState.statistics.player2Score = 4;
+      expectedGameState.board.currPlayerIx = 0;
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
+      expectedGameState.view.cells = expectedGameState.board.cells;
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+
+      const actualGameState = gameStateService.gameState();
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('late game with evaluation fully using straight scoring', async () => {
+      gameStateService.menuSettings().mode = EnMode.AiVsAi;
+      gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
+      gameStateService.menuSettings().difficulty = EnDifficulty.Hard; // use minimax
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+
+      gameService.makeMove(0, 1); // a2
+      gameService.makeMove(0, 2); // a3
+      gameService.makeMove(0, 3); // a4
+      gameService.makeMove(0, 0); // a1
+      gameService.makeMove(3, 2); // d3
+      gameService.makeMove(3, 3); // d4
+      gameService.makeMove(1, 0); // b1
+
+      const evaluateCellWeightedSpy = vi.spyOn(miniMaxService as any, 'evaluateCellWeighted');
+      const evaluateCellStraightSpy = vi.spyOn(miniMaxService as any, 'evaluateCellStraight');
+
+      // Evaluation uses only straight scoring system, as board is already filled enough.
+      // White have two potential moves here: c1 or d2. It chooses d2.
+      await aiService.maybeMakeMove(); // move 8, white
+
+      expect(evaluateCellWeightedSpy).not.toBeCalled();
+      expect(evaluateCellStraightSpy).toBeCalled();
+
+      // Verify game state after this call.
+      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
+      expectedGameState.settings.difficulty = EnDifficulty.Hard;
+
+      // Check game state.
+      addToHistory(expectedGameState, 0, "a2 b2");
+      addToHistory(expectedGameState, 1, "a3 b3");
+      addToHistory(expectedGameState, 0, "a4 a3 b3");
+      addToHistory(expectedGameState, 1, "a1 b2");
+      addToHistory(expectedGameState, 0, "d3 c3");
+      addToHistory(expectedGameState, 1, "d4 c3");
+      addToHistory(expectedGameState, 0, "b1 b2");
+      addToHistory(expectedGameState, 1, "d2 d3"); // AI move
+
+      expectedGameState.statistics.moveCount = 8;
+      expectedGameState.statistics.emptyCells = 4;
+      expectedGameState.statistics.player1Score = 7;
+      expectedGameState.statistics.player2Score = 5;
+      expectedGameState.board.currPlayerIx = 0;
+      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
+      expectedGameState.view.cells = expectedGameState.board.cells;
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);

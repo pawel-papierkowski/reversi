@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { EnPlayerType, EnGameStatus } from '@/code/data/enums';
 import { aiProp } from '@/code/data/aiConst';
-import type { Coordinate, DifficultyProp } from "@/code/data/types";
+import type { Coordinate } from "@/code/data/types";
 import { delay } from '@/code/common/utils';
 import { MiniMaxReq, MiniMaxResult } from '@/code/data/aiState';
 
@@ -68,7 +68,7 @@ export class AiService {
       return this.gameStateService.gameState().board.legalMoves[0];
 
     // Can we use MiniMax to determine which move to use?
-    if (this.resolveDifficulty().canMiniMax) return this.findMoveMiniMax();
+    if (this.gameService.resolveDifficulty().canMiniMax) return this.findMoveMiniMax();
 
     // Well, if all else fails, we just pick move randomly...
     return this.findMoveRandom();
@@ -89,12 +89,14 @@ export class AiService {
    * @returns Move coordinates or null if no move possible.
    */
   private findMoveMiniMax(): Coordinate {
+    const diffProp = this.gameService.resolveDifficulty();
     const req: MiniMaxReq = {
       piece: this.gameStateService.getCurrPlayer().piece,
-      maxDepth: this.resolveDifficulty().maxDepth,
       legalMoves: this.gameStateService.gameState().board.legalMoves,
       cells: this.gameStateService.gameState().board.cells,
-      // TODO additional options later
+      maxDepth: diffProp.maxDepth,
+      dynamicWeights: diffProp.dynamicWeights,
+      scoringThreshold: diffProp.scoringThreshold,
     }
     const resp = this.miniMaxService.resolve(req); // this might be costly call
     return this.pickMove(resp.results);
@@ -132,16 +134,5 @@ export class AiService {
       break; // end immediately if we hit result with lower score
     }
     return bestResults;
-  }
-
-  // //////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Resolve properties for given difficulty.
-   * @returns Difficulty properties.
-   */
-  private resolveDifficulty(): DifficultyProp {
-    if (aiProp.customDifficulty !== null) return aiProp.customDifficulty;
-    return aiProp.difficulties[this.gameStateService.gameState().settings.difficulty];
   }
 }

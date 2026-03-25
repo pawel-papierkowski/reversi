@@ -16,6 +16,7 @@ export function createDirCoord(dir: EnDir, x: number, y: number): DirCoord {
 
 /**
  * Applies direction to X and Y coordinates.
+ * Note YOU are responsible for checking if coordinates went out of bounds.
  * @param dirCoord Original coordinates
  * @returns Updated coordinates.
  */

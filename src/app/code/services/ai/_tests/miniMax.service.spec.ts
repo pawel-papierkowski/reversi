@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EnCellState } from '@/code/data/enums';
+import { EnCellState, EnDifficulty } from '@/code/data/enums';
 import { MiniMaxReq, MiniMaxResp } from '@/code/data/aiState';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
@@ -35,6 +35,8 @@ describe('MiniMaxService', () => {
         maxDepth: 0,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       // Note: 0 max depth means we are scoring for every black's legal move available at this
       // time without going deeper.
@@ -57,6 +59,8 @@ describe('MiniMaxService', () => {
         maxDepth: 1,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       // Note: 1 max depth means we are scoring for every black's legal move available at this
       // time, going one depth below (analyzing every legal move of whites in response).
@@ -79,6 +83,8 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -99,6 +105,8 @@ describe('MiniMaxService', () => {
         maxDepth: 3,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -119,6 +127,8 @@ describe('MiniMaxService', () => {
         maxDepth: 4,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -139,6 +149,8 @@ describe('MiniMaxService', () => {
         maxDepth: 5,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -171,6 +183,8 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -197,6 +211,8 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -222,6 +238,8 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -230,7 +248,6 @@ describe('MiniMaxService', () => {
       ]};
       expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
     });
-  });
 
     it('board almost completely filled up', () => {
       gameStateService.menuSettings().boardSize = 4; // 4x4, moves: b1 a1 a2 a3 a4 c4 d4 d3 d2 c1 d1
@@ -247,6 +264,8 @@ describe('MiniMaxService', () => {
         maxDepth: 5,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1,
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -254,8 +273,70 @@ describe('MiniMaxService', () => {
       ]};
       expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
     });
+  });
 
+  //
+
+  describe('change in scoring system', () => {
   // TODO: testing for high difficulty level:
   // - scoring system change when board is mostly filled (over 80% of cells not empty)
   // - dynamic weighting tests
+
+    it('for weighted scoring', () => {
+      gameStateService.menuSettings().boardSize = 6; // 6x6
+      gameService.startGame();
+      const gameState = gameStateService.gameState();
+      const boardStr = "WB____"+ // artificial state of board
+                       "______"+ // it has two moves for white
+                       "______"+ // one will flip one piece
+                       "WBBBB_"+ // second will flip 4 pieces at once
+                       "______"+
+                       "______";
+      setBoard(gameState, boardStr);
+
+      const req: MiniMaxReq = {
+        piece: EnCellState.W,
+        maxDepth: 0,
+        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
+        cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 1, // use weighted scoring
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [
+        {score: 134, depth: 0, moves: [{x:5, y:3}]},
+        {score: 106, depth: 0, moves: [{x:2, y:0}]},
+      ]};
+      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+    });
+
+    it('for straight scoring', () => {
+      // state of board same as in 'for weighted scoring'
+      gameStateService.menuSettings().boardSize = 6; // 6x6
+      gameService.startGame();
+      const gameState = gameStateService.gameState();
+      const boardStr = "WB____"+ // artificial state of board
+                       "______"+ // it has two moves for white
+                       "______"+ // one will flip one piece
+                       "WBBBB_"+ // second will flip 4 pieces at once
+                       "______"+
+                       "______";
+      setBoard(gameState, boardStr);
+
+      const req: MiniMaxReq = {
+        piece: EnCellState.W,
+        maxDepth: 0,
+        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
+        cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringThreshold: 0, // use straight scoring
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [
+        {score: 6, depth: 0, moves: [{x:5, y:3}]},
+        {score: 0, depth: 0, moves: [{x:2, y:0}]},
+      ]};
+      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+    });
+  });
 });

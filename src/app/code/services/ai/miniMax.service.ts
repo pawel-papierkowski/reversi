@@ -21,6 +21,33 @@ export class MiniMaxService {
   private readonly legalMoveService = inject(LegalMoveService);
 
   /**
+   * Check if should use weighted or straight scoring.
+   * If amount of filled cells compared to all cells is above threshold, it should use straight scoring.
+   * Example: for 8x8 board and threshold 0.8, if amount of filled cells is above 52
+   * (so 12 or less empty cells), returns false.
+   * @param cells Cells on board.
+   * @param scoringThreshold Scoring threshold.
+   * @returns True if weighted scoring, otherwise straight scoring.
+   */
+  public shouldUseWeights(cells: Cell[][], scoringThreshold: number): boolean {
+    if (scoringThreshold <= 0) return false; // always straight scoring
+    if (scoringThreshold >= 1) return true; // always weighted scoring
+
+    const size = cells.length;
+    let nonEmptyCells = 0; // count empty cells
+    for (let x = 0; x < size; x++) {
+      for (let y = 0; y < size; y++) {
+        if (cells[x][y].state !== EnCellState.Empty) nonEmptyCells++;
+      }
+    }
+    const totalCells = size*size;
+    const thresholdCells = Math.floor(totalCells*scoringThreshold); // round down
+    return nonEmptyCells < thresholdCells;
+  }
+
+  //
+
+  /**
    * Resolve best moves for current state of board.
    * Note: 0 max depth means we are scoring for every legal move available at this
    * time without going deeper.
@@ -61,6 +88,7 @@ export class MiniMaxService {
         piece: req.piece,
         isYou: true,
         cells: updatedCells,
+        useWeights: this.shouldUseWeights(req.cells, req.scoringThreshold),
       };
       return {
         score: this.evaluate(evalArgs),
@@ -77,6 +105,8 @@ export class MiniMaxService {
       maxDepth: req.maxDepth,
       cells: updatedCells,
       moves: [ {x: legalMove.x, y: legalMove.y} ],
+      useWeights: this.shouldUseWeights(updatedCells, req.scoringThreshold),
+      scoringThreshold: req.scoringThreshold,
     };
     return this.recursiveMiniMax(miniMaxArgs);
   }
@@ -155,6 +185,7 @@ export class MiniMaxService {
       isYou: !args.isYou,
       currDepth: args.currDepth + 1, // we are going even deeper
       cells: cells,
+      useWeights: this.shouldUseWeights(cells, args.scoringThreshold),
     }
     return newArgs;
   }
@@ -205,12 +236,12 @@ export class MiniMaxService {
    * @returns Summary score for all cells.
    */
   public evaluate(args: EvaluateArgs): number {
+    const size = args.cells.length;
     let score = 0;
-    for (let x=0; x<args.cells.length; x++) { // columns
-      const row = args.cells[x];
-      for (let y=0; y<row.length; y++) { // rows
-        const cell = row[y];
-        score += this.evaluateCell(cell, true, args);
+    for (let x=0; x<size; x++) { // columns
+      for (let y=0; y<size; y++) { // rows
+        const cell = args.cells[x][y];
+        score += this.evaluateCell(cell, args);
       }
     }
     return score;
@@ -219,11 +250,37 @@ export class MiniMaxService {
   /**
    * Evaluates score for single cell.
    * @param cell Cell data.
-   * @param useWeights If true, use weights.
    * @param args Arguments.
    * @returns Score for single cell.
    */
-  private evaluateCell(cell: Cell, useWeights: boolean, args: EvaluateArgs): number {
+  private evaluateCell(cell: Cell, args: EvaluateArgs): number {
+    if (args.useWeights) return this.evaluateCellWeighted(cell, args);
+    return this.evaluateCellStraight(cell, args);
+  }
+
+  /**
+   * Evaluates score for single cell: weighted scoring.
+   * @param cell Cell data.
+   * @param args Arguments.
+   * @returns Score for single cell.
+   */
+  private evaluateCellWeighted(cell: Cell, args: EvaluateArgs): number {
+    let mul = this.findCellMultiplier(cell, args);
+    return cell.weight * mul;
+  }
+
+  /**
+   * Evaluates score for single cell: straight scoring.
+   * @param cell Cell data.
+   * @param args Arguments.
+   * @returns Score for single cell.
+   */
+  private evaluateCellStraight(cell: Cell, args: EvaluateArgs): number {
+    let mul = this.findCellMultiplier(cell, args);
+    return mul;
+  }
+
+  private findCellMultiplier(cell: Cell, args: EvaluateArgs) {
     let mul = 1;
     switch (cell.state) {
       case EnCellState.B:
@@ -236,7 +293,6 @@ export class MiniMaxService {
         break;
       default: return 0;
     }
-    let weight = useWeights ? cell.weight : 1;
-    return weight * mul;
+    return mul;
   }
 }

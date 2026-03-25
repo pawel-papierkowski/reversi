@@ -37,7 +37,7 @@ export type DifficultyProp = {
   canMiniMax: boolean; // If false, pick move randomly instead of using MiniMax.
   maxDepth: number; // How deep is MiniMax search.
   dynamicWeights: boolean; // If true, AI edits its weights dynamically.
-  scoringThreshold: number; // 0.0 - 1.0, if board is filled up more than this fraction, use straight scoring instead of weights
+  scoringThreshold: number; // 0.0 - 1.0, if board is filled up more than this fraction, use straight scoring instead of weights.
 };
 
 // OTHER

@@ -24,11 +24,12 @@ describe('MiniMax evaluation', () => {
    * @param isYou Is this you?
    * @returns Instance of MiniMaxArgs.
    */
-  function setEvaluateArgs(gameState: GameState, piece: EnCellState, isYou: boolean): EvaluateArgs {
+  function setEvaluateArgs(gameState: GameState, piece: EnCellState, isYou: boolean, useWeights:boolean=true): EvaluateArgs {
     return {
       piece: piece,
       isYou: isYou,
       cells: gameState.board.cells,
+      useWeights: useWeights,
     }
   }
 
