@@ -7,6 +7,7 @@
   --border-background: #224422;
   --cell-background-light: #2da14c;
   --cell-background-dark: #299345;
+  /* Note: --board-size is defined in board.ts. */
 }
 
 .board {

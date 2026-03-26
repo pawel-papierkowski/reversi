@@ -546,10 +546,13 @@ export class GameStateService {
   private affectCellWeights(cells: Cell[][], playerIx: number, coords: Coordinate[], newWeightValue: number) {
     for (const coord of coords) {
       const cell = cells[coord.x][coord.y];
-      const weights = cell.weights;
-      weights[playerIx] = newWeightValue;
       // update reference so cell notifiers (like cell field in cell.ts) can register change in cell
-      cells[coord.x][coord.y] = { ...cell };
+      cells[coord.x][coord.y] = {
+        ...cell,
+        // yes, weights are also copied, otherwise it wont properly update visually in debug mode
+        weights: [...cell.weights]
+      };
+      cells[coord.x][coord.y].weights[playerIx] = newWeightValue;
     }
   }
 }

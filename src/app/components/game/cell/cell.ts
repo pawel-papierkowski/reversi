@@ -21,7 +21,6 @@ export class ReversiCellCmp {
 
   public readonly x = input.required<number>();
   public readonly y = input.required<number>();
-  //public readonly cell = input.required<Cell>();
   public readonly cell = computed<Cell>(() =>
     this.gameStateService.gameState().view.cells[this.x()][this.y()]
   );
