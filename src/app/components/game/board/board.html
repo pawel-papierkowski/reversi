@@ -25,7 +25,7 @@
           [class.bottom-edge]="rowLast"
           [class.right-edge]="colLast"
           [class.dark]="(colOdd && !rowOdd) || (!colOdd && rowOdd)">
-          <reversi-board-cell [x]="colCoord" [y]="rowCoord"/>
+          <reversi-board-cell [x]="colCoord" [y]="rowCoord" /> <!-- [cell]="gameStateService.gameState().board.cells[colCoord][rowCoord]" /> -->
         </div>
       }
 

@@ -345,8 +345,7 @@ export class GameStateService {
    */
   public executeMoveCustom(cells: Cell[][], playerPiece: EnCellState, move: ReversiMove) {
     const oppPlayerPiece = getOppPiece(playerPiece);
-    const cell = cells[move.x][move.y];
-    this.setCell(cell, playerPiece);
+    this.setCell(cells, move.x, move.y, playerPiece);
 
     const potentialMoves = this.resolvePotentialMoves(cells, move.x, move.y, oppPlayerPiece);
     for (let i=0; i<potentialMoves.length; i++) {
@@ -370,19 +369,23 @@ export class GameStateService {
 
     for (let i=0; i<opposingPieces.length; i++) { // flip them all
       const opposingPiece = opposingPieces[i];
-      const cell = cells[opposingPiece.x][opposingPiece.y];
-      cell.state = playerPiece; // most important line of code in game
+      this.setCell(cells, opposingPiece.x, opposingPiece.y, playerPiece); // most important line of code in the game
     }
   }
 
   /**
    * Set new cell state for given player.
-   * @param cell Cell to modify.
+   * @param cells State of board.
+   * @param x X coordinate.
+   * @param y Y coordinate.
    * @param playerPiece Player piece.
    */
-  private setCell(cell: Cell, playerPiece: EnCellState) {
-    cell.state = playerPiece;
-    cell.potentialMove = EnCellState.Empty;
+  private setCell(cells: Cell[][], x: number, y: number, playerPiece: EnCellState) {
+    const cell = cells[x][y];
+    cell.state = playerPiece,
+    cell.potentialMove = EnCellState.Empty,
+     // update reference so cell notifiers (like cell field in cell.ts) can register change in cell
+    cells[x][y] = { ...cell };
   }
 
   //
@@ -542,7 +545,11 @@ export class GameStateService {
    */
   private affectCellWeights(cells: Cell[][], playerIx: number, coords: Coordinate[], newWeightValue: number) {
     for (const coord of coords) {
-      cells[coord.x][coord.y].weights[playerIx] = newWeightValue;
+      const cell = cells[coord.x][coord.y];
+      const weights = cell.weights;
+      weights[playerIx] = newWeightValue;
+      // update reference so cell notifiers (like cell field in cell.ts) can register change in cell
+      cells[coord.x][coord.y] = { ...cell };
     }
   }
 }

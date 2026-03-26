@@ -84,6 +84,8 @@ export class GameStorageService {
 
   /**
    * Trigger game state update and notifications.
+   * NOTE: this update is shallow. gameState() notifiers will trigger, but not any other notifiers,
+   * notably cell() in cell.html. You need to properly update any cell that needs updating separately.
    * @param gameState Game state data as signal.
    */
   public updateGameState(gameState: WritableSignal<GameState>) {
