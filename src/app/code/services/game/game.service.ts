@@ -197,12 +197,13 @@ export class GameService {
         statistics.player2WinInRow++;
       }
     }
-    // properly update game state
+
+    // Properly update game state. Needed as gameStorageService.updateGameState() call is done before endRound().
     this.gameStateService.gameState.update(state => ({ // end round
       ...state,
+      statistics: statistics,
       board: {
         ...state.board,
-        statistics: statistics,
         status: status
       }
     }));
