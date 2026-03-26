@@ -172,12 +172,8 @@ describe('App (logic)', () => {
       expectedGameState.statistics.player1Score = 4;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
       expectedGameState.debugSettings.disableAutoAi = true;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -204,12 +200,8 @@ describe('App (logic)', () => {
       expectedGameState.statistics.emptyCells = 10;
       expectedGameState.statistics.player1Score = 3;
       expectedGameState.statistics.player2Score = 3;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
       expectedGameState.debugSettings.disableAutoAi = true;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -254,12 +246,8 @@ describe('App (logic)', () => {
       expectedGameState.statistics.player1Score = 5;
       expectedGameState.statistics.player2Score = 3;
       expectedGameState.board.currPlayerIx = 1; // would be 0 without pass
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
       expectedGameState.debugSettings.disableAutoAi = true;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -303,13 +291,8 @@ describe('App (logic)', () => {
       expectedGameState.statistics.player2WinInRow = 1;
       expectedGameState.board.status = EnGameStatus.PlayerWon;
       expectedGameState.board.doublePass = true;
-      expectedGameState.board.currPlayerIx = 0;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
       expectedGameState.debugSettings.disableAutoAi = true;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -375,15 +358,8 @@ describe('App (logic)', () => {
       expectedGameState.board.status = EnGameStatus.Tie;
       expectedGameState.board.doublePass = true;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
       expectedGameState.debugSettings.disableAutoAi = true;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
-
-      const actualGameState = gameStateService.gameState();
-      assertGameState(actualGameState, expectedGameState);
+      debugService.fillGameState(expectedGameState);
 
       // Now we start next round. Next round button should be present.
       const nextRoundButton = fixture.nativeElement.querySelector('[data-testid="btn-nextRound"]') as HTMLButtonElement;
@@ -435,13 +411,8 @@ describe('App (logic)', () => {
       expectedGameState.statistics.player2WinInRow = 1;
       expectedGameState.board.status = EnGameStatus.PlayerWon;
       expectedGameState.board.doublePass = true;
-      expectedGameState.board.currPlayerIx = 0;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
       expectedGameState.debugSettings.disableAutoAi = true;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -499,12 +470,8 @@ describe('App (logic)', () => {
       expectedGameState.board.status = EnGameStatus.PlayerWon;
       expectedGameState.board.doublePass = true;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
       expectedGameState.debugSettings.disableAutoAi = true;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EnCellState, EnMode } from '@/code/data/enums';
+import { EnCellState, EnDifficulty, EnMode, EnScoringType } from '@/code/data/enums';
+import { aiProp } from '@/code/data/aiConst';
 
 import { assertGameState } from '@/code/services/gameState/gameState.test-setup';
 
@@ -41,11 +42,7 @@ describe('GameService', () => {
       expectedGameState.statistics.player1Score = 4;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -54,7 +51,6 @@ describe('GameService', () => {
     it('that flips many pieces', () => {
       gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameService.startGame();
-      const gameState = gameStateService.gameState();
       const boardStr = "________"+
                        "________"+
                        "________"+
@@ -63,11 +59,8 @@ describe('GameService', () => {
                        "________"+
                        "________"+
                        "________";
-      debugService.setBoard(gameState, boardStr, true);
-
+      debugService.setBoard(gameStateService.gameState(), boardStr, true);
       gameService.makeMove(0, 3);
-
-      //
 
       const expectedGameState = debugService.genStartState(8);
       debugService.addToHistory(expectedGameState, 0, "a4 b4 c4 d4 e4 f4 g4 h4");
@@ -78,9 +71,7 @@ describe('GameService', () => {
       expectedGameState.statistics.player1Score = 9;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -89,7 +80,6 @@ describe('GameService', () => {
     it('unsuccessfully (invalid move)', () => {
       gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameService.startGame();
-
       gameService.makeMove(1, 1); // invalid move, nothing should change
 
       const actualGameState = gameStateService.gameState();
@@ -108,6 +98,30 @@ describe('GameService', () => {
 
       const actualGameState = gameStateService.gameState();
       const expectedGameState = debugService.genStartState(4);
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('that affects weights', () => {
+      aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: true,
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}] };
+      gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+      gameService.makeMove(0, 1); // a2
+      gameService.makeMove(0, 0); // a1, this move changes weights
+
+      const expectedGameState = debugService.genStartState(4);
+      debugService.addToHistory(expectedGameState, 0, "a2 b2");
+      debugService.addToHistory(expectedGameState, 1, "a1 b2");
+
+      // Check game state.
+      expectedGameState.statistics.moveCount = 2;
+      expectedGameState.statistics.emptyCells = 10;
+      expectedGameState.statistics.player1Score = 3;
+      expectedGameState.statistics.player2Score = 3;
+      debugService.fillGameState(expectedGameState);
+
+      const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
     });
   });
