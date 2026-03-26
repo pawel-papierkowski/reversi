@@ -5,10 +5,11 @@ import { EnCellState, EnViewMode } from '@/code/data/enums';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
+import { DebugService } from '@/code/services/debug/debug.service';
 
 import { setupTestBedTranslate, startGame, clickOnCell, clickOnPass, assertDomBoard } from './app.test-setup';
 import { selectComboboxOption } from '@/components/basic/comboBox/_tests/comboBox.test-setup';
-import { assertGameState, genStartState } from '@/code/services/gameState/gameState.test-setup';
+import { assertGameState } from '@/code/services/gameState/gameState.test-setup';
 
 import { App } from '../app';
 
@@ -17,6 +18,7 @@ describe('App (history)', () => {
   let router: Router;
   let gameStateService: GameStateService;
   let legalMoveService: LegalMoveService;
+  let debugService: DebugService;
 
   beforeEach(async () => {
     localStorage.clear(); // Reset local storage before every test to avoid pollution.
@@ -25,6 +27,7 @@ describe('App (history)', () => {
     router = TestBed.inject(Router);
     gameStateService = TestBed.inject(GameStateService);
     legalMoveService = TestBed.inject(LegalMoveService);
+    debugService = TestBed.inject(DebugService);
 
     // Trigger initial navigation to load the '' (MainMenu) route.
     router.initialNavigation();
@@ -36,17 +39,17 @@ describe('App (history)', () => {
   // History handling.
 
   it('verify content of history panel', async () => {
-    const expectedGameState = genStartState(4);
+    const expectedGameState = debugService.genStartState(4);
     // board 4x4, moves: b1 c1 d3 a1 pass
-      selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
+    selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
     selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
     await startGame(fixture);
 
-    await clickOnCell(fixture, expectedGameState, 0, "b1 b2"); // black b1
-    await clickOnCell(fixture, expectedGameState, 1, "c1 c2"); // white c1
-    await clickOnCell(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
-    await clickOnCell(fixture, expectedGameState, 1, "a1 b1"); // white a1
-    await clickOnPass(fixture, expectedGameState, 0); // black pass
+    await clickOnCell(debugService, fixture, expectedGameState, 0, "b1 b2"); // black b1
+    await clickOnCell(debugService, fixture, expectedGameState, 1, "c1 c2"); // white c1
+    await clickOnCell(debugService, fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
+    await clickOnCell(debugService, fixture, expectedGameState, 1, "a1 b1"); // white a1
+    await clickOnPass(debugService, fixture, expectedGameState, 0); // black pass
 
     // CHECKING WEBPAGE
     // Currently there should be 6 entries in history panel: initial state, 4 moves and pass.
@@ -63,17 +66,17 @@ describe('App (history)', () => {
   });
 
   it('click on history entry and exit', async () => {
-    const expectedGameState = genStartState(4);
+    const expectedGameState = debugService.genStartState(4);
     // board 4x4, moves: b1 c1 d3 a1 pass
       selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
     selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
     await startGame(fixture);
 
-    await clickOnCell(fixture, expectedGameState, 0, "b1 b2"); // black b1
-    await clickOnCell(fixture, expectedGameState, 1, "c1 c2"); // white c1
-    await clickOnCell(fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
-    await clickOnCell(fixture, expectedGameState, 1, "a1 b1"); // white a1
-    await clickOnPass(fixture, expectedGameState, 0); // black pass
+    await clickOnCell(debugService, fixture, expectedGameState, 0, "b1 b2"); // black b1
+    await clickOnCell(debugService, fixture, expectedGameState, 1, "c1 c2"); // white c1
+    await clickOnCell(debugService, fixture, expectedGameState, 0, "d3 c2 c3"); // black d3
+    await clickOnCell(debugService, fixture, expectedGameState, 1, "a1 b1"); // white a1
+    await clickOnPass(debugService, fixture, expectedGameState, 0); // black pass
 
     const boardStr = "WWW_"+ // Expected board state.
                      "_BB_"+

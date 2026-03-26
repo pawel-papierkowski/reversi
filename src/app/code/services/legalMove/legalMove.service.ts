@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 
 import { EnCellState } from '@/code/data/enums';
 import type { ReversiMove, Cell } from '@/code/data/gameState';
-import { createReversiMove } from '@/code/data/gameState';
 import { getOppPiece } from '@/code/data/dirCoord';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
@@ -89,7 +88,7 @@ export class LegalMoveService {
     for (let i=0; i<potentialMoves.length; i++) {
       const potentialMove = potentialMoves[i];
       const opposingPieces = this.gameStateService.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
-      if (opposingPieces.length > 0) return createReversiMove(x, y);
+      if (opposingPieces.length > 0) return { x: x, y: y };
     }
 
     return null; // no legal move found

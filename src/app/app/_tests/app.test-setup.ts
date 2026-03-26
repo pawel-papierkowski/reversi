@@ -11,7 +11,8 @@ import { routes } from './../app.routes';
 import { App } from './../app';
 
 import type { GameState } from "@/code/data/gameState";
-import { addToHistory } from '@/code/services/gameState/gameState.test-setup';
+
+import { DebugService } from '@/code/services/debug/debug.service';
 
 import en from '../../../../public/i18n/en.json';
 import pl from '../../../../public/i18n/pl.json';
@@ -87,8 +88,8 @@ export async function startGame(fixture: ComponentFixture<App>) {
  * @param playerIx Player index.
  * @param moves Moves as array of coordinates or grid coordinates.
  */
-export async function clickOnCell(fixture: ComponentFixture<App>, gameState: GameState, playerIx: number, movesAny: {x:number, y: number}[]|string) {
-  const moves = addToHistory(gameState, playerIx, movesAny); // for move below
+export async function clickOnCell(debugService: DebugService, fixture: ComponentFixture<App>, gameState: GameState, playerIx: number, movesAny: {x:number, y: number}[]|string) {
+  const moves = debugService.addToHistory(gameState, playerIx, movesAny); // for move below
 
   // Find correct cell and click it.
   const testId = `[data-testid="cell-${moves[0].x}x${moves[0].y}"]`
@@ -98,8 +99,8 @@ export async function clickOnCell(fixture: ComponentFixture<App>, gameState: Gam
   await fixture.whenStable();
 }
 
-export async function clickOnPass(fixture: ComponentFixture<App>, gameState: GameState, playerIx: number) {
-  addToHistory(gameState, playerIx, []); // pass generates special history entry
+export async function clickOnPass(debugService: DebugService, fixture: ComponentFixture<App>, gameState: GameState, playerIx: number) {
+  debugService.addToHistory(gameState, playerIx, []); // pass generates special history entry
 
   // Find pass move button and click it.
   const passButton = fixture.nativeElement.querySelector('[data-testid="btn-pass"]') as HTMLButtonElement;

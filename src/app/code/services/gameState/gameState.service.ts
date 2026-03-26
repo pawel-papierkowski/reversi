@@ -298,7 +298,7 @@ export class GameStateService {
    */
   public initializeRound() {
     const boardSize = this.gameState().settings.boardSize;
-    const newCells = this.generateCells(boardSize);
+    const newCells = this.genCells(boardSize);
 
     this.gameState.update(state => ({ // initialize round
       ...state, // duplicates rest of state
@@ -328,10 +328,11 @@ export class GameStateService {
 
   /**
    * Create board for start of the game with correct size and four pieces already placed.
+   * @param boardSize Size of board.
    * @returns Initial board state.
    */
-  private generateCells(boardSize: number) : Cell[][] {
-    const cells = this.generateCellsEmpty();
+  private genCells(boardSize: number) : Cell[][] {
+    const cells = this.genCellsEmpty(boardSize);
     // Now put starting pieces in middle of board, like in Othello.
     const startIx = boardSize/2 - 1;
     cells[startIx][startIx].state = EnCellState.W;
@@ -343,10 +344,10 @@ export class GameStateService {
 
   /**
    * Generate empty board of known size.
-   * @returns Empty board state.
+   * @param boardSize Size of board.
+   * @returns 2D array of cells.
    */
-  private generateCellsEmpty() : Cell[][] {
-    const boardSize = this.gameState().settings.boardSize;
+  public genCellsEmpty(boardSize: number) : Cell[][] {
     const currentWeights = weights[boardSize];
 
     const cells : Cell[][] = Array.from({ length: boardSize }, (_, x) =>
