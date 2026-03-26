@@ -7,18 +7,19 @@ import type { EvaluateArgs } from '@/code/data/aiState';
 
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
-
-import { genStartState, setCells, setBoard } from '@/code/services/gameState/gameState.test-setup';
+import { DebugService } from '@/code/services/debug/debug.service';
 
 const defScoringSystem: ScoringSystem = { type: EnScoringType.Weighted, weight: 1 };
 
 describe('MiniMax evaluation', () => {
   let legalMoveService: LegalMoveService;
   let miniMaxService: MiniMaxService;
+  let debugService: DebugService;
 
   beforeEach(async () => {
     legalMoveService = TestBed.inject(LegalMoveService);
     miniMaxService = TestBed.inject(MiniMaxService);
+    debugService = TestBed.inject(DebugService);
   });
 
   //
@@ -47,7 +48,7 @@ describe('MiniMax evaluation', () => {
 
   describe('scoring (weighted) for', () => {
     it('starting board', () => {
-      const gameState = genStartState(4);
+      const gameState = debugService.genStartState(4);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -56,8 +57,8 @@ describe('MiniMax evaluation', () => {
     });
 
     it('on edges', () => {
-      const gameState = genStartState(6);
-      setCells(gameState, EnCellState.B, [{x:0,y:2},{x:0,y:3},{x:2,y:5},{x:3,y:5}]);
+      const gameState = debugService.genStartState(6);
+      debugService.setCells(gameState, EnCellState.B, [{x:0,y:2},{x:0,y:3},{x:2,y:5},{x:3,y:5}]);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -66,8 +67,8 @@ describe('MiniMax evaluation', () => {
     });
 
     it('wipeout', () => {
-      const gameState = genStartState(6);
-      setCells(gameState, EnCellState.B, [{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}]);
+      const gameState = debugService.genStartState(6);
+      debugService.setCells(gameState, EnCellState.B, [{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}]);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -76,8 +77,8 @@ describe('MiniMax evaluation', () => {
     });
 
     it('empty board', () => {
-      const gameState = genStartState(6);
-      setCells(gameState, EnCellState.Empty, [{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}]);
+      const gameState = debugService.genStartState(6);
+      debugService.setCells(gameState, EnCellState.Empty, [{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}]);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -88,9 +89,9 @@ describe('MiniMax evaluation', () => {
 
   describe('game position (weighted)', () => {
     it('2 moves in', () => {
-      const gameState = genStartState(6);
-      setCells(gameState, EnCellState.B, [{x:2,y:1},{x:2,y:2}]); // emulate first move
-      setCells(gameState, EnCellState.W, [{x:3,y:1},{x:3,y:2}]); // emulate second move
+      const gameState = debugService.genStartState(6);
+      debugService.setCells(gameState, EnCellState.B, [{x:2,y:1},{x:2,y:2}]); // emulate first move
+      debugService.setCells(gameState, EnCellState.W, [{x:3,y:1},{x:3,y:2}]); // emulate second move
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -99,9 +100,9 @@ describe('MiniMax evaluation', () => {
     });
 
     it('early game', () => {
-      const gameState = genStartState(8);
-      setCells(gameState, EnCellState.B, [{x:5,y:4},{x:2,y:5},{x:5,y:6}]);
-      setCells(gameState, EnCellState.W, [{x:3,y:5},{x:5,y:5},{x:6,y:6}]);
+      const gameState = debugService.genStartState(8);
+      debugService.setCells(gameState, EnCellState.B, [{x:5,y:4},{x:2,y:5},{x:5,y:6}]);
+      debugService.setCells(gameState, EnCellState.W, [{x:3,y:5},{x:5,y:5},{x:6,y:6}]);
       // note these moves break symmetry, causing non-zero score
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
@@ -111,7 +112,7 @@ describe('MiniMax evaluation', () => {
     });
 
     it('middle game', () => {
-      const gameState = genStartState(8);
+      const gameState = debugService.genStartState(8);
       const boardStr = "WB______"+
                        "_W______"+
                        "BBBBBB__"+
@@ -120,7 +121,7 @@ describe('MiniMax evaluation', () => {
                        "WWWWWW__"+
                        "__B_WBW_"+
                        "________";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -129,7 +130,7 @@ describe('MiniMax evaluation', () => {
     });
 
     it('late game', () => {
-      const gameState = genStartState(8);
+      const gameState = debugService.genStartState(8);
       const boardStr = "__W_WWWW"+
                        "BWWWWWWW"+
                        "_WBBWWWW"+
@@ -138,7 +139,7 @@ describe('MiniMax evaluation', () => {
                        "_BWBWBWW"+
                        "BBWWBB__"+
                        "_WWBBBB_";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -147,7 +148,7 @@ describe('MiniMax evaluation', () => {
     });
 
     it('filled board', () => {
-      const gameState = genStartState(8);
+      const gameState = debugService.genStartState(8);
       const boardStr = "BBBWWWWW"+
                        "BBBWWBWW"+
                        "BWBBBWWW"+
@@ -156,7 +157,7 @@ describe('MiniMax evaluation', () => {
                        "BWWWWWBB"+
                        "WBWWWBBB"+
                        "BWWWWWWW";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -167,7 +168,7 @@ describe('MiniMax evaluation', () => {
 
   describe('different player handling (weighted)', () => {
     it('corner for black and you are black', () => {
-      const gameState = genStartState(6);
+      const gameState = debugService.genStartState(6);
       const cells = gameState.board.cells;
       cells[0][0].state = EnCellState.B; // +100
       cells[1][0].state = EnCellState.W; // +20
@@ -180,7 +181,7 @@ describe('MiniMax evaluation', () => {
     });
 
     it('corner for black and you are white', () => {
-      const gameState = genStartState(6);
+      const gameState = debugService.genStartState(6);
       const cells = gameState.board.cells;
       cells[5][5].state = EnCellState.B; // +100
       cells[5][4].state = EnCellState.W; // +20
@@ -193,7 +194,7 @@ describe('MiniMax evaluation', () => {
     });
 
     it('corner for white and you are white', () => {
-      const gameState = genStartState(6);
+      const gameState = debugService.genStartState(6);
       const cells = gameState.board.cells;
       cells[5][5].state = EnCellState.B; // -100
       cells[4][5].state = EnCellState.W; // -20
@@ -206,7 +207,7 @@ describe('MiniMax evaluation', () => {
     });
 
     it('corner for white and you are black', () => {
-      const gameState = genStartState(6);
+      const gameState = debugService.genStartState(6);
       const cells = gameState.board.cells;
       cells[0][0].state = EnCellState.B; // -100
       cells[0][1].state = EnCellState.W; // -20
@@ -223,7 +224,7 @@ describe('MiniMax evaluation', () => {
 
   describe('straight scoring', () => {
     it('for starting board', () => {
-      const gameState = genStartState(4);
+      const gameState = debugService.genStartState(4);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.Straight, weight: 1 });
       const actualScore = miniMaxService.evaluate(args);
@@ -232,12 +233,12 @@ describe('MiniMax evaluation', () => {
     });
 
     it('for board with more white, PoV black', () => {
-      const gameState = genStartState(4);
+      const gameState = debugService.genStartState(4);
       const boardStr = "_WW_"+
                        "_BBW"+
                        "WBB_"+
                        "_WW_";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.Straight, weight: 1 });
       const actualScore = miniMaxService.evaluate(args);
@@ -246,12 +247,12 @@ describe('MiniMax evaluation', () => {
     });
 
     it('for board with more white, PoV white', () => {
-      const gameState = genStartState(4);
+      const gameState = debugService.genStartState(4);
       const boardStr = "_WW_"+
                        "_BBW"+
                        "WBB_"+
                        "_WW_";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const args = setEvaluateArgs(gameState, 1, EnCellState.W, true, { type: EnScoringType.Straight, weight: 1 });
       const actualScore = miniMaxService.evaluate(args);
@@ -262,7 +263,7 @@ describe('MiniMax evaluation', () => {
 
   describe('move amount scoring', () => {
     it('for starting board for black', () => {
-      const gameState = genStartState(4);
+      const gameState = debugService.genStartState(4);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.AvailableMoves, weight: 1 });
       const actualScore = miniMaxService.evaluate(args);
@@ -271,12 +272,12 @@ describe('MiniMax evaluation', () => {
     });
 
     it('for board with zero moves for black', () => {
-      const gameState = genStartState(4);
+      const gameState = debugService.genStartState(4);
       const boardStr = "BB__"+
                        "BWB_"+
                        "_BB_"+
                        "____";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.AvailableMoves, weight: 1 });
       const actualScore = miniMaxService.evaluate(args);
@@ -285,12 +286,12 @@ describe('MiniMax evaluation', () => {
     });
 
     it('for board with one move for black, PoV white', () => {
-      const gameState = genStartState(4);
+      const gameState = debugService.genStartState(4);
       const boardStr = "B___"+
                        "BWB_"+
                        "_BB_"+
                        "____";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, false, { type: EnScoringType.AvailableMoves, weight: 1 });
       const actualScore = miniMaxService.evaluate(args);

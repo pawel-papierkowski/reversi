@@ -7,7 +7,6 @@ import { getOppPiece } from '@/code/data/dirCoord';
 import type { Cell, ReversiMove } from "@/code/data/gameState";
 
 import type { MiniMaxReq, MiniMaxResp, MiniMaxResult, MiniMaxArgs, EvaluateArgs } from "@/code/data/aiState";
-import { createMiniMaxResult } from "@/code/data/aiState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
@@ -223,9 +222,11 @@ export class MiniMaxService {
    * @returns Best result found.
    */
   private findBestResult(results: MiniMaxResult[], isYou: boolean, currDepth: number) : MiniMaxResult {
-    let bestResult = createMiniMaxResult();
-    bestResult.depth = currDepth;
-    bestResult.score = isYou ? -aiProp.maxScore : aiProp.maxScore;
+    let bestResult: MiniMaxResult = {
+      score: isYou ? -aiProp.maxScore : aiProp.maxScore,
+      depth: currDepth,
+      moves: [],
+    };
 
     // Make sure to pick the best result.
     for (const result of results) {
@@ -274,6 +275,7 @@ export class MiniMaxService {
 
   /**
    * Evaluates score: available moves scoring.
+   * TODO: right now it does not work properly. Deal with it later.
    * @param cell Cell data.
    * @param args Arguments.
    * @returns Score for single cell.
@@ -308,7 +310,7 @@ export class MiniMaxService {
    */
   private evaluateScoringWeighted(cell: Cell, args: EvaluateArgs): number {
     const mul = this.findCellMultiplier(cell, args);
-    return cell.weight[args.playerIx] * mul;
+    return cell.weights[args.playerIx] * mul;
   }
 
   /**

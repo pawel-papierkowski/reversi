@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { EnGameStatus, EnCellState, EnPlayerType, EnViewMode } from '@/code/data/enums';
 import type { DifficultyProp } from "@/code/data/types";
 import { aiProp } from '@/code/data/aiConst';
-import type { GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
+import type { GameState, GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
 import type { EvaluateArgs } from "@/code/data/aiState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
@@ -38,7 +38,7 @@ export class GameService {
    * - resolve legal moves
    * - scoring
    */
-  private updateSideData() {
+  public updateSideData() {
     this.legalMoveService.resolveMoves();
     this.legalMoveService.showHints();
     this.gameStateService.recalcScoring();
@@ -321,39 +321,4 @@ export class GameService {
   // //////////////////////////////////////////////////////////////////////////
 
   // DEBUG AND TEST FUNCTIONS
-
-  /**
-   * Manually set cell state. Updates potential moves and scoring. Player stays same.
-   * @param x X coordinate.
-   * @param y Y coordinate.
-   * @param newState New state of cell.
-   */
-  public debugSetPiece(x: number, y: number, newState: EnCellState) {
-    const cell = this.gameStateService.gameState().board.cells[x][y];
-    const oldState = cell.state;
-    if (oldState === newState) return;
-
-    cell.state = newState;
-    // no need to set cell.potentialMove, updateSideData() recalculates them all anyway
-    this.updateSideData();
-  }
-
-  /**
-   * Manually swap cell state: Empty->Black->White->Empty. Updates potential moves and scoring.
-   * Player stays same.
-   * @param x X coordinate.
-   * @param y Y coordinate.
-   */
-  public debugSwapPiece(x: number, y: number) {
-    const cell = this.gameStateService.gameState().board.cells[x][y];
-
-    switch (cell.state) {
-      case EnCellState.Empty: cell.state = EnCellState.B; break;
-      case EnCellState.B: cell.state = EnCellState.W; break;
-      case EnCellState.W: cell.state = EnCellState.Empty; break;
-      default: break;
-    }
-
-    this.updateSideData();
-  }
 }

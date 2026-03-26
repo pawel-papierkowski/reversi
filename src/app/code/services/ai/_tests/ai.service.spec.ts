@@ -8,8 +8,9 @@ import { GameService } from '@/code/services/game/game.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { AiService } from '@/code/services/ai/ai.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
+import { DebugService } from '@/code/services/debug/debug.service';
 
-import { assertGameState, genStartState, addToHistory } from '@/code/services/gameState/gameState.test-setup';
+import { assertGameState } from '@/code/services/gameState/gameState.test-setup';
 
 /**
  * Important notes:
@@ -22,6 +23,7 @@ describe('AiService', () => {
   let legalMoveService: LegalMoveService;
   let aiService: AiService;
   let miniMaxService: MiniMaxService;
+  let debugService: DebugService;
 
   beforeEach(async () => {
     gameStateService = TestBed.inject(GameStateService);
@@ -29,6 +31,7 @@ describe('AiService', () => {
     legalMoveService = TestBed.inject(LegalMoveService);
     aiService = TestBed.inject(AiService);
     miniMaxService = TestBed.inject(MiniMaxService);
+    debugService = TestBed.inject(DebugService);
 
     // set up rng seed
     gameStateService.rng.seed = 333333;
@@ -53,7 +56,7 @@ describe('AiService', () => {
 
       // Verify game state after this call.
 
-      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.HumanVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.Human, EnMode.HumanVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Mindless;
 
       const actualGameState = gameStateService.gameState();
@@ -75,11 +78,12 @@ describe('AiService', () => {
       expect(findMoveMiniMaxSpy).toBeCalledTimes(0);
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Mindless;
 
+      debugService.addToHistory(expectedGameState, 0, "b1 b2");
+
       // Check game state.
-      addToHistory(expectedGameState, 0, "b1 b2");
       expectedGameState.statistics.moveCount = 1;
       expectedGameState.statistics.emptyCells = 11;
       expectedGameState.statistics.player1Score = 4;
@@ -110,11 +114,12 @@ describe('AiService', () => {
       expect(findMoveMiniMaxSpy).toBeCalledTimes(1);
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Easy;
 
+      debugService.addToHistory(expectedGameState, 0, "b1 b2");
+
       // Check game state.
-      addToHistory(expectedGameState, 0, "b1 b2");
       expectedGameState.statistics.moveCount = 1;
       expectedGameState.statistics.emptyCells = 11;
       expectedGameState.statistics.player1Score = 4;
@@ -150,15 +155,16 @@ describe('AiService', () => {
       expect(findMoveMiniMaxSpy).toBeCalledTimes(0);
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Mindless;
 
+      debugService.addToHistory(expectedGameState, 0, "a2 b2");
+      debugService.addToHistory(expectedGameState, 1, "a1 b2");
+      debugService.addToHistory(expectedGameState, 0, "c4 c3");
+      debugService.addToHistory(expectedGameState, 1, "a3 a2");
+      debugService.addToHistory(expectedGameState, 0, "b1 b2"); // AI move
+
       // Check game state.
-      addToHistory(expectedGameState, 0, "a2 b2");
-      addToHistory(expectedGameState, 1, "a1 b2");
-      addToHistory(expectedGameState, 0, "c4 c3");
-      addToHistory(expectedGameState, 1, "a3 a2");
-      addToHistory(expectedGameState, 0, "b1 b2"); // AI move
       expectedGameState.statistics.moveCount = 5;
       expectedGameState.statistics.emptyCells = 7;
       expectedGameState.statistics.player1Score = 6;
@@ -192,14 +198,15 @@ describe('AiService', () => {
       await aiService.maybeMakeMove();
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.HumanVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.Human, EnMode.HumanVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Easy;
 
+      debugService.addToHistory(expectedGameState, 0, "c4 c3");
+      debugService.addToHistory(expectedGameState, 1, "b4 b3");
+      debugService.addToHistory(expectedGameState, 0, "a3 b3");
+      debugService.addToHistory(expectedGameState, 1, "d4 c3 c4"); // AI move
+
       // Check game state.
-      addToHistory(expectedGameState, 0, "c4 c3");
-      addToHistory(expectedGameState, 1, "b4 b3");
-      addToHistory(expectedGameState, 0, "a3 b3");
-      addToHistory(expectedGameState, 1, "d4 c3 c4"); // AI move
       expectedGameState.statistics.moveCount = 4;
       expectedGameState.statistics.emptyCells = 8;
       expectedGameState.statistics.player1Score = 3;
@@ -233,13 +240,14 @@ describe('AiService', () => {
       await aiService.maybeMakeMove();
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.AI, EnMode.HumanVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Easy;
 
+      debugService.addToHistory(expectedGameState, 0, "a2 b2");
+      debugService.addToHistory(expectedGameState, 1, "c1 c2");
+      debugService.addToHistory(expectedGameState, 0, "d4 c3"); // AI move
+
       // Check game state.
-      addToHistory(expectedGameState, 0, "a2 b2");
-      addToHistory(expectedGameState, 1, "c1 c2");
-      addToHistory(expectedGameState, 0, "d4 c3"); // AI move
       expectedGameState.statistics.moveCount = 3;
       expectedGameState.statistics.emptyCells = 9;
       expectedGameState.statistics.player1Score = 5;
@@ -271,15 +279,16 @@ describe('AiService', () => {
       await aiService.maybeMakeMove();
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Easy;
 
+      debugService.addToHistory(expectedGameState, 0, "b1 b2");
+      debugService.addToHistory(expectedGameState, 1, "c1 c2");
+      debugService.addToHistory(expectedGameState, 0, "d3 c2 c3");
+      debugService.addToHistory(expectedGameState, 1, "a1 b1");
+      debugService.addToHistory(expectedGameState, 0, ""); // AI move: pass
+
       // Check game state.
-      addToHistory(expectedGameState, 0, "b1 b2");
-      addToHistory(expectedGameState, 1, "c1 c2");
-      addToHistory(expectedGameState, 0, "d3 c2 c3");
-      addToHistory(expectedGameState, 1, "a1 b1");
-      addToHistory(expectedGameState, 0, ""); // AI move: pass
       expectedGameState.statistics.moveCount = 5;
       expectedGameState.statistics.emptyCells = 8; // with normal move it would be 7
       expectedGameState.statistics.player1Score = 5;
@@ -325,17 +334,17 @@ describe('AiService', () => {
       expect(evaluateScoringStraightSpy).toBeCalled(); // deeper
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Hard;
 
-      // Check game state.
-      addToHistory(expectedGameState, 0, "a2 b2");
-      addToHistory(expectedGameState, 1, "a3 b3");
-      addToHistory(expectedGameState, 0, "a4 a3 b3");
-      addToHistory(expectedGameState, 1, "a1 b2");
-      addToHistory(expectedGameState, 0, "d3 c3");
-      addToHistory(expectedGameState, 1, "d4 c3"); // AI move
+      debugService.addToHistory(expectedGameState, 0, "a2 b2");
+      debugService.addToHistory(expectedGameState, 1, "a3 b3");
+      debugService.addToHistory(expectedGameState, 0, "a4 a3 b3");
+      debugService.addToHistory(expectedGameState, 1, "a1 b2");
+      debugService.addToHistory(expectedGameState, 0, "d3 c3");
+      debugService.addToHistory(expectedGameState, 1, "d4 c3"); // AI move
 
+      // Check game state.
       expectedGameState.statistics.moveCount = 6;
       expectedGameState.statistics.emptyCells = 6;
       expectedGameState.statistics.player1Score = 6;
@@ -381,19 +390,19 @@ describe('AiService', () => {
       expect(evaluateScoringStraightSpy).toBeCalled();
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Hard;
 
-      // Check game state.
-      addToHistory(expectedGameState, 0, "a2 b2");
-      addToHistory(expectedGameState, 1, "a3 b3");
-      addToHistory(expectedGameState, 0, "a4 a3 b3");
-      addToHistory(expectedGameState, 1, "a1 b2");
-      addToHistory(expectedGameState, 0, "d3 c3");
-      addToHistory(expectedGameState, 1, "d4 c3");
-      addToHistory(expectedGameState, 0, "b1 b2");
-      addToHistory(expectedGameState, 1, "d2 d3"); // AI move
+      debugService.addToHistory(expectedGameState, 0, "a2 b2");
+      debugService.addToHistory(expectedGameState, 1, "a3 b3");
+      debugService.addToHistory(expectedGameState, 0, "a4 a3 b3");
+      debugService.addToHistory(expectedGameState, 1, "a1 b2");
+      debugService.addToHistory(expectedGameState, 0, "d3 c3");
+      debugService.addToHistory(expectedGameState, 1, "d4 c3");
+      debugService.addToHistory(expectedGameState, 0, "b1 b2");
+      debugService.addToHistory(expectedGameState, 1, "d2 d3"); // AI move
 
+      // Check game state.
       expectedGameState.statistics.moveCount = 8;
       expectedGameState.statistics.emptyCells = 4;
       expectedGameState.statistics.player1Score = 7;
@@ -432,15 +441,15 @@ describe('AiService', () => {
       await aiService.maybeMakeMove(); // move 4, white
 
       // Verify game state after this call.
-      const expectedGameState = genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
+      const expectedGameState = debugService.genStartState(4, EnPlayerType.Human, EnMode.AiVsAi);
       expectedGameState.settings.difficulty = EnDifficulty.Hard;
 
-      // Check game state.
-      addToHistory(expectedGameState, 0, "a2 b2");
-      addToHistory(expectedGameState, 1, "a1 b2");
-      addToHistory(expectedGameState, 0, "d3 c3");
-      addToHistory(expectedGameState, 1, "d2 c2"); // AI move
+      debugService.addToHistory(expectedGameState, 0, "a2 b2");
+      debugService.addToHistory(expectedGameState, 1, "a1 b2");
+      debugService.addToHistory(expectedGameState, 0, "d3 c3");
+      debugService.addToHistory(expectedGameState, 1, "d2 c2"); // AI move
 
+      // Check game state.
       expectedGameState.statistics.moveCount = 4;
       expectedGameState.statistics.emptyCells = 8;
       expectedGameState.statistics.player1Score = 4;

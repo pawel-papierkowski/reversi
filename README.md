@@ -4,6 +4,11 @@ Very simple project showing off the very basics of Angular frontend project. Bas
 
 This is functional Reversi game - human vs human is fully playable. Currently, AI is being worked on.
 
+AI features:
+- MiniMax algorithm, different diffculty levels have different depth
+- Uses weighted scoring, swaps for straight scoring in late game.
+- Uses dynamic weights.
+
 Link to webpage: https://pawel-papierkowski.github.io/reversi
 
 ## Used

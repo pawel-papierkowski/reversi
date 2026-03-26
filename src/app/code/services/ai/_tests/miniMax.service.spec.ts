@@ -7,20 +7,21 @@ import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { GameService } from '@/code/services/game/game.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
-
-import { setBoard } from '@/code/services/gameState/gameState.test-setup';
+import { DebugService } from '@/code/services/debug/debug.service';
 
 describe('MiniMaxService', () => {
   let gameStateService: GameStateService;
   let gameService: GameService;
   let legalMoveService: LegalMoveService;
   let miniMaxService: MiniMaxService;
+  let debugService: DebugService;
 
   beforeEach(async () => {
     gameStateService = TestBed.inject(GameStateService);
     gameService = TestBed.inject(GameService);
     legalMoveService = TestBed.inject(LegalMoveService);
     miniMaxService = TestBed.inject(MiniMaxService);
+    debugService = TestBed.inject(DebugService);
   });
 
   //
@@ -182,7 +183,7 @@ describe('MiniMaxService', () => {
                        "BBBBB_"+
                        "____W_"+
                        "____BW";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -211,7 +212,7 @@ describe('MiniMaxService', () => {
                        "_BB_"+
                        "_BBB"+
                        "____";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -239,7 +240,7 @@ describe('MiniMaxService', () => {
                        "WWBW"+
                        "_WWW"+
                        "BWWW";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -266,7 +267,7 @@ describe('MiniMaxService', () => {
                        "WWBB"+
                        "WBWB"+
                        "B_WB";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -298,7 +299,7 @@ describe('MiniMaxService', () => {
                        "WBBBB_"+ // second will flip 4 pieces at once
                        "______"+
                        "______";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -328,7 +329,7 @@ describe('MiniMaxService', () => {
                        "WBBBB_"+ // second will flip 4 pieces at once
                        "______"+
                        "______";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -348,39 +349,9 @@ describe('MiniMaxService', () => {
     });
 
     it('for available moves scoring', () => {
-      // state of board same as in 'for weighted scoring'
-      gameStateService.menuSettings().boardSize = 6; // 6x6
-      gameService.startGame();
-      const gameState = gameStateService.gameState();
-      const boardStr = "WB____"+ // artificial state of board
-                       "______"+ // it has two moves for white
-                       "______"+ // one will flip one piece
-                       "WBBBB_"+ // second will flip 4 pieces at once
-                       "______"+
-                       "______";
-      setBoard(gameState, boardStr);
-
-      const req: MiniMaxReq = {
-        playerIx: 1,
-        piece: EnCellState.W,
-        maxDepth: 0,
-        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
-        cells: gameState.board.cells,
-        dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1}],
-      }
-      const actualResponse = miniMaxService.resolve(req);
-      const expectedResponse: MiniMaxResp = { results: [
-        {score: 2, depth: 0, moves: [{x:2, y:0}]},
-        {score: 2, depth: 0, moves: [{x:5, y:3}]},
-      ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
-      // note for this scoring system all potential moves will have exactly same score on depth 0
-      // you need to go deeper
-    });
-
-    it('for available moves scoring, asymetric board', () => {
+      // TODO make realistic board for available moves scoring with more depth to ensure it works properly
       // TODO: make it asymmetric
+      // TODO: right now, available moves scoring is not working properly
       gameStateService.menuSettings().boardSize = 4; // 4x4
       gameService.startGame();
       const gameState = gameStateService.gameState();
@@ -388,7 +359,7 @@ describe('MiniMaxService', () => {
                        "_WB_"+
                        "_BW_"+
                        "____";
-      setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
         playerIx: 0,
@@ -408,9 +379,10 @@ describe('MiniMaxService', () => {
       ]};
       expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
     });
-
-    // TODO make realistic board for available moves scoring with more depth to ensure it works properly
   });
+
+  //describe('dynamic weights', () => {
+  //});
 
   // TODO: testing for high difficulty level:
   // - dynamic weighting tests

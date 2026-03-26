@@ -140,26 +140,15 @@ export function createGameStatistics(): GameStatistics {
 export type Cell = {
   state: EnCellState;
   potentialMove: EnCellState; // Used only when defDebugShowMove === true.
-  weight: number[]; // Weight of cell for player AI.
+  weights: number[]; // Weight of cell for player AI.
 }
 
-export function createCell(weight: number[]): Cell {
+export function createCell(weights: number[]): Cell {
   return {
     state: EnCellState.Empty,
     potentialMove: EnCellState.Empty,
-    weight: weight,
+    weights: weights,
   };
-}
-
-export function updateCellState(cell: Cell, state: EnCellState) {
-  cell.state = state;
-  // rest is unchanged
-}
-
-export function updateCellFull(cell: Cell, state: EnCellState, potentialMove: EnCellState) {
-  cell.state = state;
-  cell.potentialMove = potentialMove;
-  // rest is unchanged
 }
 
 //
@@ -171,7 +160,7 @@ export type Player = {
   name: string;
 }
 
-export function createPlayer(ix: number, piece: EnCellState.B | EnCellState.W): Player {
+function createPlayer(ix: number, piece: EnCellState.B | EnCellState.W): Player {
   return {
     ix: ix,
     type: EnPlayerType.Human,
@@ -179,7 +168,8 @@ export function createPlayer(ix: number, piece: EnCellState.B | EnCellState.W): 
     name: '',
   };
 }
-export function createPlayers(): Player[] {
+
+function createPlayers(): Player[] {
   return [createPlayer(0, EnCellState.B), createPlayer(1, EnCellState.W)];
 }
 
@@ -193,21 +183,11 @@ export type GameHistoryEntry = {
   cells: Cell[][]; // Board state as copy of main board at that moment.
 };
 
-export function createGameHistoryEntry(): GameHistoryEntry {
-  return {
-    ix: 0,
-    num: 0,
-    playerIx: -1,
-    move: null,
-    cells: [],
-  };
-}
-
 export type GameHistory = {
   moves: GameHistoryEntry[];
 };
 
-export function createGameHistory(): GameHistory {
+function createGameHistory(): GameHistory {
   return {
     moves: [],
   };
@@ -219,13 +199,6 @@ export type ReversiMove = {
   x: number;
   y: number;
 };
-
-export function createReversiMove(x: number, y: number): ReversiMove {
-  return {
-    x: x,
-    y: y
-  };
-}
 
 //
 

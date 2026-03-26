@@ -35,14 +35,6 @@ export type MiniMaxResult = {
   moves: Coordinate[]; // Moves that lead to this result. Note: {x:-1, y:-1} is pass.
 };
 
-export function createMiniMaxResult(): MiniMaxResult {
-  return {
-    score: 0,
-    depth: -1,
-    moves: [],
-  };
-}
-
 /** Arguments for recursive call of MiniMax algorithm. */
 export type MiniMaxArgs = {
   playerIx: number; // Index of current player.

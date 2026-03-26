@@ -1,257 +1,6 @@
 import { expect } from 'vitest';
 
-import { EnGameStatus, EnCellState, EnMode, EnPlayerType } from '@/code/data/enums';
-import { weights } from '@/code/data/aiConst';
-import type { Coordinate } from "@/code/data/types";
 import type { GameState, Cell, ReversiBoard, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
-import { createGameState, createCell, updateCellState, updateCellFull, createGameHistoryEntry, createReversiMove } from "@/code/data/gameState";
-
-/**
- * Generate game state after start of game, but with empty board.
- * @param boardSize Size of board.
- */
-export function genEmptyState(boardSize: number): GameState {
-  const startGameState = genState(boardSize);
-  genDataFromBoard(startGameState);
-  return startGameState;
-}
-
-/**
- * Generate game state after start of game. Four pieces in center of board are already placed.
- * @param boardSize Size of board.
- */
-export function genStartState(boardSize: number, whoFirst: EnPlayerType=EnPlayerType.Human, mode: EnMode=EnMode.HumanVsHuman): GameState {
-  const startGameState = genState(boardSize);
-
-  const ix = boardSize/2 - 1; // for size 8 it will be 3
-  // add pieces already on board in center
-  updateCellState(startGameState.board.cells[ix][ix], EnCellState.W);
-  updateCellState(startGameState.board.cells[ix+1][ix], EnCellState.B);
-  updateCellState(startGameState.board.cells[ix][ix+1], EnCellState.B);
-  updateCellState(startGameState.board.cells[ix+1][ix+1], EnCellState.W);
-
-  // set potential legal moves
-  updateCellFull(startGameState.board.cells[ix-1][ix], EnCellState.Empty, EnCellState.B);
-  updateCellFull(startGameState.board.cells[ix][ix-1], EnCellState.Empty, EnCellState.B);
-  updateCellFull(startGameState.board.cells[ix+1][ix+2], EnCellState.Empty, EnCellState.B);
-  updateCellFull(startGameState.board.cells[ix+2][ix+1], EnCellState.Empty, EnCellState.B);
-
-  startGameState.board.legalMoves = [
-    createReversiMove(ix-1, ix),
-    createReversiMove(ix, ix-1),
-    createReversiMove(ix+1, ix+2),
-    createReversiMove(ix+2, ix+1),
-  ];
-
-  // scoring
-  startGameState.statistics.emptyCells = boardSize*boardSize - 4;
-  startGameState.statistics.player1Score = 2;
-  startGameState.statistics.player2Score = 2;
-
-  genDataFromBoard(startGameState);
-  startGameState.settings.whoFirst = whoFirst;
-  setupMode(startGameState, mode);
-  return startGameState;
-}
-
-function setupMode(gameState: GameState, mode: EnMode) {
-  gameState.settings.mode = mode;
-  switch (mode) {
-    case EnMode.HumanVsHuman:
-      gameState.players[0].type = EnPlayerType.Human;
-      gameState.players[1].type = EnPlayerType.Human;
-      break;
-    case EnMode.HumanVsAi:
-      if (gameState.settings.whoFirst === EnPlayerType.Human) {
-        gameState.players[0].type = EnPlayerType.Human;
-        gameState.players[1].type = EnPlayerType.AI;
-      } else {
-        gameState.players[0].type = EnPlayerType.AI;
-        gameState.players[1].type = EnPlayerType.Human;
-      }
-      break;
-    case EnMode.AiVsAi:
-      gameState.players[0].type = EnPlayerType.AI;
-      gameState.players[1].type = EnPlayerType.AI;
-      break;
-  }
-}
-
-//
-
-/**
- * Generate default game state with empty board.
- */
-function genState(boardSize: number): GameState {
-  const startGameState = createGameState();
-  // Mutate only the fields that change after "Start Game" is clicked.
-  startGameState.settings.boardSize = boardSize;
-  startGameState.board.status = EnGameStatus.InProgress;
-  startGameState.board.cells = genCells(boardSize); // generate empty board
-  return startGameState;
-}
-
-/**
- * Generate cells for board. Every cell is empty.
- * @param boardSize Size of board.
- * @returns 2D array of cells.
- */
-function genCells(boardSize: number): Cell[][] {
-  const currentWeights = weights[boardSize];
-
-  const cells : Cell[][] = Array.from({ length: boardSize }, (_, x) =>
-    Array.from({ length: boardSize }, (_, y) => {
-      // Lookup the predefined weight, falling back to 0 if the size isn't mapped.
-      const weightVal = currentWeights ? currentWeights[x][y] : 0;
-      return createCell([weightVal, weightVal]);
-    })
-  );
-  return cells;
-}
-
-/**
- * Call it after modifications to board.
- * @param gameState Generated game state.
- */
-function genDataFromBoard(gameState: GameState) {
-  gameState.statistics.round = 1;
-
-  // Should have first entry (initial board state) already in history.
-  const historyEntry = createGameHistoryEntry();
-  historyEntry.cells = structuredClone(gameState.board.cells);
-  clearPotentialMoves(gameState, historyEntry.cells);
-  gameState.board.history.moves.push(historyEntry);
-
-  // Game view should be set.
-  gameState.view.cells = gameState.board.cells;
-}
-
-function clearPotentialMoves(startGameState: GameState, cells: Cell[][])  {
-  const boardSize = startGameState.settings.boardSize;
-  for (let x=0; x<boardSize; x++) {
-    for (let y=0; y<boardSize; y++) {
-      cells[x][y].potentialMove = EnCellState.Empty;
-    }
-  }
-}
-
-// ////////////////////////////////////////////////////////////////////////////
-// BOARD EDITING
-
-/**
- * Set cells on board for given player.
- * @param gameState Game state.
- * @param piece Piece.
- * @param coords Array of coordinates to set.
- */
-export function setCells(gameState: GameState, piece: EnCellState, coords:Coordinate[]) {
-  const cells = gameState.board.cells;
-  for (const coord of coords) {
-    cells[coord.x][coord.y].state = piece;
-  }
-}
-
-/**
- * Set pieces on board based on boardStr that contains human-readable state of board.
- * Note that if you need to recalculate potential moves, do it after calling this.
- * @param gameState Game state.
- * @param piece Piece.
- * @param boardStr Board as string. B is black, W is white, _ is empty cell.
- */
-export function setBoard(gameState: GameState, boardStr:string) {
-  const size = Math.sqrt(boardStr.length);
-  if (!Number.isInteger(size)) throw new Error(`Board string length ${boardStr.length} is not a perfect square.`);
-  const boardSize = gameState.settings.boardSize;
-  if (size !== boardSize) throw new Error(`Size of board from boardStr (${size}) does not match game board data (${boardSize}).`);
-
-  const cells = gameState.board.cells;
-  let ix = 0;
-  while (ix < boardStr.length) {
-    const char = boardStr[ix];
-    const state = char2state(char);
-
-    const y = Math.floor(ix/boardSize);
-    const x = ix - y*boardSize;
-    cells[x][y].state = state;
-    ix++;
-  }
-}
-
-/**
- * Converts character to cell state. Unknown character is considered empty cell.
- * @param char Character representing cell state.
- * @returns Enum for cell state.
- */
-function char2state(char: string): EnCellState  {
-  if (char === '_') return EnCellState.Empty;
-  if (char === 'B') return EnCellState.B;
-  if (char === 'W') return EnCellState.W;
-  return EnCellState.Empty;
-}
-
-// ////////////////////////////////////////////////////////////////////////////
-// HELPERS
-
-/**
- * Convert moves as string to moves as array of coordinates.
- * String contains move sequence using standard grid coordinates
- * (columns are a, b, c... and rows are 1, 2, 3...).
- * Example of movesStr: "d5 e3 a1".
- * Expected result: [{3, 4}, {4, 2}, {0, 0}]
- *
- * @param moves String containing moves in standard grid coordinates.
- * @returns Moves as array of coordinates (zero-based).
- */
-function movesStrToMovesCoord(movesStr: string): {x:number, y: number}[] {
-  if (!movesStr || movesStr === '') return [];
-
-  const base = 'a'.charCodeAt(0);
-  return movesStr.split(' ').map(move => {
-    const x = move.charCodeAt(0) - base;
-    const y = parseInt(move.substring(1)) - 1;
-    return { x, y };
-  });
-}
-
-  /**
-   * Add move to history entry. Note it also affects main board.
-   * @param playerIx Player index.
-   * @param movesAny First entry is actual move, others are flipped pieces. Empty string/array means no change to board (pass).
-   * @returns Moves as array of coordinates.
-   */
-  export function addToHistory(gameState: GameState, playerIx: number, movesAny: {x:number, y: number}[]|string): {x:number, y: number}[] {
-    let moves: {x:number, y: number}[] = [];
-    if (typeof movesAny === 'string') {
-      moves = movesStrToMovesCoord(movesAny);
-    }
-
-    if (moves.length > 0) {
-      const piece = playerIx === 0 ? EnCellState.B: EnCellState.W;
-      for (let i=0; i<moves.length; i++) {
-        const move = moves[i];
-        gameState.board.cells[move.x][move.y].state = piece;
-      }
-    }
-
-    // actually add to history
-    const nextNo = gameState.board.history.moves.length;
-    const historyEntry: GameHistoryEntry = {
-      ix: 0,
-      num: nextNo,
-      playerIx: playerIx,
-      move: moves.length === 0 ? null : {x:moves[0].x, y:moves[0].y},
-      cells: structuredClone(gameState.board.cells)
-    };
-    clearPotentialMoves(gameState, historyEntry.cells);
-    // ensure latest history entry is first on list
-    gameState.board.history.moves.unshift(historyEntry);
-    // update rest of history to reflect correct index
-    for (let ix=0; ix<nextNo+1; ix++) {
-      gameState.board.history.moves[ix].ix = ix;
-    }
-
-    return moves;
-  }
 
 // ////////////////////////////////////////////////////////////////////////////
 // ASSERTIONS
@@ -287,7 +36,7 @@ function assertGameBoard(actualBoard: ReversiBoard, expectedBoard: ReversiBoard)
   expect(actualBoard.status, 'Board status should be same').toEqual(expectedBoard.status);
   expect(actualBoard.currPlayerIx, 'Board currPlayerIx should be same').toEqual(expectedBoard.currPlayerIx);
   assertGameHistory(actualBoard.history, expectedBoard.history);
-  expect(actualBoard.cells, 'Board cells should be same').toEqual(expectedBoard.cells);
+  assertCells(actualBoard.cells, expectedBoard.cells, 'Board cells should be same');
   expect(actualBoard.legalMoves, 'Board legalMoves should be same').toEqual(expectedBoard.legalMoves);
   expect(actualBoard.doublePass, 'Board doublePass should be same').toEqual(expectedBoard.doublePass);
 }
@@ -315,7 +64,35 @@ function assertGameHistory(actualHistory: GameHistory, expectedHistory: GameHist
 function assertGameHistoryEntry(actualHistoryEntry: GameHistoryEntry, expectedHistoryEntry: GameHistoryEntry, ix: number) {
   expect(actualHistoryEntry.playerIx, `History entry [${ix}] playerIx should be same`).toEqual(expectedHistoryEntry.playerIx);
   expect(actualHistoryEntry.move, `History entry [${ix}] move should be same`).toEqual(expectedHistoryEntry.move);
-  expect(actualHistoryEntry.cells, `History entry [${ix}] cells should be same`).toEqual(expectedHistoryEntry.cells);
+  assertCells(actualHistoryEntry.cells, expectedHistoryEntry.cells, `History entry [${ix}] cells should be same`);
+}
+
+/**
+ * Asserts cells.
+ * @param actualCells Actual 2d array of cells.
+ * @param expectedCells Expected 2d array of cells.
+ */
+function assertCells(actualCells: Cell[][], expectedCells: Cell[][], comment: string) {
+  //expect(actualCells, `${comment}`).toEqual(expectedCells);
+  expect(actualCells.length, `${comment}. Array should have same size`).toEqual(expectedCells.length);
+  const size = actualCells.length;
+  for (let x=0; x<size; x++) {
+    for (let y=0; y<size; y++) {
+      const actualCell = actualCells[x][y];
+      const expectedCell = expectedCells[x][y];
+      const subComment = `${comment}. Cell x=${x}, y=${y} differs`
+      assertCell(actualCell, expectedCell, subComment);
+    }
+  }
+}
+
+/**
+ * Asserts single cell.
+ * @param actualCell Actual cell.
+ * @param expectedCell Expected cell.
+ */
+function assertCell(actualCell: Cell, expectedCell: Cell, comment: string) {
+  expect(actualCell, `${comment}`).toEqual(expectedCell);
 }
 
 function adjustExpectedGameState(actualGameState: GameState, expectedGameState: GameState) {
