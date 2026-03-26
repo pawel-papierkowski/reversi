@@ -89,11 +89,7 @@ describe('AiService', () => {
       expectedGameState.statistics.player1Score = 4;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -125,11 +121,7 @@ describe('AiService', () => {
       expectedGameState.statistics.player1Score = 4;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -170,11 +162,7 @@ describe('AiService', () => {
       expectedGameState.statistics.player1Score = 6;
       expectedGameState.statistics.player2Score = 3;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -212,11 +200,7 @@ describe('AiService', () => {
       expectedGameState.statistics.player1Score = 3;
       expectedGameState.statistics.player2Score = 5;
       expectedGameState.board.currPlayerIx = 0;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -253,11 +237,7 @@ describe('AiService', () => {
       expectedGameState.statistics.player1Score = 5;
       expectedGameState.statistics.player2Score = 2;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -294,11 +274,7 @@ describe('AiService', () => {
       expectedGameState.statistics.player1Score = 5;
       expectedGameState.statistics.player2Score = 3;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -349,12 +325,7 @@ describe('AiService', () => {
       expectedGameState.statistics.emptyCells = 6;
       expectedGameState.statistics.player1Score = 6;
       expectedGameState.statistics.player2Score = 4;
-      expectedGameState.board.currPlayerIx = 0;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -407,12 +378,7 @@ describe('AiService', () => {
       expectedGameState.statistics.emptyCells = 4;
       expectedGameState.statistics.player1Score = 7;
       expectedGameState.statistics.player2Score = 5;
-      expectedGameState.board.currPlayerIx = 0;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
@@ -454,12 +420,7 @@ describe('AiService', () => {
       expectedGameState.statistics.emptyCells = 8;
       expectedGameState.statistics.player1Score = 4;
       expectedGameState.statistics.player2Score = 4;
-      expectedGameState.board.currPlayerIx = 0;
-      expectedGameState.board.cells = structuredClone(expectedGameState.board.history.moves[0].cells);
-      expectedGameState.view.cells = expectedGameState.board.cells;
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
+      debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);

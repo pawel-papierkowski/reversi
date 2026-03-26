@@ -139,6 +139,22 @@ export class DebugService {
   // //////////////////////////////////////////////////////////////////////////
 
   /**
+   * Fill certain parts of game state based on other data in game state.
+   * In particular, it expects history to be properly filled.
+   * @param gameState Game state.
+   */
+  public fillGameState(gameState: GameState) {
+    gameState.board.cells = structuredClone(gameState.board.history.moves[0].cells);
+    gameState.view.cells = gameState.board.cells;
+
+    const piece = gameState.board.currPlayerIx == 0 ? EnCellState.B : EnCellState.W;
+    gameState.board.legalMoves = this.legalMoveService.resolveMovesCustom(gameState.board.cells, piece);
+    this.legalMoveService.showHintsCustom(gameState.board.cells, piece, gameState.board.legalMoves);
+  }
+
+  // //////////////////////////////////////////////////////////////////////////
+
+  /**
    * Set pieces on board based on boardStr that contains human-readable state of board.
    * @param gameState Game state.
    * @param boardStr Board as string. B is black, W is white, _ is empty cell.

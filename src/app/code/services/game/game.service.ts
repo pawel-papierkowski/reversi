@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 
-import { EnGameStatus, EnCellState, EnPlayerType, EnViewMode } from '@/code/data/enums';
+import { EnGameStatus, EnPlayerType, EnViewMode } from '@/code/data/enums';
 import type { DifficultyProp } from "@/code/data/types";
 import { aiProp } from '@/code/data/aiConst';
-import type { GameState, GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
+import type { GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
 import type { EvaluateArgs } from "@/code/data/aiState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
