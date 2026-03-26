@@ -105,6 +105,9 @@ export const aiProp: AiProp = {
   wait: 700,
   maxScore: 100000,
   weights: weights,
+  weightData: {
+    friendlyCorner: 30,
+  },
   difficulties: difficulties,
   customDifficulty: null, // used in debug and unit tests, normally should stay null
 };

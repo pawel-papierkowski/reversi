@@ -107,12 +107,12 @@ describe('GameService', () => {
       gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameStateService.menuSettings().boardSize = 4; // 4x4
       gameService.startGame();
-      gameService.makeMove(0, 1); // a2
-      gameService.makeMove(0, 0); // a1, this move changes weights
+      gameService.makeMove(3, 2); // d3
+      gameService.makeMove(3, 3); // d4, this move changes weights
 
       const expectedGameState = debugService.genStartState(4);
-      debugService.addToHistory(expectedGameState, 0, "a2 b2");
-      debugService.addToHistory(expectedGameState, 1, "a1 b2");
+      debugService.addToHistory(expectedGameState, 0, "d3 c3");
+      debugService.addToHistory(expectedGameState, 1, "d4 c3", [{x:2, y:3, w:30}, {x:3, y:2, w:30}, {x:2, y:2, w:30}]);
 
       // Check game state.
       expectedGameState.statistics.moveCount = 2;

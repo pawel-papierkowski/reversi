@@ -36,8 +36,13 @@ export type AiProp = {
   wait: number; // in milliseconds
   maxScore: number; // value for maximum possible score
   weights: Record<number, number[][]>; // weights for different sizes of board
+  weightData: WeightData; // weight values for dynamic weighting
   difficulties: Record<EnDifficulty, DifficultyProp>; // properties for difficulty levels
   customDifficulty: DifficultyProp|null;
+};
+
+export type WeightData = {
+  friendlyCorner: number; // weight value for friendly corner
 };
 
 /** Scoring system. */
@@ -57,3 +62,5 @@ export type DifficultyProp = {
 // OTHER
 
 export type Coordinate = { x: number; y: number };
+
+export type WeightCoord = { x: number; y: number, w: number };

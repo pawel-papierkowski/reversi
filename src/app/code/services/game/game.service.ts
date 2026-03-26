@@ -104,6 +104,9 @@ export class GameService {
 
     // Legal move found, execute it.
     this.gameStateService.executeMove(move);
+    // Affect weights if allowed.
+    if (this.resolveDifficulty().dynamicWeights) this.gameStateService.affectWeights(move);
+
     // Current state of board as latest entry in history. Notes:
     // - State of board is from PoV of player that made move AFTER making move.
     // - Potential moves are erased.
