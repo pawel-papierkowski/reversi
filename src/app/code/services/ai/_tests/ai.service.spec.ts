@@ -387,8 +387,8 @@ describe('AiService', () => {
 
   describe('MiniMax with dynamic weighting', () => {
     it('corner changes weight', async () => {
-      // TODO finish this unit test: you need to make situation where weight change actually
-      // changes evaluation and picked move
+      // We need to make situation where weight change actually changes evaluation
+      // and picked move.
       aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: true,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1}] };
       gameStateService.menuSettings().mode = EnMode.AiVsAi;
@@ -402,8 +402,7 @@ describe('AiService', () => {
       gameService.makeMove(3, 2); // d3
 
       // Evaluation will be impacted by changed weights.
-      // White have four potential moves here: a3, b4, d2 or d4. It chooses d4.
-      // Without weight change, all potential moves are equally bad.
+      // White have four potential moves here: a3, b4, d2 or d4. It chooses a3.
       await aiService.maybeMakeMove(); // move 4, white
 
       // Verify game state after this call.
@@ -411,9 +410,9 @@ describe('AiService', () => {
       expectedGameState.settings.difficulty = EnDifficulty.Hard;
 
       debugService.addToHistory(expectedGameState, 0, "a2 b2");
-      debugService.addToHistory(expectedGameState, 1, "a1 b2");
+      debugService.addToHistory(expectedGameState, 1, "a1 b2", [{x:1, y:1, w:30}, {x:1, y:0, w:30}, {x:0, y:1, w:30}]);
       debugService.addToHistory(expectedGameState, 0, "d3 c3");
-      debugService.addToHistory(expectedGameState, 1, "d2 c2"); // AI move
+      debugService.addToHistory(expectedGameState, 1, "a3 a2"); // AI move
 
       // Check game state.
       expectedGameState.statistics.moveCount = 4;

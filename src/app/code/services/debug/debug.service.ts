@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
-import type { Coordinate } from "@/code/data/types";
-import { weights } from '@/code/data/aiConst';
+import type { Coordinate, WeightCoord } from "@/code/data/types";
 import type { GameState, Cell, GameHistoryEntry } from "@/code/data/gameState";
-import { createGameState, createCell } from "@/code/data/gameState";
+import { createGameState } from "@/code/data/gameState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { GameService } from '@/code/services/game/game.service';
@@ -203,10 +202,11 @@ export class DebugService {
    * Add move to history entry. Note it also affects main board.
    * @param playerIx Player index.
    * @param movesAny First entry is actual move, others are flipped pieces. Empty string/array means no change to board (pass).
+   * @param weightChanges If present, it is array of weights to change.
    * @returns Moves as array of coordinates.
    */
-  public addToHistory(gameState: GameState, playerIx: number, movesAny: {x:number, y: number}[]|string): {x:number, y: number}[] {
-    let moves: {x:number, y: number}[] = [];
+  public addToHistory(gameState: GameState, playerIx: number, movesAny: Coordinate[]|string, weightChanges:WeightCoord[]=[]): {x:number, y: number}[] {
+    let moves: Coordinate[] = [];
     if (typeof movesAny === 'string') {
       moves = this.movesStrToMovesCoord(movesAny);
     }
@@ -216,6 +216,13 @@ export class DebugService {
       for (let i=0; i<moves.length; i++) {
         const move = moves[i];
         gameState.board.cells[move.x][move.y].state = piece;
+      }
+    }
+
+    if (weightChanges.length > 0) {
+      for (let i=0; i<weightChanges.length; i++) {
+        const weightChange = weightChanges[i];
+        gameState.board.cells[weightChange.x][weightChange.y].weights[playerIx] = weightChange.w;
       }
     }
 
@@ -249,7 +256,7 @@ export class DebugService {
    * @param moves String containing moves in standard grid coordinates.
    * @returns Moves as array of coordinates (zero-based).
    */
-  private movesStrToMovesCoord(movesStr: string): {x:number, y: number}[] {
+  private movesStrToMovesCoord(movesStr: string): Coordinate[] {
     if (!movesStr || movesStr === '') return [];
 
     const base = 'a'.charCodeAt(0);

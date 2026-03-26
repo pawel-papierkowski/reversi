@@ -3,8 +3,9 @@ import { Injectable, inject, signal } from '@angular/core';
 import { XORShift128Plus } from 'random-seedable';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
-import { BoardStats } from '@/code/data/types';
+import { BoardStats, Coordinate } from '@/code/data/types';
 import { weights } from '@/code/data/aiConst';
+import { aiProp } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
 import type { DirCoord } from '@/code/data/dirCoord';
 import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
@@ -71,153 +72,6 @@ export class GameStateService {
   public changePlayer() {
     const playerIx = this.gameState().board.currPlayerIx;
     this.gameState().board.currPlayerIx = playerIx === 0 ? 1 : 0;
-  }
-
-  // //////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Execute move for current state of board.
-   * That means changing state of selected cell and flipping
-   * any contiguous line of opposite pieces that touch this piece.
-   * @param move Move to execute.
-   */
-  public executeMove(move: ReversiMove) {
-    const cells = this.gameState().board.cells;
-    const playerPiece = this.getCurrPlayer().piece;
-    return this.executeMoveCustom(cells, playerPiece, move);
-  }
-
-  /**
-   * Execute move for given board.
-   * That means changing state of selected cell and flipping
-   * any contiguous line of opposite pieces that touch this piece.
-   * @param cells State of board.
-   * @param playerPiece Player piece.
-   * @param move Move to execute.
-   */
-  public executeMoveCustom(cells: Cell[][], playerPiece: EnCellState, move: ReversiMove) {
-    const oppPlayerPiece = getOppPiece(playerPiece);
-    const cell = cells[move.x][move.y];
-    this.setCell(cell, playerPiece);
-
-    const potentialMoves = this.resolvePotentialMoves(cells, move.x, move.y, oppPlayerPiece);
-    for (let i=0; i<potentialMoves.length; i++) {
-      const potentialMove = potentialMoves[i];
-      this.tryFlipInDirection(cells, potentialMove, playerPiece, oppPlayerPiece);
-    }
-  }
-
-  /**
-   * Try to flip pieces in given direction for given coordinates.
-   * This is done in two phases:
-   * - First we trace until we hit another your player piece. If that fails, we abort.
-   * - Now we flipp all opposing pieces detected in trace.
-   * @param potentialMove Direction and coordinates to use.
-   * @param playerPiece Piece of your player.
-   * @param oppPlayerPiece Piece of opposing player.
-   */
-  private tryFlipInDirection(cells: Cell[][], potentialMove: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState) {
-    const opposingPieces: DirCoord[] = this.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
-    if (opposingPieces.length === 0) return; // nothing to do in this direction
-
-    for (let i=0; i<opposingPieces.length; i++) { // flip them all
-      const opposingPiece = opposingPieces[i];
-      const cell = cells[opposingPiece.x][opposingPiece.y];
-      cell.state = playerPiece; // most important line of code in game
-    }
-  }
-
-  /**
-   * Set new cell state for given player.
-   * @param cell Cell to modify.
-   * @param playerPiece Player piece.
-   */
-  private setCell(cell: Cell, playerPiece: EnCellState) {
-    cell.state = playerPiece;
-    cell.potentialMove = EnCellState.Empty;
-  }
-
-  //
-
-  /**
-   * Resolve potential moves around selected cell.
-   * Note you will need to cast trace out of them to ensure this potential move is in fact legal move.
-   * @param cells State of board.
-   * @param x X coordinate of cell.
-   * @param y Y coordinate of cell.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @returns Array of offsets.
-   */
-  public resolvePotentialMoves(cells: Cell[][], x: number, y: number, oppPlayerPiece: EnCellState): DirCoord[] {
-    const potentialMoves : DirCoord[] = [];
-    // Find out all directions around given cell.
-    // Already exclude coordinates out of range or containing something else than piece of opposite color.
-    for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
-      let dirCoord : DirCoord = createDirCoord(dir, x, y);
-      dirCoord = applyDir(dirCoord);
-      if (this.canUsePotentialMove(cells, dirCoord, oppPlayerPiece)) potentialMoves.push(dirCoord);
-    }
-    return potentialMoves;
-  }
-
-  /**
-   * Check if can use coordinates (starting point for tracing) of potential move. Conditions:
-   * - X and Y cannot be outside range.
-   * - Cell must contain piece for opposing player.
-   * @param cells State of board.
-   * @param dirCoord Coordinates to use.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @returns True if can use given coordinates, otherwise false.
-   */
-  private canUsePotentialMove(cells: Cell[][], dirCoord : DirCoord, oppPlayerPiece: EnCellState) : boolean {
-    const size = cells.length;
-    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
-    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
-    const cell = cells[dirCoord.x][dirCoord.y];
-    return cell.state === oppPlayerPiece;
-  }
-
-  //
-
-  /**
-   * Trace from given coordinates in given direction across board until you hit edge or cell that has
-   * something else than piece of opposing player. If that cell has your piece, bingo. Move is valid.
-   * @param cells State of board.
-   * @param dirCoord Coordinates+direction to use.
-   * @param playerPiece Piece of your player.
-   * @returns Array of coordinates where opposing pieces are present. If empty, this is not legal move.
-   */
-  public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState): DirCoord[] {
-    const boardSize = cells.length;
-    const opposingPieces: DirCoord[] = [];
-    // we always are one step away from origin point
-    //if (cells[dirCoord.x][dirCoord.y].state === oppPlayerPiece)
-    opposingPieces.push(structuredClone(dirCoord));
-
-    do {
-      dirCoord = applyDir(dirCoord); // move coordinates
-      if (!this.hitEdge(dirCoord, boardSize)) return []; // hit edge of board, can't be valid move
-      const cell = cells[dirCoord.x][dirCoord.y];
-      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return []; // can't be legal move!
-      if (cell.state === oppPlayerPiece) {
-        // found piece of opposite player, add to array and continue
-        opposingPieces.push(structuredClone(dirCoord));
-        continue;
-      }
-      if (cell.state === playerPiece) return opposingPieces; // it is legal move!
-    } while (true);
-  }
-
-  /**
-   * Check if we hit edge of board.
-   * @param dirCoord Coordinates.
-   * @param size Size of board.
-   * @returns True if edge was hit, otherwise false.
-   */
-  private hitEdge(dirCoord : DirCoord, size: number): boolean {
-    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
-    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
-    return true;
   }
 
   // //////////////////////////////////////////////////////////////////////////
@@ -465,5 +319,230 @@ export class GameStateService {
       foundName = this.rng.choice(names);
     } while (foundName === excludeName);
     return foundName;
+  }
+
+  // //////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Execute move for current state of board. That means changing state of selected cell
+   * and flipping any contiguous line of opposite pieces that touch this piece.
+   * Note: code assumes this move is legal. Check it before calling this function!
+   * @param move Move to execute.
+   */
+  public executeMove(move: ReversiMove) {
+    const cells = this.gameState().board.cells;
+    const playerPiece = this.getCurrPlayer().piece;
+    this.executeMoveCustom(cells, playerPiece, move);
+  }
+
+  /**
+   * Execute move for current state of board. That means changing state of selected cell
+   * and flipping any contiguous line of opposite pieces that touch this piece.
+   * Note: code assumes this move is legal. Check it before calling this function!
+   * @param cells State of board.
+   * @param playerPiece Player piece.
+   * @param move Move to execute.
+   */
+  public executeMoveCustom(cells: Cell[][], playerPiece: EnCellState, move: ReversiMove) {
+    const oppPlayerPiece = getOppPiece(playerPiece);
+    const cell = cells[move.x][move.y];
+    this.setCell(cell, playerPiece);
+
+    const potentialMoves = this.resolvePotentialMoves(cells, move.x, move.y, oppPlayerPiece);
+    for (let i=0; i<potentialMoves.length; i++) {
+      const potentialMove = potentialMoves[i];
+      this.tryFlipInDirection(cells, potentialMove, playerPiece, oppPlayerPiece);
+    }
+  }
+
+  /**
+   * Try to flip pieces in given direction for given coordinates.
+   * This is done in two phases:
+   * - First we trace until we hit another your player piece. If that fails, we abort.
+   * - Now we flipp all opposing pieces detected in trace.
+   * @param potentialMove Direction and coordinates to use.
+   * @param playerPiece Piece of your player.
+   * @param oppPlayerPiece Piece of opposing player.
+   */
+  private tryFlipInDirection(cells: Cell[][], potentialMove: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState) {
+    const opposingPieces: DirCoord[] = this.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
+    if (opposingPieces.length === 0) return; // nothing to do in this direction
+
+    for (let i=0; i<opposingPieces.length; i++) { // flip them all
+      const opposingPiece = opposingPieces[i];
+      const cell = cells[opposingPiece.x][opposingPiece.y];
+      cell.state = playerPiece; // most important line of code in game
+    }
+  }
+
+  /**
+   * Set new cell state for given player.
+   * @param cell Cell to modify.
+   * @param playerPiece Player piece.
+   */
+  private setCell(cell: Cell, playerPiece: EnCellState) {
+    cell.state = playerPiece;
+    cell.potentialMove = EnCellState.Empty;
+  }
+
+  //
+
+  /**
+   * Resolve potential moves around selected cell.
+   * Note you will need to cast trace out of them to ensure this potential move is in fact legal move.
+   * @param cells State of board.
+   * @param x X coordinate of cell.
+   * @param y Y coordinate of cell.
+   * @param oppPlayerPiece Piece of opposing player.
+   * @returns Array of offsets.
+   */
+  public resolvePotentialMoves(cells: Cell[][], x: number, y: number, oppPlayerPiece: EnCellState): DirCoord[] {
+    const potentialMoves : DirCoord[] = [];
+    // Find out all directions around given cell.
+    // Already exclude coordinates out of range or containing something else than piece of opposite color.
+    for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
+      let dirCoord : DirCoord = createDirCoord(dir, x, y);
+      dirCoord = applyDir(dirCoord);
+      if (this.canUsePotentialMove(cells, dirCoord, oppPlayerPiece)) potentialMoves.push(dirCoord);
+    }
+    return potentialMoves;
+  }
+
+  /**
+   * Check if can use coordinates (starting point for tracing) of potential move. Conditions:
+   * - X and Y cannot be outside range.
+   * - Cell must contain piece for opposing player.
+   * @param cells State of board.
+   * @param dirCoord Coordinates to use.
+   * @param oppPlayerPiece Piece of opposing player.
+   * @returns True if can use given coordinates, otherwise false.
+   */
+  private canUsePotentialMove(cells: Cell[][], dirCoord : DirCoord, oppPlayerPiece: EnCellState) : boolean {
+    const size = cells.length;
+    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
+    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
+    const cell = cells[dirCoord.x][dirCoord.y];
+    return cell.state === oppPlayerPiece;
+  }
+
+  //
+
+  /**
+   * Trace from given coordinates in given direction across board until you hit edge or cell that has
+   * something else than piece of opposing player. If that cell has your piece, bingo. Move is valid.
+   * @param cells State of board.
+   * @param dirCoord Coordinates+direction to use.
+   * @param playerPiece Piece of your player.
+   * @returns Array of coordinates where opposing pieces are present. If empty, this is not legal move.
+   */
+  public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState): DirCoord[] {
+    const boardSize = cells.length;
+    const opposingPieces: DirCoord[] = [];
+    // we always are one step away from origin point
+    //if (cells[dirCoord.x][dirCoord.y].state === oppPlayerPiece)
+    opposingPieces.push(structuredClone(dirCoord));
+
+    do {
+      dirCoord = applyDir(dirCoord); // move coordinates
+      if (!this.hitEdge(dirCoord, boardSize)) return []; // hit edge of board, can't be valid move
+      const cell = cells[dirCoord.x][dirCoord.y];
+      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return []; // can't be legal move!
+      if (cell.state === oppPlayerPiece) {
+        // found piece of opposite player, add to array and continue
+        opposingPieces.push(structuredClone(dirCoord));
+        continue;
+      }
+      if (cell.state === playerPiece) return opposingPieces; // it is legal move!
+    } while (true);
+  }
+
+  /**
+   * Check if we hit edge of board.
+   * @param dirCoord Coordinates.
+   * @param size Size of board.
+   * @returns True if edge was hit, otherwise false.
+   */
+  private hitEdge(dirCoord : DirCoord, size: number): boolean {
+    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
+    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
+    return true;
+  }
+
+  // //////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Affect weights on board.
+   * @param move Move.
+   */
+  public affectWeights(move: ReversiMove) {
+    const cells = this.gameState().board.cells;
+    const playerIx = this.getCurrPlayer().ix;
+    this.affectWeightsCustom(cells, playerIx, move);
+  }
+
+  /**
+   * Affect weights on custom board.
+   * @param cells State of board.
+   * @param playerIx Player index.
+   * @param move Move.
+   */
+  private affectWeightsCustom(cells: Cell[][], playerIx: number, move: ReversiMove) {
+    // Right now, we only change weights for corners.
+    if (this.isCorner(move, cells.length-1)) this.affectCorners(cells, playerIx, move);
+  }
+
+  /**
+   * Check if given move is corner.
+   * @param move Move to check.
+   * @param maxCoord Maximum coordinate value.
+   * @returns True if it is corner, otherwise false.
+   */
+  private isCorner(move: ReversiMove, maxCoord: number): boolean {
+    if ((move.x === 0 || move.x === maxCoord) &&
+        (move.y === 0 || move.y === maxCoord)) return true;
+    return false;
+  }
+
+  /**
+   * Affect weights on corner.
+   * @param cells State of board.
+   * @param playerIx Player index.
+   * @param move Move.
+   */
+  private affectCorners(cells: Cell[][], playerIx: number, move: ReversiMove) {
+    const maxCoord = cells.length-1;
+    const coords: Coordinate[] = [];
+    if (move.x === 0 && move.y === 0) {
+      coords.push({x:1, y:0});
+      coords.push({x:0, y:1});
+      coords.push({x:1, y:1});
+    } else if (move.x === maxCoord && move.y === 0) {
+      coords.push({x:maxCoord-1, y:0});
+      coords.push({x:maxCoord, y:1});
+      coords.push({x:maxCoord-1, y:1});
+    } else if (move.x === 0 && move.y === maxCoord) {
+      coords.push({x:1, y:maxCoord});
+      coords.push({x:0, y:maxCoord-1});
+      coords.push({x:1, y:maxCoord-1});
+    } else if (move.x === maxCoord && move.y === maxCoord) {
+      coords.push({x:maxCoord-1, y:maxCoord});
+      coords.push({x:maxCoord, y:maxCoord-1});
+      coords.push({x:maxCoord-1, y:maxCoord-1});
+    }
+
+    this.affectCellWeights(cells, playerIx, coords, aiProp.weightData.friendlyCorner);
+  }
+
+  /**
+   * Set new weight value to weights in cells indicated by given array of coordinates.
+   * @param cells State of board.
+   * @param playerIx Player index.
+   * @param coords Array of coordinates.
+   * @param newWeightValue New weight value.
+   */
+  private affectCellWeights(cells: Cell[][], playerIx: number, coords: Coordinate[], newWeightValue: number) {
+    for (const coord of coords) {
+      cells[coord.x][coord.y].weights[playerIx] = newWeightValue;
+    }
   }
 }
