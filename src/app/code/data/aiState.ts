@@ -1,5 +1,5 @@
 import { EnCellState } from '@/code/data/enums';
-import type { Coordinate, ScoringSystem } from "@/code/data/types";
+import type { ScoreCoord, ScoringSystem } from "@/code/data/types";
 import type { Cell, ReversiMove } from "@/code/data/gameState";
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ export type MiniMaxResp = {
 export type MiniMaxResult = {
   score: number; // Best score found.
   depth: number; // Depth.
-  moves: Coordinate[]; // Moves that lead to this result. Note: {x:-1, y:-1} is pass.
+  moves: ScoreCoord[]; // Moves that lead to this result. Note: {x:-1, y:-1} is a pass.
 };
 
 /** Arguments for recursive call of MiniMax algorithm. */
@@ -43,7 +43,7 @@ export type MiniMaxArgs = {
   currDepth: number; // Current depth of search.
   maxDepth: number; // Maximum depth of search.
   cells: Cell[][]; // Current board state.
-  moves: Coordinate[]; // Moves made so far.
+  moves: ScoreCoord[]; // Moves made so far.
   scoringSystems: ScoringSystem[]; // Available scoring systems.
   scoringSystem: ScoringSystem; // Scoring system to use.
 }

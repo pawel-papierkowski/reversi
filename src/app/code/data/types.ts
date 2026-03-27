@@ -61,6 +61,19 @@ export type DifficultyProp = {
 
 // OTHER
 
-export type Coordinate = { x: number; y: number };
+export type Coordinate = {
+  x: number;
+  y: number;
+};
 
-export type WeightCoord = { x: number; y: number, w: number };
+export type ScoreCoord = {
+  x: number;
+  y: number;
+  s: number; // score
+};
+
+export type WeightCoord = {
+  x: number;
+  y: number;
+  w: number; // weight
+};

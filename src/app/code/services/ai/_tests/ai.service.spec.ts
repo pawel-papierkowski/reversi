@@ -33,8 +33,8 @@ describe('AiService', () => {
     miniMaxService = TestBed.inject(MiniMaxService);
     debugService = TestBed.inject(DebugService);
 
-    // set up rng seed
-    gameStateService.rng.seed = 333333;
+    // set up all needed properties
+    gameStateService.rng.seed = 333333; // for consistency
     aiProp.wait = 0;
     aiProp.customDifficulty = null;
   });
@@ -347,14 +347,15 @@ describe('AiService', () => {
       gameService.makeMove(3, 2); // d3
       gameService.makeMove(3, 3); // d4
       gameService.makeMove(1, 0); // b1
+      gameService.makeMove(2, 0); // c1
 
       const evaluateScoringMovesSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringMoves');
       const evaluateScoringWeightedSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringWeighted');
       const evaluateScoringStraightSpy = vi.spyOn(miniMaxService as any, 'evaluateScoringStraight');
 
       // Evaluation uses only straight scoring system, as board is already filled enough.
-      // White have two potential moves here: c1 or d2. It chooses d2.
-      await aiService.maybeMakeMove(); // move 8, white
+      // Black have two potential moves here: d1 or d2. It chooses d1.
+      await aiService.maybeMakeMove(); // move 9, black
 
       expect(evaluateScoringMovesSpy).not.toBeCalled(); // never
       expect(evaluateScoringWeightedSpy).not.toBeCalled();
@@ -371,13 +372,15 @@ describe('AiService', () => {
       debugService.addToHistory(expectedGameState, 0, "d3 c3");
       debugService.addToHistory(expectedGameState, 1, "d4 c3");
       debugService.addToHistory(expectedGameState, 0, "b1 b2");
-      debugService.addToHistory(expectedGameState, 1, "d2 d3"); // AI move
+      debugService.addToHistory(expectedGameState, 1, "c1 b1 c2");
+      debugService.addToHistory(expectedGameState, 0, "d1 c2"); // AI move
 
       // Check game state.
-      expectedGameState.statistics.moveCount = 8;
-      expectedGameState.statistics.emptyCells = 4;
-      expectedGameState.statistics.player1Score = 7;
+      expectedGameState.statistics.moveCount = 9;
+      expectedGameState.statistics.emptyCells = 3;
+      expectedGameState.statistics.player1Score = 8;
       expectedGameState.statistics.player2Score = 5;
+      expectedGameState.board.currPlayerIx = 1;
       debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();

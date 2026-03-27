@@ -1,7 +1,7 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
-import { EnCellState, EnDifficulty, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
+import { EnDifficulty, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
@@ -29,6 +29,7 @@ describe('App (logic)', () => {
     legalMoveService = TestBed.inject(LegalMoveService);
     debugService = TestBed.inject(DebugService);
 
+    // Disable AI trigger.
     gameStateService.gameState().debugSettings.disableAutoAi = true;
 
     // Trigger initial navigation to load the '' (MainMenu) route.
@@ -61,7 +62,8 @@ describe('App (logic)', () => {
       assertGameState(actualGameState, expectedGameState);
     });
 
-    it('with changed settings', async () => { // AI IS TRIGGERED
+    it('with changed settings', async () => {
+      // AI is not triggered, this is intentional. We test trigger separately.
       // Set AI as first and set 4x4 board.
       selectComboboxOption(fixture, 'cb-mainMenu-whoFirst', 1);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0);
@@ -100,7 +102,8 @@ describe('App (logic)', () => {
       assertGameState(actualGameState, expectedGameState);
     });
 
-    it('in AI vs AI mode', async () => { // AI IS TRIGGERED
+    it('in AI vs AI mode', async () => {
+      // AI is not triggered, this is intentional. We test trigger separately.
       selectComboboxOption(fixture, 'cb-mainMenu-mode', 2); // AI vs AI
       selectComboboxOption(fixture, 'cb-mainMenu-difficulty', 3); // hard difficulty
       await startGame(fixture);
@@ -180,8 +183,8 @@ describe('App (logic)', () => {
     });
 
     it('on two valid cells should add and flip pieces for both players', async () => {
-      // board 4x4, moves: b1 a3
       const expectedGameState = debugService.genStartState(4);
+      // board 4x4, moves: b1 a3
       selectComboboxOption(fixture, 'cb-mainMenu-mode', 0);
       selectComboboxOption(fixture, 'cb-mainMenu-boardSize', 0); // 4x4
       await startGame(fixture);
@@ -493,4 +496,3 @@ describe('App (logic)', () => {
     });
   });
 });
-

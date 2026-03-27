@@ -207,11 +207,11 @@ export class DebugService {
    */
   public addToHistory(gameState: GameState, playerIx: number, movesAny: Coordinate[]|string, weightChanges:WeightCoord[]=[]): {x:number, y: number}[] {
     let moves: Coordinate[] = [];
-    if (typeof movesAny === 'string') {
-      moves = this.movesStrToMovesCoord(movesAny);
+    if (typeof movesAny === 'string') { // first convert to array of coordinates if needed
+      moves = this.movesStrToMovesCoord(movesAny.trim());
     }
 
-    if (moves.length > 0) {
+    if (moves.length > 0) { // change state of board
       const piece = playerIx === 0 ? EnCellState.B: EnCellState.W;
       for (let i=0; i<moves.length; i++) {
         const move = moves[i];
@@ -219,7 +219,7 @@ export class DebugService {
       }
     }
 
-    if (weightChanges.length > 0) {
+    if (weightChanges.length > 0) { // change weights
       for (let i=0; i<weightChanges.length; i++) {
         const weightChange = weightChanges[i];
         gameState.board.cells[weightChange.x][weightChange.y].weights[playerIx] = weightChange.w;
@@ -227,10 +227,10 @@ export class DebugService {
     }
 
     // actually add to history
-    const nextNo = gameState.board.history.moves.length;
+    const nextMoveNum = gameState.board.history.moves.length;
     const historyEntry: GameHistoryEntry = {
       ix: 0,
-      num: nextNo,
+      num: nextMoveNum,
       playerIx: playerIx,
       move: moves.length === 0 ? null : {x:moves[0].x, y:moves[0].y},
       cells: structuredClone(gameState.board.cells)
@@ -239,7 +239,7 @@ export class DebugService {
     // ensure latest history entry is first on list
     gameState.board.history.moves.unshift(historyEntry);
     // update rest of history to reflect correct index
-    for (let ix=0; ix<nextNo+1; ix++) {
+    for (let ix=0; ix<nextMoveNum+1; ix++) {
       gameState.board.history.moves[ix].ix = ix;
     }
 
@@ -257,7 +257,7 @@ export class DebugService {
    * @returns Moves as array of coordinates (zero-based).
    */
   private movesStrToMovesCoord(movesStr: string): Coordinate[] {
-    if (!movesStr || movesStr === '') return [];
+    if (!movesStr || movesStr === '') return []; // pass
 
     const base = 'a'.charCodeAt(0);
     return movesStr.split(' ').map(move => {
