@@ -24,8 +24,7 @@ export class GameScreenPage {
   private readonly isThinking = signal(false);
 
   constructor() {
-    effect(() => {
-      // Trigger AI move if it is AI's turn and game is in progress.
+    effect(() => { // Trigger AI move if it is AI's turn and game is in progress.
       const state = this.gameStateService.gameState(); // subscribe to game state changes
 
       if (state.debugSettings.disableAutoAi) return;
@@ -38,13 +37,14 @@ export class GameScreenPage {
       // Only make move if game is in progress, not in history mode and it is AI's turn.
       if (!isInProgress || isHistoryMode || !isAiTurn) return;
 
-      // Note: not executed in unit tests.
+      // Note: not executed in almost all unit tests.
       untracked(async () => {
         this.isThinking.set(true);
         try {
           await this.aiService.maybeMakeMove();
         } finally {
           this.isThinking.set(false);
+          this.gameStateService.gameState().statistics.aiTrigger++;
         }
       });
     });

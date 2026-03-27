@@ -101,6 +101,7 @@ type GameStatistics = {
   round: number;
   moveCount: number;
   emptyCells: number;
+  aiTrigger: number; // How many times AI was asked for move. NOTE: only from effect() in GameScreenPage.
 
   ties: number;
   tiesInRow: number;
@@ -119,6 +120,7 @@ export function createGameStatistics(): GameStatistics {
     round: 0,
     moveCount: 0,
     emptyCells: 0,
+    aiTrigger: 0,
 
     ties: 0,
     tiesInRow: 0,

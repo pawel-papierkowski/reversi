@@ -9,6 +9,8 @@ import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 import { DebugService } from '@/code/services/debug/debug.service';
 
+import { assertMiniMaxResp } from '@/code/services/ai/_tests/ai.test-setup';
+
 describe('MiniMaxService', () => {
   let gameStateService: GameStateService;
   let gameService: GameService;
@@ -44,12 +46,12 @@ describe('MiniMaxService', () => {
       // time without going deeper.
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -120, depth: 0, moves: [{x:0, y:1}]},
-        {score: -120, depth: 0, moves: [{x:1, y:0}]},
-        {score: -120, depth: 0, moves: [{x:2, y:3}]},
-        {score: -120, depth: 0, moves: [{x:3, y:2}]},
+        {score: -120, depth: 0, moves: [{x:0, y:1, s:-120}]},
+        {score: -120, depth: 0, moves: [{x:1, y:0, s:-120}]},
+        {score: -120, depth: 0, moves: [{x:2, y:3, s:-120}]},
+        {score: -120, depth: 0, moves: [{x:3, y:2, s:-120}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('1 depth', () => {
@@ -69,12 +71,12 @@ describe('MiniMaxService', () => {
       // time, going one depth below (analyzing every legal move of whites in response).
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -120, depth: 1, moves: [{x:0, y:1},{x:0, y:0}]},
-        {score: -120, depth: 1, moves: [{x:1, y:0},{x:0, y:0}]},
-        {score: -120, depth: 1, moves: [{x:2, y:3},{x:3, y:3}]},
-        {score: -120, depth: 1, moves: [{x:3, y:2},{x:3, y:3}]},
+        {score: -120, depth: 1, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120}]},
+        {score: -120, depth: 1, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120}]},
+        {score: -120, depth: 1, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120}]},
+        {score: -120, depth: 1, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('2 depth', () => {
@@ -92,12 +94,12 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -240, depth: 2, moves: [{x:0, y:1},{x:0, y:0},{x:3, y:2}]},
-        {score: -240, depth: 2, moves: [{x:1, y:0},{x:0, y:0},{x:3, y:2}]},
-        {score: -240, depth: 2, moves: [{x:2, y:3},{x:3, y:3},{x:3, y:2}]},
-        {score: -240, depth: 2, moves: [{x:3, y:2},{x:3, y:3},{x:2, y:3}]},
+        {score: -240, depth: 2, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120},{x:3, y:2, s:-240}]},
+        {score: -240, depth: 2, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120},{x:3, y:2, s:-240}]},
+        {score: -240, depth: 2, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240}]},
+        {score: -240, depth: 2, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('3 depth', () => {
@@ -115,12 +117,12 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -80, depth: 3, moves: [{x:0, y:1},{x:0, y:0},{x:1, y:0},{x:2, y:0}]},
-        {score: -80, depth: 3, moves: [{x:1, y:0},{x:0, y:0},{x:0, y:1},{x:2, y:0}]},
-        {score: -80, depth: 3, moves: [{x:2, y:3},{x:3, y:3},{x:3, y:2},{x:3, y:1}]},
-        {score: -80, depth: 3, moves: [{x:3, y:2},{x:3, y:3},{x:2, y:3},{x:3, y:1}]},
+        {score: -80, depth: 3, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120},{x:1, y:0, s:-240},{x:2, y:0, s:-80}]},
+        {score: -80, depth: 3, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120},{x:0, y:1, s:-240},{x:2, y:0, s:-80}]},
+        {score: -80, depth: 3, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240},{x:3, y:1, s:-80}]},
+        {score: -80, depth: 3, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240},{x:3, y:1, s:-80}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('4 depth', () => {
@@ -138,12 +140,12 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -120, depth: 4, moves: [{x:0, y:1},{x:2, y:0},{x:3, y:3},{x:0, y:3},{x:3, y:1}]},
-        {score: -120, depth: 4, moves: [{x:1, y:0},{x:0, y:2},{x:3, y:3},{x:3, y:0},{x:3, y:2}]},
-        {score: -120, depth: 4, moves: [{x:2, y:3},{x:3, y:1},{x:3, y:0},{x:3, y:3},{x:1, y:0}]},
-        {score: -120, depth: 4, moves: [{x:3, y:2},{x:1, y:3},{x:0, y:3},{x:3, y:3},{x:1, y:0}]},
+        {score: -120, depth: 4, moves: [{x:0, y:1, s:-120},{x:2, y:0, s:0},{x:3, y:3, s:0},{x:0, y:3, s:0},{x:3, y:1, s:-120}]},
+        {score: -120, depth: 4, moves: [{x:1, y:0, s:-120},{x:0, y:2, s:0},{x:3, y:3, s:0},{x:3, y:0, s:0},{x:3, y:2, s:-120}]},
+        {score: -120, depth: 4, moves: [{x:2, y:3, s:-120},{x:3, y:1, s:0},{x:3, y:0, s:0},{x:3, y:3, s:0},{x:1, y:0, s:-120}]},
+        {score: -120, depth: 4, moves: [{x:3, y:2, s:-120},{x:1, y:3, s:0},{x:0, y:3, s:0},{x:3, y:3, s:0},{x:1, y:0, s:-120}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('5 depth', () => {
@@ -161,12 +163,12 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 20, depth: 5, moves: [{x:0, y:1},{x:2, y:0},{x:3, y:1},{x:0, y:0},{x:1, y:0},{x:0, y:2}]},
-        {score: 20, depth: 5, moves: [{x:1, y:0},{x:0, y:2},{x:1, y:3},{x:0, y:0},{x:0, y:1},{x:2, y:0}]},
-        {score: 20, depth: 5, moves: [{x:2, y:3},{x:3, y:1},{x:2, y:0},{x:3, y:3},{x:3, y:2},{x:1, y:3}]},
-        {score: 20, depth: 5, moves: [{x:3, y:2},{x:1, y:3},{x:0, y:2},{x:3, y:3},{x:2, y:3},{x:3, y:1}]},
+        {score: 20, depth: 5, moves: [{x:0, y:1, s:-120},{x:2, y:0, s:0},{x:3, y:1, s:-120},{x:0, y:0, s:-120},{x:1, y:0, s:-240},{x:0, y:2, s:20}]},
+        {score: 20, depth: 5, moves: [{x:1, y:0, s:-120},{x:0, y:2, s:0},{x:1, y:3, s:-120},{x:0, y:0, s:-120},{x:0, y:1, s:-240},{x:2, y:0, s:20}]},
+        {score: 20, depth: 5, moves: [{x:2, y:3, s:-120},{x:3, y:1, s:0},{x:2, y:0, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240},{x:1, y:3, s:20}]},
+        {score: 20, depth: 5, moves: [{x:3, y:2, s:-120},{x:1, y:3, s:0},{x:0, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240},{x:3, y:1, s:20}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
   });
 
@@ -196,12 +198,12 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 4, depth: 2, moves: [{x:3, y:1},{x:2, y:0},{x:4, y:2}]},
-        {score: 4, depth: 2, moves: [{x:4, y:2},{x:5, y:2},{x:3, y:1}]},
-        {score: -14, depth: 2, moves: [{x:3, y:5},{x:0, y:0},{x:4, y:2}]},
-        {score: -40, depth: 2, moves: [{x:1, y:4},{x:0, y:2},{x:5, y:3}]},
+        {score: 4,   depth: 2, moves: [{x:3, y:1, s:16},{x:2, y:0, s:10},{x:4, y:2, s:4}]},
+        {score: 4,   depth: 2, moves: [{x:4, y:2, s:16},{x:5, y:2, s:10},{x:3, y:1, s:4}]},
+        {score: -14, depth: 2, moves: [{x:3, y:5, s:-8},{x:0, y:0, s:-8},{x:4, y:2, s:-14}]},
+        {score: -40, depth: 2, moves: [{x:1, y:4, s:-36},{x:0, y:2, s:-42},{x:5, y:3, s:-40}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('proper handling of single pass', () => {
@@ -225,11 +227,11 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 180, depth: 2, moves: [{x:0, y:0},{x:-1, y:-1},{x:3, y:3}]}, // pass
-        {score: 40, depth: 2, moves: [{x:2, y:3},{x:3, y:0},{x:0, y:0}]},
-        {score: -120, depth: 2, moves: [{x:0, y:2},{x:0, y:0},{x:2, y:3}]},
+        {score: 180,  depth: 2, moves: [{x:0, y:0, s:280},{x:-1, y:-1, s:280},{x:3, y:3, s:180}]}, // pass
+        {score: 40,   depth: 2, moves: [{x:2, y:3, s:0},{x:3, y:0, s:40},{x:0, y:0, s:40}]},
+        {score: -120, depth: 2, moves: [{x:0, y:2, s:100},{x:0, y:0, s:100},{x:2, y:3, s:-120}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('double pass while there are still empty cells', () => {
@@ -253,10 +255,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -360, depth: 2, moves: [{x:2, y:0},{x:1, y:0},{x:-1, y:-1}]},
-        {score: -420, depth: 0, moves: [{x:1, y:0}]}, // double pass
+        {score: -360, depth: 2, moves: [{x:2, y:0, s:-420},{x:1, y:0, s:-360},{x:-1, y:-1, s:-360}]},
+        {score: -420, depth: 0, moves: [{x:1, y:0, s:-420}]}, // double pass
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('board almost completely filled up', () => {
@@ -280,9 +282,9 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -380, depth: 0, moves: [{x:1, y:3}]}, // end of game
+        {score: -380, depth: 0, moves: [{x:1, y:3, s:-380}]}, // end of game
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
   });
 
@@ -312,10 +314,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 134, depth: 0, moves: [{x:5, y:3}]},
-        {score: 106, depth: 0, moves: [{x:2, y:0}]},
+        {score: 134, depth: 0, moves: [{x:5, y:3, s:134}]},
+        {score: 106, depth: 0, moves: [{x:2, y:0, s:106}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
     it('for straight scoring', () => {
@@ -342,24 +344,16 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 6, depth: 0, moves: [{x:5, y:3}]},
-        {score: 0, depth: 0, moves: [{x:2, y:0}]},
+        {score: 6, depth: 0, moves: [{x:5, y:3, s:6}]},
+        {score: 0, depth: 0, moves: [{x:2, y:0, s:0}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
 
-    it('for available moves scoring', () => {
-      // TODO make realistic board for available moves scoring with more depth to ensure it works properly
-      // TODO: make it asymmetric
-      // TODO: right now, available moves scoring is not working properly
+    it('for available moves scoring, starting board', () => {
       gameStateService.menuSettings().boardSize = 4; // 4x4
       gameService.startGame();
       const gameState = gameStateService.gameState();
-      const boardStr = "____"+
-                       "_WB_"+
-                       "_BW_"+
-                       "____";
-      debugService.setBoard(gameState, boardStr);
 
       const req: MiniMaxReq = {
         playerIx: 0,
@@ -372,18 +366,42 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 4, depth: 3, moves: [{x:0, y:1}, {x:2, y:0}, {x:3, y:3}, {x:2, y:3}]},
-        {score: 4, depth: 3, moves: [{x:1, y:0}, {x:2, y:0}, {x:3, y:1}, {x:0, y:0}]},
-        {score: 4, depth: 3, moves: [{x:2, y:3}, {x:3, y:3}, {x:3, y:2}, {x:3, y:1}]},
-        {score: 4, depth: 3, moves: [{x:3, y:2}, {x:3, y:3}, {x:2, y:3}, {x:3, y:1}]},
+        {score: -2, depth: 3, moves: [{x:0, y:1, s:4}, {x:2, y:0, s:-3}, {x:3, y:1, s:4}, {x:0, y:2, s:-2}]},
+        {score: -2, depth: 3, moves: [{x:1, y:0, s:4}, {x:2, y:0, s:-3}, {x:3, y:1, s:4}, {x:0, y:2, s:-2}]},
+        {score: -2, depth: 3, moves: [{x:2, y:3, s:4}, {x:3, y:3, s:-3}, {x:3, y:2, s:3}, {x:3, y:1, s:-2}]},
+        {score: -2, depth: 3, moves: [{x:3, y:2, s:4}, {x:3, y:3, s:-3}, {x:2, y:3, s:3}, {x:3, y:1, s:-2}]},
       ]};
-      expect(actualResponse, 'Response should be same').toEqual(expectedResponse);
+      assertMiniMaxResp(actualResponse, expectedResponse);
+    });
+
+    it('for available moves scoring, custom board', () => {
+      gameStateService.menuSettings().boardSize = 6; // 6x6
+      gameService.startGame();
+      const gameState = gameStateService.gameState();
+      const boardStr = "______"+
+                       "__WW__"+
+                       "__WW__"+
+                       "__WW__"+
+                       "__WW__"+
+                       "___B__";
+      debugService.setBoard(gameState, boardStr);
+      // two moves available on this board for black: d1 (flips a lot of pieces in way that provides a lot of potential moves) and b4
+
+      const req: MiniMaxReq = {
+        playerIx: 0,
+        piece: EnCellState.B,
+        maxDepth: 2,
+        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
+        cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1}],
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [
+        {score: 5, depth: 2, moves: [{x:3, y:0, s:2}, {x:4, y:3, s:-6}, {x:5, y:2, s:5}]},
+        {score: 3, depth: 2, moves: [{x:1, y:3, s:2}, {x:1, y:5, s:-5}, {x:4, y:3, s:3}]},
+      ]};
+      assertMiniMaxResp(actualResponse, expectedResponse);
     });
   });
-
-  //describe('dynamic weights', () => {
-  //});
-
-  // TODO: testing for high difficulty level:
-  // - dynamic weighting tests
 });

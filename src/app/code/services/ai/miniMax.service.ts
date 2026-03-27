@@ -38,6 +38,8 @@ export class MiniMaxService {
 
   /**
    * Pick scoring system that should be used for current state of board.
+   * Picking is done based on how much is board filled. That allows dividing gameplay in
+   * distinct phases, where different scoring system is used for every phase.
    * @param stats Stats about state of board.
    * @param scoringSystems Scoring systems.
    */
@@ -96,20 +98,22 @@ export class MiniMaxService {
     const updatedCells = structuredClone(req.cells);
     this.gameStateService.executeMoveCustom(updatedCells, req.piece, legalMove);
 
-    if (req.maxDepth === 0) {
-      // return immediately, evaluating score as CURRENT player
-      const evalArgs: EvaluateArgs = {
-        playerIx: req.playerIx,
-        piece: req.piece,
-        isYou: true,
-        cells: updatedCells,
-        scoringSystem: this.getCurrScoringSystem(req.cells, req.scoringSystems),
-        moveCount: req.legalMoves.length,
-      };
+    const evalArgs: EvaluateArgs = {
+      playerIx: req.playerIx,
+      piece: req.piece,
+      isYou: true,
+      cells: updatedCells,
+      scoringSystem: this.getCurrScoringSystem(req.cells, req.scoringSystems),
+      moveCount: req.legalMoves.length,
+    };
+    const score = this.evaluate(evalArgs);
+    const moves = [ {x: legalMove.x, y: legalMove.y, s:score} ]; // first move
+
+    if (req.maxDepth === 0) { // return immediately, evaluating score as CURRENT player
       return {
-        score: this.evaluate(evalArgs),
+        score: score,
         depth: 0,
-        moves: [ {x: legalMove.x, y: legalMove.y} ],
+        moves: moves,
       };
     }
 
@@ -121,7 +125,7 @@ export class MiniMaxService {
       currDepth: 0, // yes, that's correct value
       maxDepth: req.maxDepth,
       cells: updatedCells,
-      moves: [ {x: legalMove.x, y: legalMove.y} ],
+      moves: moves,
       scoringSystems: req.scoringSystems,
       scoringSystem: this.getCurrScoringSystem(updatedCells, req.scoringSystems),
     };
@@ -147,12 +151,9 @@ export class MiniMaxService {
     let terminalResult : MiniMaxResult | null = null;
     if ((currPlayerMoves.length === 0 && nextPlayerMoves.length === 0) ||
         (args.currDepth === args.maxDepth)) {
-      const evalArgs: EvaluateArgs = {
-        ...args, // copy relevant properties from MiniMaxArgs
-        moveCount: currPlayerMoves.length,
-      };
+      const score = args.moves[args.moves.length-1].s;
       terminalResult = {
-        score: this.evaluate(evalArgs),
+        score: score,
         depth: args.currDepth,
         moves: [...args.moves],
       };
@@ -163,11 +164,11 @@ export class MiniMaxService {
       return terminalResult;
     }
 
-    // Handle skip case here.
-    if (currPlayerMoves.length === 0) {
-      args.moves.push({x: -1, y: -1}); // Remember pass.
-      // Switch players and continue. If we are here, we know next player must have
-      // at least one legal move.
+    if (currPlayerMoves.length === 0) { // Handle skip case here.
+      const score = args.moves[args.moves.length-1].s;
+      args.moves.push({x: -1, y: -1, s:score}); // Remember pass.
+      // Switch players and continue.
+      // If we are here, we know next player must have at least one legal move.
       const newArgs = this.createNewArgs(args, otherPiece, args.cells);
       const result = this.recursiveMiniMax(newArgs);
       args.moves.pop(); // Unmake that move.
@@ -177,13 +178,20 @@ export class MiniMaxService {
     // Now process all legal moves.
     const results : MiniMaxResult[] = [];
     for (const legalMove of currPlayerMoves) {
-      // We persist move history, as we can revert these easily.
-      args.moves.push({x: legalMove.x, y: legalMove.y}); // Remember that move.
-
       // We need to clone board, as we cannot easily revert state of cells.
       const updatedCells = structuredClone(args.cells);
       // Make move as CURRENT player.
       this.gameStateService.executeMoveCustom(updatedCells, args.piece, legalMove);
+
+      const evalArgs: EvaluateArgs = {
+        ...args, // copy relevant properties from MiniMaxArgs
+        cells: updatedCells,
+        moveCount: currPlayerMoves.length,
+      };
+      const score = this.evaluate(evalArgs); // score for current board
+
+      // We persist move history, as we can revert these easily.
+      args.moves.push({x: legalMove.x, y: legalMove.y, s:score}); // Remember that move.
 
       // Swap to NEXT player and find deeper moves.
       const newArgs = this.createNewArgs(args, otherPiece, updatedCells);
@@ -199,6 +207,13 @@ export class MiniMaxService {
     return bestResult;
   }
 
+  /**
+   * Create new MiniMax arguments instance, swapping players.
+   * @param args Current args instance.
+   * @param otherPiece Piece for other player.
+   * @param cells Separate clone of board.
+   * @returns New args instance.
+   */
   private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState, cells: Cell[][]): MiniMaxArgs {
     const newArgs: MiniMaxArgs = {
       ...args,
@@ -275,7 +290,6 @@ export class MiniMaxService {
 
   /**
    * Evaluates score: available moves scoring.
-   * TODO: right now it does not work properly. Deal with it later.
    * @param cell Cell data.
    * @param args Arguments.
    * @returns Score for single cell.
@@ -296,9 +310,9 @@ export class MiniMaxService {
    */
   private evaluateCell(cell: Cell, args: EvaluateArgs): number {
     switch (args.scoringSystem.type) {
-      case EnScoringType.AvailableMoves: throw new Error("Scoring type AvailableMoves should not be used for each cell!"); // should not happen
       case EnScoringType.Weighted: return this.evaluateScoringWeighted(cell, args);
       case EnScoringType.Straight: return this.evaluateScoringStraight(cell, args);
+      default: return 0;
     }
   }
 

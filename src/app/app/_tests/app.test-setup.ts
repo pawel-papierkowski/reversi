@@ -99,6 +99,23 @@ export async function clickOnCell(debugService: DebugService, fixture: Component
   await fixture.whenStable();
 }
 
+/**
+ * Wait until AI trigger is at desired value.
+ * @param fixture Component fixture.
+ * @param gameState Game state.
+ */
+export async function waitForAi(fixture: ComponentFixture<any>, gameState: GameState, desiredAiTrigger: number) {
+  // We use a small delay to allow the effect() in GameScreenPage and the async maybeMakeMove() to run.
+  const start = Date.now();
+  const timeout = 2000; // 2 seconds timeout
+  while (gameState.statistics.aiTrigger !== desiredAiTrigger) {
+    if (Date.now() - start > timeout) throw new Error('Timeout waiting for AI to move');
+    // We need to wait for macrotasks (like setTimeout in delay()) to finish.
+    await new Promise(resolve => setTimeout(resolve, 20));
+    fixture.detectChanges();
+  }
+}
+
 export async function clickOnPass(debugService: DebugService, fixture: ComponentFixture<App>, gameState: GameState, playerIx: number) {
   debugService.addToHistory(gameState, playerIx, []); // pass generates special history entry
 

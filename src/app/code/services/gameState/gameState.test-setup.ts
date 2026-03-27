@@ -48,7 +48,9 @@ function assertGameBoard(actualBoard: ReversiBoard, expectedBoard: ReversiBoard)
  */
 function assertGameHistory(actualHistory: GameHistory, expectedHistory: GameHistory) {
   expect(actualHistory.moves.length, 'Game history must have same size').toEqual(expectedHistory.moves.length);
-  for (let i=0; i<actualHistory.moves.length; i++) {
+  // We check history backwards, from initial state of board to last (chronologically) move.
+  // Reminder that moves are stored in order from latest move to first move.
+  for (let i=actualHistory.moves.length-1; i>=0; i--) {
     const actualHistoryEntry = actualHistory.moves[i];
     const expectedHistoryEntry = expectedHistory.moves[i];
     assertGameHistoryEntry(actualHistoryEntry, expectedHistoryEntry, i);
