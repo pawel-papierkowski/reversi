@@ -68,7 +68,7 @@ export class AiService {
       return this.gameStateService.gameState().board.legalMoves[0];
 
     // Can we use MiniMax to determine which move to use?
-    if (this.gameService.resolveDifficulty().canMiniMax) return this.findMoveMiniMax();
+    if (this.gameStateService.gameState().ai.difficulty.canMiniMax) return this.findMoveMiniMax();
 
     // Well, if all else fails, we just pick move randomly...
     return this.findMoveRandom();
@@ -89,7 +89,7 @@ export class AiService {
    * @returns Move coordinates or null if no move possible.
    */
   private findMoveMiniMax(): Coordinate {
-    const diffProp = this.gameService.resolveDifficulty();
+    const diffProp = this.gameStateService.gameState().ai.difficulty;
     const req: MiniMaxReq = {
       playerIx: this.gameStateService.getCurrPlayer().ix,
       piece: this.gameStateService.getCurrPlayer().piece,

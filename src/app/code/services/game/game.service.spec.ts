@@ -103,7 +103,7 @@ describe('GameService', () => {
 
     it('that affects weights', () => {
       aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: true,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}] };
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}] };
       gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameStateService.menuSettings().boardSize = 4; // 4x4
       gameService.startGame();
