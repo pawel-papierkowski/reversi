@@ -62,6 +62,7 @@ export class MiniMaxService {
     // Make move as CURRENT player.
     const updatedCells = structuredClone(req.cells);
     this.gameStateService.executeMoveCustom(updatedCells, req.piece, legalMove, false);
+    nonEmptyCells++; // we made a move
 
     let score = 0;
     if (req.maxDepth === 0 || this.gameStateService.gameState().debugSettings.evaluateEveryStep) {
@@ -92,6 +93,8 @@ export class MiniMaxService {
       isYou: false,
       currDepth: 0, // yes, that's correct value
       maxDepth: req.maxDepth,
+      alpha: -aiProp.maxScore,
+      beta: aiProp.maxScore,
       cells: updatedCells,
       nonEmptyCells: nonEmptyCells,
       moves: moves,
@@ -117,7 +120,6 @@ export class MiniMaxService {
     // - Neither player can make legal moves for current state of board (double pass).
     //   Happens also when board is completely filled, so we do not have to check for it separately.
     // - We also stop if we hit max depth.
-    let terminalResult : MiniMaxResult | null = null;
     if ((currPlayerMoves.length === 0 && nextPlayerMoves.length === 0) ||
         (args.currDepth === args.maxDepth)) {
       // TERMINAL RESULT - only place where evaluation is actually needed.
@@ -129,16 +131,11 @@ export class MiniMaxService {
         };
         score = this.evaluate(evalArgs);
       }
-      terminalResult = {
+      return {
         score: score,
         depth: args.currDepth,
         moves: [...args.moves],
       };
-    }
-
-    if (terminalResult !== null) {
-      //console.log("Terminal result: ", terminalResult);
-      return terminalResult;
     }
 
     if (currPlayerMoves.length === 0) { // Handle skip case here.
@@ -146,14 +143,22 @@ export class MiniMaxService {
       args.moves.push({x: -1, y: -1, s:score}); // Remember pass.
       // Switch players and continue.
       // If we are here, we know next player must have at least one legal move.
-      const newArgs = this.createNewArgs(args, otherPiece, true);
+      const newArgs = this.createNewArgs(args, otherPiece, false);
       const result = this.recursiveMiniMax(newArgs);
       args.moves.pop(); // Unmake that move.
       return result;
     }
 
     // Now process all legal moves.
-    const results : MiniMaxResult[] = [];
+    let bestResult: MiniMaxResult = {
+      score: args.isYou ? -aiProp.maxScore : aiProp.maxScore,
+      depth: args.currDepth,
+      moves: [],
+    };
+
+    let alpha = args.alpha;
+    let beta = args.beta;
+
     for (const legalMove of currPlayerMoves) {
       // We avoid cloning board: make array of affected cells with old state and weight so we can undo state of board later.
       // Make move as CURRENT player.
@@ -173,17 +178,24 @@ export class MiniMaxService {
       args.moves.push({x: legalMove.x, y: legalMove.y, s:score}); // Remember that move.
 
       // Swap to NEXT player and find deeper moves.
-      const newArgs = this.createNewArgs(args, otherPiece, false);
+      const newArgs = this.createNewArgs(args, otherPiece, true);
+      newArgs.alpha = alpha;
+      newArgs.beta = beta;
       const result = this.recursiveMiniMax(newArgs);
-      results.push(result);
+
+      // Track the best result and update alpha/beta.
+      if (this.isBetterResult(args.isYou, result, bestResult)) {
+        bestResult = result;
+        if (args.isYou) alpha = Math.max(alpha, result.score);
+        else beta = Math.min(beta, result.score);
+      }
 
       args.moves.pop(); // Undo that move...
       this.undoBoard(args.cells, affectedCells); // ...and restore state of board.
+
+      if (alpha >= beta) break; // Alpha-Beta Pruning.
     }
 
-    // Find best result.
-    const bestResult = this.findBestResult(results, args.isYou, args.currDepth);
-    //console.log("Best (non-terminal) result: ", bestResult);
     return bestResult;
   }
 
@@ -199,12 +211,11 @@ export class MiniMaxService {
    * Create new MiniMax arguments instance, swapping players.
    * @param args Current args instance.
    * @param otherPiece Piece for other player.
-   * @param cells Separate clone of board.
-   * @param isPass True if it is pass, otherwise false.
+   * @param isMove True if it is a move, false if it is a pass.
    * @returns New args instance.
    */
-  private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState, isPass: boolean): MiniMaxArgs {
-    const nonEmptyCells = isPass ? args.nonEmptyCells+1 : args.nonEmptyCells;
+  private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState, isMove: boolean): MiniMaxArgs {
+    const nonEmptyCells = isMove ? args.nonEmptyCells + 1 : args.nonEmptyCells;
     const newArgs: MiniMaxArgs = {
       ...args,
       playerIx: args.playerIx === 0 ? 1 : 0,
@@ -218,27 +229,6 @@ export class MiniMaxService {
   }
 
   //
-
-  /**
-   * Find best result from array of results.
-   * @param results All results from current depth resolved for given state of board.
-   * @param isYou If true, this is you (so maximizing). Otherwise it is opponent (so minimizing).
-   * @param currDepth Current depth. Starts at 0 and increments for every recursive call.
-   * @returns Best result found.
-   */
-  private findBestResult(results: MiniMaxResult[], isYou: boolean, currDepth: number) : MiniMaxResult {
-    let bestResult: MiniMaxResult = {
-      score: isYou ? -aiProp.maxScore : aiProp.maxScore,
-      depth: currDepth,
-      moves: [],
-    };
-
-    // Make sure to pick the best result.
-    for (const result of results) {
-      if (this.isBetterResult(isYou, result, bestResult)) bestResult = result;
-    }
-    return bestResult;
-  }
 
   /**
    * Check if new result is better than current result.

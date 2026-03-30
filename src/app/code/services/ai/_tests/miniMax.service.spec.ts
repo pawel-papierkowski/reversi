@@ -144,9 +144,9 @@ describe('MiniMaxService', () => {
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
         {score: -120, depth: 4, moves: [{x:0, y:1, s:-120},{x:2, y:0, s:0},{x:3, y:3, s:0},{x:0, y:3, s:0},{x:3, y:1, s:-120}]},
-        {score: -120, depth: 4, moves: [{x:1, y:0, s:-120},{x:0, y:2, s:0},{x:3, y:3, s:0},{x:3, y:0, s:0},{x:3, y:2, s:-120}]},
+        {score: -120, depth: 4, moves: [{x:1, y:0, s:-120},{x:2, y:0, s:0},{x:3, y:3, s:0},{x:0, y:3, s:0},{x:0, y:2, s:-120}]},
         {score: -120, depth: 4, moves: [{x:2, y:3, s:-120},{x:3, y:1, s:0},{x:3, y:0, s:0},{x:3, y:3, s:0},{x:1, y:0, s:-120}]},
-        {score: -120, depth: 4, moves: [{x:3, y:2, s:-120},{x:1, y:3, s:0},{x:0, y:3, s:0},{x:3, y:3, s:0},{x:1, y:0, s:-120}]},
+        {score: -120, depth: 4, moves: [{x:3, y:2, s:-120},{x:3, y:1, s:0},{x:0, y:0, s:0},{x:0, y:3, s:0},{x:0, y:2, s:-120}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -369,8 +369,8 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -2, depth: 3, moves: [{x:0, y:1, s:4}, {x:2, y:0, s:-3}, {x:3, y:1, s:4}, {x:0, y:2, s:-2}]},
-        {score: -2, depth: 3, moves: [{x:1, y:0, s:4}, {x:2, y:0, s:-3}, {x:3, y:1, s:4}, {x:0, y:2, s:-2}]},
+        {score: -2, depth: 3, moves: [{x:0, y:1, s:4}, {x:2, y:0, s:-3}, {x:3, y:0, s:4}, {x:0, y:2, s:-2}]},
+        {score: -2, depth: 3, moves: [{x:1, y:0, s:4}, {x:2, y:0, s:-3}, {x:3, y:0, s:4}, {x:0, y:2, s:-2}]},
         {score: -2, depth: 3, moves: [{x:2, y:3, s:4}, {x:3, y:3, s:-3}, {x:3, y:2, s:3}, {x:3, y:1, s:-2}]},
         {score: -2, depth: 3, moves: [{x:3, y:2, s:4}, {x:3, y:3, s:-3}, {x:2, y:3, s:3}, {x:3, y:1, s:-2}]},
       ]};
@@ -401,7 +401,7 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 5, depth: 2, moves: [{x:3, y:0, s:2}, {x:4, y:3, s:-6}, {x:5, y:2, s:5}]},
+        {score: 5, depth: 2, moves: [{x:3, y:0, s:2}, {x:4, y:3, s:-6}, {x:1, y:1, s:5}]},
         {score: 3, depth: 2, moves: [{x:1, y:3, s:2}, {x:1, y:5, s:-5}, {x:4, y:3, s:3}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
