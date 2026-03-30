@@ -33,6 +33,7 @@ export type MiniMaxResult = {
   score: number; // Best score found.
   depth: number; // Depth.
   moves: ScoreCoord[]; // Moves that lead to this result. Note: {x:-1, y:-1} is a pass.
+  processed: number; // How many board states were processed.
 };
 
 /** Arguments for recursive call of MiniMax algorithm. */

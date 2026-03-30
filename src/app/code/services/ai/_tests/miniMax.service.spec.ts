@@ -49,10 +49,10 @@ describe('MiniMaxService', () => {
       // time without going deeper.
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -120, depth: 0, moves: [{x:0, y:1, s:-120}]},
-        {score: -120, depth: 0, moves: [{x:1, y:0, s:-120}]},
-        {score: -120, depth: 0, moves: [{x:2, y:3, s:-120}]},
-        {score: -120, depth: 0, moves: [{x:3, y:2, s:-120}]},
+        {score: -120, depth: 0, processed: 1, moves: [{x:0, y:1, s:-120}]},
+        {score: -120, depth: 0, processed: 1, moves: [{x:1, y:0, s:-120}]},
+        {score: -120, depth: 0, processed: 1, moves: [{x:2, y:3, s:-120}]},
+        {score: -120, depth: 0, processed: 1, moves: [{x:3, y:2, s:-120}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -74,10 +74,10 @@ describe('MiniMaxService', () => {
       // time, going one depth below (analyzing every legal move of whites in response).
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -120, depth: 1, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120}]},
-        {score: -120, depth: 1, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120}]},
-        {score: -120, depth: 1, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120}]},
-        {score: -120, depth: 1, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120}]},
+        {score: -120, depth: 1, processed: 2, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120}]},
+        {score: -120, depth: 1, processed: 2, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120}]},
+        {score: -120, depth: 1, processed: 4, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120}]},
+        {score: -120, depth: 1, processed: 4, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -97,10 +97,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -240, depth: 2, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120},{x:3, y:2, s:-240}]},
-        {score: -240, depth: 2, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120},{x:3, y:2, s:-240}]},
-        {score: -240, depth: 2, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240}]},
-        {score: -240, depth: 2, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240}]},
+        {score: -240, depth: 2, processed: 5, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120},{x:3, y:2, s:-240}]},
+        {score: -240, depth: 2, processed: 5, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120},{x:3, y:2, s:-240}]},
+        {score: -240, depth: 2, processed: 12, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240}]},
+        {score: -240, depth: 2, processed: 12, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -120,10 +120,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -80, depth: 3, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120},{x:1, y:0, s:-240},{x:2, y:0, s:-80}]},
-        {score: -80, depth: 3, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120},{x:0, y:1, s:-240},{x:2, y:0, s:-80}]},
-        {score: -80, depth: 3, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240},{x:3, y:1, s:-80}]},
-        {score: -80, depth: 3, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240},{x:3, y:1, s:-80}]},
+        {score: -80, depth: 3, processed: 5, moves: [{x:0, y:1, s:-120},{x:0, y:0, s:-120},{x:1, y:0, s:-240},{x:2, y:0, s:-80}]},
+        {score: -80, depth: 3, processed: 5, moves: [{x:1, y:0, s:-120},{x:0, y:0, s:-120},{x:0, y:1, s:-240},{x:2, y:0, s:-80}]},
+        {score: -80, depth: 3, processed: 33, moves: [{x:2, y:3, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240},{x:3, y:1, s:-80}]},
+        {score: -80, depth: 3, processed: 41, moves: [{x:3, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240},{x:3, y:1, s:-80}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -143,10 +143,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -120, depth: 4, moves: [{x:0, y:1, s:-120},{x:2, y:0, s:0},{x:3, y:3, s:0},{x:0, y:3, s:0},{x:3, y:1, s:-120}]},
-        {score: -120, depth: 4, moves: [{x:1, y:0, s:-120},{x:2, y:0, s:0},{x:3, y:3, s:0},{x:0, y:3, s:0},{x:0, y:2, s:-120}]},
-        {score: -120, depth: 4, moves: [{x:2, y:3, s:-120},{x:3, y:1, s:0},{x:3, y:0, s:0},{x:3, y:3, s:0},{x:1, y:0, s:-120}]},
-        {score: -120, depth: 4, moves: [{x:3, y:2, s:-120},{x:3, y:1, s:0},{x:0, y:0, s:0},{x:0, y:3, s:0},{x:0, y:2, s:-120}]},
+        {score: -120, depth: 4, processed: 75, moves: [{x:0, y:1, s:-120},{x:2, y:0, s:0},{x:3, y:3, s:0},{x:0, y:3, s:0},{x:3, y:1, s:-120}]},
+        {score: -120, depth: 4, processed: 77, moves: [{x:1, y:0, s:-120},{x:2, y:0, s:0},{x:3, y:3, s:0},{x:0, y:3, s:0},{x:0, y:2, s:-120}]},
+        {score: -120, depth: 4, processed: 91, moves: [{x:2, y:3, s:-120},{x:3, y:1, s:0},{x:3, y:0, s:0},{x:3, y:3, s:0},{x:1, y:0, s:-120}]},
+        {score: -120, depth: 4, processed: 52, moves: [{x:3, y:2, s:-120},{x:3, y:1, s:0},{x:0, y:0, s:0},{x:0, y:3, s:0},{x:0, y:2, s:-120}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -166,10 +166,33 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 20, depth: 5, moves: [{x:0, y:1, s:-120},{x:2, y:0, s:0},{x:3, y:1, s:-120},{x:0, y:0, s:-120},{x:1, y:0, s:-240},{x:0, y:2, s:20}]},
-        {score: 20, depth: 5, moves: [{x:1, y:0, s:-120},{x:0, y:2, s:0},{x:1, y:3, s:-120},{x:0, y:0, s:-120},{x:0, y:1, s:-240},{x:2, y:0, s:20}]},
-        {score: 20, depth: 5, moves: [{x:2, y:3, s:-120},{x:3, y:1, s:0},{x:2, y:0, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240},{x:1, y:3, s:20}]},
-        {score: 20, depth: 5, moves: [{x:3, y:2, s:-120},{x:1, y:3, s:0},{x:0, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240},{x:3, y:1, s:20}]},
+        {score: 20, depth: 5, processed: 101, moves: [{x:0, y:1, s:-120},{x:2, y:0, s:0},{x:3, y:1, s:-120},{x:0, y:0, s:-120},{x:1, y:0, s:-240},{x:0, y:2, s:20}]},
+        {score: 20, depth: 5, processed: 54, moves: [{x:1, y:0, s:-120},{x:0, y:2, s:0},{x:1, y:3, s:-120},{x:0, y:0, s:-120},{x:0, y:1, s:-240},{x:2, y:0, s:20}]},
+        {score: 20, depth: 5, processed: 167, moves: [{x:2, y:3, s:-120},{x:3, y:1, s:0},{x:2, y:0, s:-120},{x:3, y:3, s:-120},{x:3, y:2, s:-240},{x:1, y:3, s:20}]},
+        {score: 20, depth: 5, processed: 70, moves: [{x:3, y:2, s:-120},{x:1, y:3, s:0},{x:0, y:2, s:-120},{x:3, y:3, s:-120},{x:2, y:3, s:-240},{x:3, y:1, s:20}]},
+      ]};
+      assertMiniMaxResp(actualResponse, expectedResponse);
+    });
+
+    it('6 depth', () => {
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+
+      const req: MiniMaxReq = {
+        playerIx: 0,
+        piece: EnCellState.B,
+        maxDepth: 6,
+        legalMoves: gameStateService.gameState().board.legalMoves,
+        cells: gameStateService.gameState().board.cells,
+        dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [
+        {score: 0, depth: 6, processed: 128, moves: [{x:0, y:1, s:-120},{x:2, y:0, s:0},{x:3, y:0, s:0},{x:0, y:0, s:0},{x:1, y:0, s:-160},{x:0, y:2, s:0},{x:0, y:3, s:0}]},
+        {score: 0, depth: 6, processed: 208, moves: [{x:1, y:0, s:-120},{x:2, y:0, s:0},{x:3, y:0, s:-40},{x:0, y:0, s:-40},{x:0, y:1, s:-160},{x:0, y:2, s:0},{x:0, y:3, s:0}]},
+        {score: 0, depth: 6, processed: 364, moves: [{x:2, y:3, s:-120},{x:3, y:1, s:0},{x:0, y:0, s:0},{x:0, y:3, s:0},{x:0, y:1, s:-120},{x:1, y:3, s:0},{x:3, y:0, s:0}]},
+        {score: 0, depth: 6, processed: 486, moves: [{x:3, y:2, s:-120},{x:3, y:1, s:0},{x:3, y:0, s:-40},{x:3, y:3, s:-40},{x:2, y:3, s:-160},{x:1, y:3, s:0},{x:0, y:0, s:0}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -201,10 +224,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 4,   depth: 2, moves: [{x:3, y:1, s:16},{x:2, y:0, s:10},{x:4, y:2, s:4}]},
-        {score: 4,   depth: 2, moves: [{x:4, y:2, s:16},{x:5, y:2, s:10},{x:3, y:1, s:4}]},
-        {score: -14, depth: 2, moves: [{x:3, y:5, s:-8},{x:0, y:0, s:-8},{x:4, y:2, s:-14}]},
-        {score: -40, depth: 2, moves: [{x:1, y:4, s:-36},{x:0, y:2, s:-42},{x:5, y:3, s:-40}]},
+        {score: 4,   depth: 2, processed: 17, moves: [{x:3, y:1, s:16},{x:2, y:0, s:10},{x:4, y:2, s:4}]},
+        {score: 4,   depth: 2, processed: 20, moves: [{x:4, y:2, s:16},{x:5, y:2, s:10},{x:3, y:1, s:4}]},
+        {score: -14, depth: 2, processed: 3, moves: [{x:3, y:5, s:-8},{x:0, y:0, s:-8},{x:4, y:2, s:-14}]},
+        {score: -40, depth: 2, processed: 18, moves: [{x:1, y:4, s:-36},{x:0, y:2, s:-42},{x:5, y:3, s:-40}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -230,9 +253,9 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 180,  depth: 2, moves: [{x:0, y:0, s:280},{x:-1, y:-1, s:280},{x:3, y:3, s:180}]}, // pass
-        {score: 40,   depth: 2, moves: [{x:2, y:3, s:0},{x:3, y:0, s:40},{x:0, y:0, s:40}]},
-        {score: -120, depth: 2, moves: [{x:0, y:2, s:100},{x:0, y:0, s:100},{x:2, y:3, s:-120}]},
+        {score: 180,  depth: 2, processed: 5, moves: [{x:0, y:0, s:280},{x:-1, y:-1, s:280},{x:3, y:3, s:180}]}, // pass
+        {score: 40,   depth: 2, processed: 3, moves: [{x:2, y:3, s:0},{x:3, y:0, s:40},{x:0, y:0, s:40}]},
+        {score: -120, depth: 2, processed: 3, moves: [{x:0, y:2, s:100},{x:0, y:0, s:100},{x:2, y:3, s:-120}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -258,8 +281,8 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -360, depth: 2, moves: [{x:2, y:0, s:-420},{x:1, y:0, s:-360},{x:-1, y:-1, s:-360}]},
-        {score: -420, depth: 0, moves: [{x:1, y:0, s:-420}]}, // double pass
+        {score: -360, depth: 2, processed: 2, moves: [{x:2, y:0, s:-420},{x:1, y:0, s:-360},{x:-1, y:-1, s:-360}]},
+        {score: -420, depth: 0, processed: 1, moves: [{x:1, y:0, s:-420}]}, // double pass
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -285,7 +308,7 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -380, depth: 0, moves: [{x:1, y:3, s:-380}]}, // end of game
+        {score: -380, depth: 0, processed: 1, moves: [{x:1, y:3, s:-380}]}, // end of game
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -317,8 +340,8 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 134, depth: 0, moves: [{x:5, y:3, s:134}]},
-        {score: 106, depth: 0, moves: [{x:2, y:0, s:106}]},
+        {score: 134, depth: 0, processed: 1, moves: [{x:5, y:3, s:134}]},
+        {score: 106, depth: 0, processed: 1, moves: [{x:2, y:0, s:106}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -347,8 +370,8 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 6, depth: 0, moves: [{x:5, y:3, s:6}]},
-        {score: 0, depth: 0, moves: [{x:2, y:0, s:0}]},
+        {score: 6, depth: 0, processed: 1, moves: [{x:5, y:3, s:6}]},
+        {score: 0, depth: 0, processed: 1, moves: [{x:2, y:0, s:0}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -369,10 +392,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: -2, depth: 3, moves: [{x:0, y:1, s:4}, {x:2, y:0, s:-3}, {x:3, y:0, s:4}, {x:0, y:2, s:-2}]},
-        {score: -2, depth: 3, moves: [{x:1, y:0, s:4}, {x:2, y:0, s:-3}, {x:3, y:0, s:4}, {x:0, y:2, s:-2}]},
-        {score: -2, depth: 3, moves: [{x:2, y:3, s:4}, {x:3, y:3, s:-3}, {x:3, y:2, s:3}, {x:3, y:1, s:-2}]},
-        {score: -2, depth: 3, moves: [{x:3, y:2, s:4}, {x:3, y:3, s:-3}, {x:2, y:3, s:3}, {x:3, y:1, s:-2}]},
+        {score: -2, depth: 3, processed: 17, moves: [{x:0, y:1, s:4}, {x:2, y:0, s:-3}, {x:3, y:0, s:4}, {x:0, y:2, s:-2}]},
+        {score: -2, depth: 3, processed: 17, moves: [{x:1, y:0, s:4}, {x:2, y:0, s:-3}, {x:3, y:0, s:4}, {x:0, y:2, s:-2}]},
+        {score: -2, depth: 3, processed: 38, moves: [{x:2, y:3, s:4}, {x:3, y:3, s:-3}, {x:3, y:2, s:3}, {x:3, y:1, s:-2}]},
+        {score: -2, depth: 3, processed: 38, moves: [{x:3, y:2, s:4}, {x:3, y:3, s:-3}, {x:2, y:3, s:3}, {x:3, y:1, s:-2}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -401,8 +424,8 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
-        {score: 5, depth: 2, moves: [{x:3, y:0, s:2}, {x:4, y:3, s:-6}, {x:1, y:1, s:5}]},
-        {score: 3, depth: 2, moves: [{x:1, y:3, s:2}, {x:1, y:5, s:-5}, {x:4, y:3, s:3}]},
+        {score: 5, depth: 2, processed: 24, moves: [{x:3, y:0, s:2}, {x:4, y:3, s:-6}, {x:1, y:1, s:5}]},
+        {score: 3, depth: 2, processed: 18, moves: [{x:1, y:3, s:2}, {x:1, y:5, s:-5}, {x:4, y:3, s:3}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
@@ -426,10 +449,10 @@ describe('MiniMaxService', () => {
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [ // s will be 0 everywhere, as evaluation happens only on terminal state
-        {score: -80, depth: 3, moves: [{x:0, y:1, s:0}, {x:0, y:0, s:0}, {x:1, y:0, s:0}, {x:2, y:0, s:0}]},
-        {score: -80, depth: 3, moves: [{x:1, y:0, s:0}, {x:0, y:0, s:0}, {x:0, y:1, s:0}, {x:2, y:0, s:0}]},
-        {score: -80, depth: 3, moves: [{x:2, y:3, s:0}, {x:3, y:3, s:0}, {x:3, y:2, s:0}, {x:3, y:1, s:0}]},
-        {score: -80, depth: 3, moves: [{x:3, y:2, s:0}, {x:3, y:3, s:0}, {x:2, y:3, s:0}, {x:3, y:1, s:0}]},
+        {score: -80, depth: 3, processed: 5, moves: [{x:0, y:1, s:0}, {x:0, y:0, s:0}, {x:1, y:0, s:0}, {x:2, y:0, s:0}]},
+        {score: -80, depth: 3, processed: 5, moves: [{x:1, y:0, s:0}, {x:0, y:0, s:0}, {x:0, y:1, s:0}, {x:2, y:0, s:0}]},
+        {score: -80, depth: 3, processed: 33, moves: [{x:2, y:3, s:0}, {x:3, y:3, s:0}, {x:3, y:2, s:0}, {x:3, y:1, s:0}]},
+        {score: -80, depth: 3, processed: 41, moves: [{x:3, y:2, s:0}, {x:3, y:3, s:0}, {x:2, y:3, s:0}, {x:3, y:1, s:0}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
