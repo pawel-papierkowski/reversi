@@ -22,7 +22,7 @@ const difficultyMedium: DifficultyProp = {
   maxDepth: 7,
   dynamicWeights: false, // no dynamic weights
   scoringSystems: [
-    //{type: EnScoringType.AvailableMoves, weight: 2},
+    {type: EnScoringType.AvailableMoves, weight: 2},
     {type: EnScoringType.Weighted, weight: 8}],
 };
 
@@ -31,7 +31,7 @@ const difficultyHard: DifficultyProp = {
   maxDepth: 9,
   dynamicWeights: true, // dynamic weights
   scoringSystems: [
-    //{type: EnScoringType.AvailableMoves, weight: 2}, // first phase
+    {type: EnScoringType.AvailableMoves, weight: 2}, // first phase
     {type: EnScoringType.Weighted, weight: 8}, // 6, second phase
     {type: EnScoringType.Straight, weight: 2}], // third phase
 };
