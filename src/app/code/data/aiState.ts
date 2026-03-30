@@ -42,6 +42,8 @@ export type MiniMaxArgs = {
   isYou: boolean; // If true, this is you (so maximizing). Otherwise it is opponent (so minimizing).
   currDepth: number; // Current depth of search.
   maxDepth: number; // Maximum depth of search.
+  alpha: number; // Best score the maximizer is currently guaranteed.
+  beta: number; // Best score the minimizer is currently guaranteed.
   cells: Cell[][]; // Current board state.
   nonEmptyCells: number; // Count of non-empty cells.
   moves: ScoreCoord[]; // Moves made so far.
