@@ -24,6 +24,9 @@ describe('MiniMaxService', () => {
     legalMoveService = TestBed.inject(LegalMoveService);
     miniMaxService = TestBed.inject(MiniMaxService);
     debugService = TestBed.inject(DebugService);
+
+    // reset common stuff
+    gameStateService.gameState().debugSettings.evaluateEveryStep = true;
   });
 
   //
@@ -40,7 +43,7 @@ describe('MiniMaxService', () => {
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       // Note: 0 max depth means we are scoring for every black's legal move available at this
       // time without going deeper.
@@ -65,7 +68,7 @@ describe('MiniMaxService', () => {
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       // Note: 1 max depth means we are scoring for every black's legal move available at this
       // time, going one depth below (analyzing every legal move of whites in response).
@@ -90,7 +93,7 @@ describe('MiniMaxService', () => {
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -113,7 +116,7 @@ describe('MiniMaxService', () => {
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -136,7 +139,7 @@ describe('MiniMaxService', () => {
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -159,7 +162,7 @@ describe('MiniMaxService', () => {
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -194,7 +197,7 @@ describe('MiniMaxService', () => {
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -223,7 +226,7 @@ describe('MiniMaxService', () => {
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -251,7 +254,7 @@ describe('MiniMaxService', () => {
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -278,7 +281,7 @@ describe('MiniMaxService', () => {
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -310,7 +313,7 @@ describe('MiniMaxService', () => {
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}], // use weighted scoring
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}], // use weighted scoring
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -340,7 +343,7 @@ describe('MiniMaxService', () => {
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.Straight, weight: 1}],
+        scoringSystems: [{type: EnScoringType.Straight, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -362,7 +365,7 @@ describe('MiniMaxService', () => {
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
         cells: gameState.board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1}],
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
@@ -394,12 +397,39 @@ describe('MiniMaxService', () => {
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
         cells: gameState.board.cells,
         dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1}],
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1, threshold: -1}],
       }
       const actualResponse = miniMaxService.resolve(req);
       const expectedResponse: MiniMaxResp = { results: [
         {score: 5, depth: 2, moves: [{x:3, y:0, s:2}, {x:4, y:3, s:-6}, {x:5, y:2, s:5}]},
         {score: 3, depth: 2, moves: [{x:1, y:3, s:2}, {x:1, y:5, s:-5}, {x:4, y:3, s:3}]},
+      ]};
+      assertMiniMaxResp(actualResponse, expectedResponse);
+    });
+  });
+
+  describe('other', () => {
+    it('evaluateEveryStep = false', () => {
+      gameStateService.gameState().debugSettings.evaluateEveryStep = false;
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+      const gameState = gameStateService.gameState();
+
+      const req: MiniMaxReq = {
+        playerIx: 0,
+        piece: EnCellState.B,
+        maxDepth: 3,
+        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
+        cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [ // s will be 0 everywhere, as evaluation happens only on terminal state
+        {score: -80, depth: 3, moves: [{x:0, y:1, s:0}, {x:0, y:0, s:0}, {x:1, y:0, s:0}, {x:2, y:0, s:0}]},
+        {score: -80, depth: 3, moves: [{x:1, y:0, s:0}, {x:0, y:0, s:0}, {x:0, y:1, s:0}, {x:2, y:0, s:0}]},
+        {score: -80, depth: 3, moves: [{x:2, y:3, s:0}, {x:3, y:3, s:0}, {x:3, y:2, s:0}, {x:3, y:1, s:0}]},
+        {score: -80, depth: 3, moves: [{x:3, y:2, s:0}, {x:3, y:3, s:0}, {x:2, y:3, s:0}, {x:3, y:1, s:0}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });

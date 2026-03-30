@@ -1,4 +1,7 @@
 import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState, EnViewMode } from '@/code/data/enums';
+
+import type { DifficultyProp } from '@/code/data/types';
+
 import { defDebugMode, defDebugPanel, defDebugHint } from '@/code/data/gameConst';
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -57,6 +60,7 @@ export function createGameSettings(): GameSettings {
 export type DebugSettings = {
   debugMode: boolean; // General debug mode switch.
   debugPanel: boolean; // If true, show separate debug panel.
+  evaluateEveryStep: boolean; // If true, evaluate every step for debug purposes (not just terminal state).
   disableAutoAi: boolean; // If true, do not run AI automatically. Used in unit tests.
 };
 
@@ -65,6 +69,7 @@ export function createDebugSettingsForDev(): DebugSettings {
   return {
     debugMode: defDebugMode,
     debugPanel: defDebugPanel,
+    evaluateEveryStep: true,
     disableAutoAi: false,
   };
 }
@@ -74,6 +79,7 @@ export function createDebugSettingsForProd(): DebugSettings {
   return {
     debugMode: false,
     debugPanel: false,
+    evaluateEveryStep: false,
     disableAutoAi: false,
   };
 }
@@ -132,6 +138,26 @@ export function createGameStatistics(): GameStatistics {
     player2Score: 0,
     player2Win: 0,
     player2WinInRow: 0,
+  };
+}
+
+// ////////////////////////
+// AI state.
+// ////////////////////////
+
+export type GameAi = {
+  difficulty: DifficultyProp;
+};
+
+/** Debug data. */
+export function createGameAi(): GameAi {
+  return {
+    difficulty: { // placeholder
+      canMiniMax: false,
+      maxDepth: 0,
+      dynamicWeights: false,
+      scoringSystems: [],
+    },
   };
 }
 
@@ -232,6 +258,7 @@ export function createGameBoard(): ReversiBoard {
 export type GameState = {
   settings: GameSettings; // persists between games unless updated in main menu
   statistics: GameStatistics; // statistics: reset for new game, update for new round
+  ai: GameAi; // AI related data: reset for new game
   players: Player[]; // players: reset for new game
   board: ReversiBoard; // data about board state: reset for new game and every round
   view: GameView; // what should be shown on screen: updated when needed
@@ -245,9 +272,11 @@ export function createGameState(): GameState {
   return {
     settings: createGameSettings(),
     statistics: createGameStatistics(),
+    ai: createGameAi(), // actually filled later, as we need to know settings
     players: createPlayers(), // actually filled later, as we need to know settings like mode and who is first
     board: createGameBoard(),
     view: createGameView(),
+
     debugSettings: createDebugSettingsForDev(),
     debugData: createDebugData(),
   };

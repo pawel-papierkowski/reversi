@@ -14,54 +14,13 @@ import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 /**
  * MiniMax algorithm for Reversi.
  * It is recursive algorithm, though 0 depth is handled separately.
+ * Note all needed data is provided in request. It does not use game state in gameStateService directly.
+ * Useful for unit tests where you construct needed game state manually.
  */
 @Injectable({providedIn: 'root'})
 export class MiniMaxService {
   private readonly gameStateService = inject(GameStateService);
   private readonly legalMoveService = inject(LegalMoveService);
-
-  /**
-   * Find out what scoring system should be used for given board state.
-   * @param cells Cells on board.
-   * @param scoringSystems Scoring systems.
-   * @returns Scoring type to use.
-   */
-  public getCurrScoringSystem(cells: Cell[][], scoringSystems: ScoringSystem[]): ScoringSystem {
-    if (scoringSystems.length === 0) return {type: EnScoringType.Weighted, weight: 1}; // default
-    if (scoringSystems.length === 1) return scoringSystems[0]; // only one present, picking is easy
-
-    // We have at least two scoring systems active, pick which one to use...
-    const stats = this.gameStateService.calcCellStats(cells);
-    const pickedScoringSystem = this.pickScoringSystem(stats, scoringSystems);
-    return pickedScoringSystem;
-  }
-
-  /**
-   * Pick scoring system that should be used for current state of board.
-   * Picking is done based on how much is board filled. That allows dividing gameplay in
-   * distinct phases, where different scoring system is used for every phase.
-   * @param stats Stats about state of board.
-   * @param scoringSystems Scoring systems.
-   */
-  private pickScoringSystem(stats: BoardStats, scoringSystems: ScoringSystem[]): ScoringSystem {
-    const nonEmptyCells = stats.player1Score+stats.player2Score;
-
-    let totalWeight = 0;
-    for (const scoringSystem of scoringSystems) {
-      totalWeight += scoringSystem.weight;
-    }
-
-    let currentWeight = 0;
-    for (const scoringSystem of scoringSystems) {
-      currentWeight += scoringSystem.weight;
-      const thresholdCells = Math.floor(stats.total*(currentWeight/totalWeight)); // round down
-      if (nonEmptyCells < thresholdCells) return scoringSystem;
-    }
-
-    return scoringSystems[scoringSystems.length-1];
-  }
-
-  //
 
   /**
    * Resolve best moves for current state of board.
@@ -71,11 +30,14 @@ export class MiniMaxService {
    * @returns Response: list of minimax results.
    */
   public resolve(req: MiniMaxReq): MiniMaxResp {
-    const response: MiniMaxResp = {results:[]};
+    const response: MiniMaxResp = { results:[] };
 
-    // Resolve for each legal move separately, AI service will pick best(?) one from them.
+    const stats = this.gameStateService.calcCellStats(req.cells);
+    const nonEmptyCells = stats.player1Score + stats.player2Score;
+
+    // Resolve for each legal move separately, AI service will pick one from them.
     for (const legalMove of req.legalMoves) {
-      const result = this.executeSearch(req, legalMove);
+      const result = this.executeSearch(req, nonEmptyCells, legalMove);
       response.results.push(result);
     }
 
@@ -87,26 +49,32 @@ export class MiniMaxService {
     return response;
   }
 
+  //
+
   /**
    * Begin evaluating given move.
    * @param req Request.
+   * @param nonEmptyCells Count of non-empty cells, needed to determine scoring system.
    * @param legalMove Legal move to evaluate.
    * @returns MiniMax result.
    */
-  private executeSearch(req: MiniMaxReq, legalMove: ReversiMove) : MiniMaxResult {
+  private executeSearch(req: MiniMaxReq, nonEmptyCells: number, legalMove: ReversiMove) : MiniMaxResult {
     // Make move as CURRENT player.
     const updatedCells = structuredClone(req.cells);
     this.gameStateService.executeMoveCustom(updatedCells, req.piece, legalMove);
 
-    const evalArgs: EvaluateArgs = {
-      playerIx: req.playerIx,
-      piece: req.piece,
-      isYou: true,
-      cells: updatedCells,
-      scoringSystem: this.getCurrScoringSystem(req.cells, req.scoringSystems),
-      moveCount: req.legalMoves.length,
-    };
-    const score = this.evaluate(evalArgs);
+    let score = 0;
+    if (req.maxDepth === 0 || this.gameStateService.gameState().debugSettings.evaluateEveryStep) {
+      const evalArgs: EvaluateArgs = {
+        playerIx: req.playerIx,
+        piece: req.piece,
+        isYou: true,
+        cells: updatedCells,
+        scoringSystem: this.getCurrScoringSystem(nonEmptyCells, req.scoringSystems),
+        moveCount: req.legalMoves.length,
+      };
+      score = this.evaluate(evalArgs);
+    }
     const moves = [ {x: legalMove.x, y: legalMove.y, s:score} ]; // first move
 
     if (req.maxDepth === 0) { // return immediately, evaluating score as CURRENT player
@@ -125,9 +93,10 @@ export class MiniMaxService {
       currDepth: 0, // yes, that's correct value
       maxDepth: req.maxDepth,
       cells: updatedCells,
+      nonEmptyCells: nonEmptyCells,
       moves: moves,
       scoringSystems: req.scoringSystems,
-      scoringSystem: this.getCurrScoringSystem(updatedCells, req.scoringSystems),
+      scoringSystem: this.getCurrScoringSystem(nonEmptyCells, req.scoringSystems),
     };
     return this.recursiveMiniMax(miniMaxArgs);
   }
@@ -151,7 +120,15 @@ export class MiniMaxService {
     let terminalResult : MiniMaxResult | null = null;
     if ((currPlayerMoves.length === 0 && nextPlayerMoves.length === 0) ||
         (args.currDepth === args.maxDepth)) {
-      const score = args.moves[args.moves.length-1].s;
+      // TERMINAL RESULT - only place where evaluation is actually needed.
+      let score = args.moves[args.moves.length-1].s; // will be filled only if debug option evaluateEveryStep is set
+      if (!this.gameStateService.gameState().debugSettings.evaluateEveryStep) {
+        const evalArgs: EvaluateArgs = {
+          ...args, // copy relevant properties from MiniMaxArgs
+          moveCount: currPlayerMoves.length,
+        };
+        score = this.evaluate(evalArgs);
+      }
       terminalResult = {
         score: score,
         depth: args.currDepth,
@@ -188,7 +165,8 @@ export class MiniMaxService {
         cells: updatedCells,
         moveCount: currPlayerMoves.length,
       };
-      const score = this.evaluate(evalArgs); // score for current board
+      // score for current board for debug purposes
+      const score = this.gameStateService.gameState().debugSettings.evaluateEveryStep ? this.evaluate(evalArgs) : 0;
 
       // We persist move history, as we can revert these easily.
       args.moves.push({x: legalMove.x, y: legalMove.y, s:score}); // Remember that move.
@@ -215,6 +193,7 @@ export class MiniMaxService {
    * @returns New args instance.
    */
   private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState, cells: Cell[][]): MiniMaxArgs {
+    const nonEmptyCells = args.nonEmptyCells + 1;
     const newArgs: MiniMaxArgs = {
       ...args,
       playerIx: args.playerIx === 0 ? 1 : 0,
@@ -222,7 +201,8 @@ export class MiniMaxService {
       isYou: !args.isYou,
       currDepth: args.currDepth + 1, // we are going even deeper
       cells: cells,
-      scoringSystem: this.getCurrScoringSystem(cells, args.scoringSystems),
+      nonEmptyCells: nonEmptyCells,
+      scoringSystem: this.getCurrScoringSystem(nonEmptyCells, args.scoringSystems),
     }
     return newArgs;
   }
@@ -338,19 +318,69 @@ export class MiniMaxService {
     return mul;
   }
 
-  private findCellMultiplier(cell: Cell, args: EvaluateArgs) {
-    let mul = 1;
-    switch (cell.state) {
-      case EnCellState.B:
-        if (args.piece == EnCellState.B && !args.isYou) mul = -1;
-        if (args.piece == EnCellState.W && args.isYou) mul = -1;
-        break;
-      case EnCellState.W:
-        if (args.piece == EnCellState.B && args.isYou) mul = -1;
-        if (args.piece == EnCellState.W && !args.isYou) mul = -1;
-        break;
-      default: return 0;
+  /**
+   * Finds out cell multiplier, needed for scoring evaluation.
+   * @param cell Cell data.
+   * @param args Arguments.
+   * @returns 1 (it is you) or -1 (it is opponent).
+   */
+  private findCellMultiplier(cell: Cell, args: EvaluateArgs): number {
+    if (cell.state === EnCellState.Empty) return 0;
+    // Find out your piece.
+    const youPiece = args.isYou ? args.piece : getOppPiece(args.piece);
+    return cell.state === youPiece ? 1 : -1;
+  }
+
+  // //////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Recalculates thresholds of scoring systems. Should be done once at start of game.
+   * @param total Count of cells on board.
+   * @param scoringSystems Scoring systems to modify.
+   */
+  public recalcScoringSystems(total: number, scoringSystems: ScoringSystem[]) {
+    if (scoringSystems.length <= 1) return;
+    if (scoringSystems[0].threshold !== -1) return; // already calculated
+
+    let totalWeight = 0;
+    for (const scoringSystem of scoringSystems) {
+      totalWeight += scoringSystem.weight;
     }
-    return mul;
+
+    let currentWeight = 0;
+    for (const scoringSystem of scoringSystems) {
+      currentWeight += scoringSystem.weight;
+      const thresholdCells = Math.floor(total*(currentWeight/totalWeight)); // round down
+      scoringSystem.threshold = thresholdCells;
+    }
+  }
+
+  /**
+   * Find out what scoring system should be used for given board state.
+   * @param nonEmptyCells Count of non-empty cells on board.
+   * @param scoringSystems Scoring systems.
+   * @returns Scoring type to use.
+   */
+  public getCurrScoringSystem(nonEmptyCells: number, scoringSystems: ScoringSystem[]): ScoringSystem {
+    if (scoringSystems.length === 0) return {type: EnScoringType.Weighted, weight: 1, threshold: -1}; // default
+    if (scoringSystems.length === 1) return scoringSystems[0]; // only one present, picking is easy
+
+    // We have at least two scoring systems active, pick which one to use...
+    const pickedScoringSystem = this.pickScoringSystem(nonEmptyCells, scoringSystems);
+    return pickedScoringSystem;
+  }
+
+  /**
+   * Pick scoring system that should be used for current state of board.
+   * Picking is done based on how many cells of board are filled. That allows dividing gameplay in
+   * distinct phases, where different scoring system is used for every phase.
+   * @param nonEmptyCells Count of non-empty cells on board.
+   * @param scoringSystems Scoring systems.
+   */
+  private pickScoringSystem(nonEmptyCells: number, scoringSystems: ScoringSystem[]): ScoringSystem {
+    for (const scoringSystem of scoringSystems) {
+      if (nonEmptyCells < scoringSystem.threshold) return scoringSystem;
+    }
+    return scoringSystems[scoringSystems.length-1];
   }
 }

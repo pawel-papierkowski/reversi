@@ -43,6 +43,7 @@ export type MiniMaxArgs = {
   currDepth: number; // Current depth of search.
   maxDepth: number; // Maximum depth of search.
   cells: Cell[][]; // Current board state.
+  nonEmptyCells: number; // Count of non-empty cells.
   moves: ScoreCoord[]; // Moves made so far.
   scoringSystems: ScoringSystem[]; // Available scoring systems.
   scoringSystem: ScoringSystem; // Scoring system to use.

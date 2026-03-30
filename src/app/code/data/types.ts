@@ -49,6 +49,7 @@ export type WeightData = {
 export type ScoringSystem = {
   type: EnScoringType; // Type of scoring.
   weight: number; // How important this scoring is.
+  threshold: number; // Calculated threshold. -1 means not yet calculated.
 };
 
 /** Properties for difficulty. */

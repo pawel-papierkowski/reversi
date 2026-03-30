@@ -1,11 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EnDifficulty, EnMode, EnPlayerType, EnCellState, EnScoringType } from '@/code/data/enums';
+import { EnDifficulty, EnMode, EnPlayerType, EnScoringType } from '@/code/data/enums';
 import { aiProp, difficulties } from '@/code/data/aiConst';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { GameService } from '@/code/services/game/game.service';
-import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { AiService } from '@/code/services/ai/ai.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 import { DebugService } from '@/code/services/debug/debug.service';
@@ -20,7 +19,6 @@ import { assertGameState } from '@/code/services/gameState/gameState.test-setup'
 describe('AiService', () => {
   let gameStateService: GameStateService;
   let gameService: GameService;
-  let legalMoveService: LegalMoveService;
   let aiService: AiService;
   let miniMaxService: MiniMaxService;
   let debugService: DebugService;
@@ -28,7 +26,6 @@ describe('AiService', () => {
   beforeEach(async () => {
     gameStateService = TestBed.inject(GameStateService);
     gameService = TestBed.inject(GameService);
-    legalMoveService = TestBed.inject(LegalMoveService);
     aiService = TestBed.inject(AiService);
     miniMaxService = TestBed.inject(MiniMaxService);
     debugService = TestBed.inject(DebugService);
@@ -284,7 +281,7 @@ describe('AiService', () => {
   describe('MiniMax with diff scoring', () => {
     it('late game with evaluation passing score threshold', async () => {
       aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 2}, {type: EnScoringType.Weighted, weight: 6}, {type: EnScoringType.Straight, weight: 2}] };
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 2, threshold: -1}, {type: EnScoringType.Weighted, weight: 6, threshold: -1}, {type: EnScoringType.Straight, weight: 2, threshold: -1}] };
       gameStateService.menuSettings().mode = EnMode.AiVsAi;
       gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
       gameStateService.menuSettings().difficulty = EnDifficulty.Hard;
@@ -333,7 +330,7 @@ describe('AiService', () => {
 
     it('late game with evaluation fully using straight scoring', async () => {
       aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: false,
-        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 2}, {type: EnScoringType.Weighted, weight: 6}, {type: EnScoringType.Straight, weight: 2}] };
+        scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 2, threshold: -1}, {type: EnScoringType.Weighted, weight: 6, threshold: -1}, {type: EnScoringType.Straight, weight: 2, threshold: -1}] };
       gameStateService.menuSettings().mode = EnMode.AiVsAi;
       gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
       gameStateService.menuSettings().difficulty = EnDifficulty.Hard;
@@ -393,7 +390,7 @@ describe('AiService', () => {
       // We need to make situation where weight change actually changes evaluation
       // and picked move.
       aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: true,
-        scoringSystems: [{type: EnScoringType.Weighted, weight: 1}] };
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}] };
       gameStateService.menuSettings().mode = EnMode.AiVsAi;
       gameStateService.menuSettings().whoFirst = EnPlayerType.Human;
       gameStateService.menuSettings().difficulty = EnDifficulty.Hard;

@@ -28,6 +28,9 @@ export class GameService {
   public startGame() {
     this.gameStateService.applySettings(); // use settings from main menu options form
     this.gameStateService.initializeGame();
+
+    let boardArea = this.gameStateService.gameState().settings.boardSize**2;
+    this.miniMaxService.recalcScoringSystems(boardArea, this.gameStateService.gameState().ai.difficulty.scoringSystems);
     this.nextRound();
 
     this.gameStorageService.saveGameState(this.gameStateService.gameState);
@@ -47,13 +50,14 @@ export class GameService {
     this.gameStorageService.updateGameState(this.gameStateService.gameState);
   }
 
-  /** Update debug data. */
+  /** Update debug data shown in debug panel. */
   private updateDebugData() {
     if (!this.gameStateService.gameState().debugSettings.debugMode) return;
     this.updateDebugEvaluation();
     this.updateDebugPotentialMoves();
   }
 
+  /** Update debug text that shows evaluation for current board or selected history entry. */
   private updateDebugEvaluation() {
     let playerIx = this.gameStateService.getCurrPlayer().ix;
     let piece = this.gameStateService.getCurrPlayer().piece;
@@ -67,18 +71,22 @@ export class GameService {
       cells = historyBoard.cells;
     }
 
-    this.gameStateService.gameState().debugData.emptyCells = this.gameStateService.calcCellStats(cells).empty;
+    const stats = this.gameStateService.calcCellStats(cells);
+    const nonEmptyCells = stats.player1Score + stats.player2Score;
+    this.gameStateService.gameState().debugData.emptyCells = stats.empty;
+    
     const args: EvaluateArgs = {
       playerIx: playerIx,
       piece: piece,
       isYou: true,
       cells: cells,
-      scoringSystem: this.miniMaxService.getCurrScoringSystem(cells, this.resolveDifficulty().scoringSystems),
+      scoringSystem: this.miniMaxService.getCurrScoringSystem(nonEmptyCells, this.gameStateService.gameState().ai.difficulty.scoringSystems),
       moveCount: this.legalMoveService.resolveMovesCustom(cells, piece).length,
     };
     this.gameStateService.gameState().debugData.evaluationScore = this.miniMaxService.evaluate(args);
   }
 
+  /** Update debug text containing potential moves. */
   private updateDebugPotentialMoves() {
     let potentialMovesStr = "";
     if (this.gameStateService.gameState().view.viewMode === EnViewMode.CurrentBoard) {
@@ -105,7 +113,7 @@ export class GameService {
     // Legal move found, execute it.
     this.gameStateService.executeMove(move);
     // Affect weights if allowed.
-    if (this.resolveDifficulty().dynamicWeights) this.gameStateService.affectWeights(move);
+    if (this.gameStateService.gameState().ai.difficulty.dynamicWeights) this.gameStateService.affectWeights(move);
 
     // Current state of board as latest entry in history. Notes:
     // - State of board is from PoV of player that made move AFTER making move.
@@ -310,19 +318,4 @@ export class GameService {
 
     this.gameStorageService.saveGameState(this.gameStateService.gameState); // save after every move
   }
-
-  // //////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Resolve properties for given difficulty.
-   * @returns Difficulty properties.
-   */
-  public resolveDifficulty(): DifficultyProp {
-    if (aiProp.customDifficulty !== null) return aiProp.customDifficulty;
-    return aiProp.difficulties[this.gameStateService.gameState().settings.difficulty];
-  }
-
-  // //////////////////////////////////////////////////////////////////////////
-
-  // DEBUG AND TEST FUNCTIONS
 }

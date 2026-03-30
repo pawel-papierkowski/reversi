@@ -3,13 +3,12 @@ import { Injectable, inject, signal } from '@angular/core';
 import { XORShift128Plus } from 'random-seedable';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
-import { BoardStats, Coordinate } from '@/code/data/types';
-import { weights } from '@/code/data/aiConst';
-import { aiProp } from '@/code/data/aiConst';
+import type { DifficultyProp, BoardStats, Coordinate } from '@/code/data/types';
+import { weights, aiProp } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
 import type { DirCoord } from '@/code/data/dirCoord';
 import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
-import type { GameState, GameSettings, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
+import type { GameState, GameSettings, GameAi, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForProd } from "@/code/data/gameState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
@@ -133,13 +132,37 @@ export class GameStateService {
     this.gameState.update(state => ({ // initialize game
       ...state, // duplicates rest of state
       statistics: createGameStatistics(),
+      ai: this.generateGameAi(),
       players: this.generatePlayers(),
       debugSettings: this.generateDebugSettings(),
     }));
     // execute initializeRound() separately after that
   }
 
-  /** Generate debug settings. Ensures production always has debug turn off. */
+  /**
+   * Generate game AI data.
+   * @returns Game AI data.
+   */
+  private generateGameAi(): GameAi {
+    const difficulty = this.resolveDifficulty();
+    return {
+      difficulty: difficulty,
+    };
+  }
+
+  /**
+   * Resolve properties for given difficulty.
+   * @returns Difficulty properties.
+   */
+  protected resolveDifficulty(): DifficultyProp {
+    if (aiProp.customDifficulty !== null) return aiProp.customDifficulty;
+    return aiProp.difficulties[this.gameState().settings.difficulty];
+  }
+
+  /**
+   * Generate debug settings. Ensures production always has debug turn off.
+   * @returns Debug settings.
+   */
   private generateDebugSettings(): DebugSettings {
     const debugMode = projectProp.build === "PROD" ? false : true;
     return debugMode ? this.gameState().debugSettings : createDebugSettingsForProd();
@@ -168,7 +191,7 @@ export class GameStateService {
         ...state.statistics, // rest of statistics (win/tie counts) won't be touched
         round: state.statistics.round+1,
         moveCount: 0, // reset part of stats for start of new round
-        emptyCells: boardSize*boardSize - 4,
+        emptyCells: boardSize**2 - 4,
         player1Score: 2,
         player2Score: 2,
       },
