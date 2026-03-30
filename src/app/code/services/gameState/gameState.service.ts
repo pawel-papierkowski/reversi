@@ -3,7 +3,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { XORShift128Plus } from 'random-seedable';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
-import type { DifficultyProp, BoardStats, Coordinate } from '@/code/data/types';
+import type { DifficultyProp, BoardStats, Coordinate, StateCoord } from '@/code/data/types';
 import { weights, aiProp } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
 import type { DirCoord } from '@/code/data/dirCoord';
@@ -92,7 +92,6 @@ export class GameStateService {
    */
   public recalcScoring() {
     const statistics = this.gameState().statistics;
-    const boardSize = this.gameState().settings.boardSize;
     const cells = this.gameState().board.cells;
 
     const stats = this.calcCellStats(cells);
@@ -355,7 +354,7 @@ export class GameStateService {
   public executeMove(move: ReversiMove) {
     const cells = this.gameState().board.cells;
     const playerPiece = this.getCurrPlayer().piece;
-    this.executeMoveCustom(cells, playerPiece, move);
+    this.executeMoveCustom(cells, playerPiece, move, true);
   }
 
   /**
@@ -365,34 +364,43 @@ export class GameStateService {
    * @param cells State of board.
    * @param playerPiece Player piece.
    * @param move Move to execute.
+   * @param copy If true, make copy of cell instead of changing cell values on spot.
+   * @returns Affected cells as array of coordinates and previous values.
    */
-  public executeMoveCustom(cells: Cell[][], playerPiece: EnCellState, move: ReversiMove) {
+  public executeMoveCustom(cells: Cell[][], playerPiece: EnCellState, move: ReversiMove, copy: boolean): StateCoord[] {
+    const affectedCells: StateCoord[] = [];
     const oppPlayerPiece = getOppPiece(playerPiece);
-    this.setCell(cells, move.x, move.y, playerPiece);
+    const oldCell = this.setCell(cells, move.x, move.y, playerPiece, copy);
+    affectedCells.push(oldCell);
 
     const potentialMoves = this.resolvePotentialMoves(cells, move.x, move.y, oppPlayerPiece);
     for (let i=0; i<potentialMoves.length; i++) {
       const potentialMove = potentialMoves[i];
-      this.tryFlipInDirection(cells, potentialMove, playerPiece, oppPlayerPiece);
+      this.tryFlipInDirection(cells, potentialMove, playerPiece, oppPlayerPiece, copy, affectedCells);
     }
+
+    return affectedCells;
   }
 
   /**
    * Try to flip pieces in given direction for given coordinates.
    * This is done in two phases:
    * - First we trace until we hit another your player piece. If that fails, we abort.
-   * - Now we flipp all opposing pieces detected in trace.
+   * - Now we flip all opposing pieces detected in trace.
    * @param potentialMove Direction and coordinates to use.
    * @param playerPiece Piece of your player.
    * @param oppPlayerPiece Piece of opposing player.
+   * @param copy If true, make copy of cell instead of changing cell values on spot.
+   * @param affectedCells Affected cells as array of coordinates and previous values.
    */
-  private tryFlipInDirection(cells: Cell[][], potentialMove: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState) {
+  private tryFlipInDirection(cells: Cell[][], potentialMove: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState, copy: boolean, affectedCells: StateCoord[]) {
     const opposingPieces: DirCoord[] = this.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
     if (opposingPieces.length === 0) return; // nothing to do in this direction
 
     for (let i=0; i<opposingPieces.length; i++) { // flip them all
       const opposingPiece = opposingPieces[i];
-      this.setCell(cells, opposingPiece.x, opposingPiece.y, playerPiece); // most important line of code in the game
+      const oldCell = this.setCell(cells, opposingPiece.x, opposingPiece.y, playerPiece, copy); // most important line of code in the game
+      affectedCells.push(oldCell);
     }
   }
 
@@ -402,13 +410,19 @@ export class GameStateService {
    * @param x X coordinate.
    * @param y Y coordinate.
    * @param playerPiece Player piece.
+   * @param copy If true, make copy of cell instead of changing cell values on spot.
+   * @return Old state of cell.
    */
-  private setCell(cells: Cell[][], x: number, y: number, playerPiece: EnCellState) {
+  private setCell(cells: Cell[][], x: number, y: number, playerPiece: EnCellState, copy: boolean): StateCoord {
     const cell = cells[x][y];
-    cell.state = playerPiece,
-    cell.potentialMove = EnCellState.Empty,
-     // update reference so cell notifiers (like cell field in cell.ts) can register change in cell
-    cells[x][y] = { ...cell };
+    const oldState = { x: x, y: y, s: cell.state, w: cell.weights };
+    cell.state = playerPiece;
+    cell.potentialMove = EnCellState.Empty;
+    // Update reference so cell notifiers (like cell field in cell.ts) can register change in cell.
+    // Note it is not needed for MiniMax algorithm, as it makes only simulated moves, not real ones.
+    // Use copy = true only for moves on actual board.
+    if (copy) cells[x][y] = { ...cell };
+    return oldState;
   }
 
   //

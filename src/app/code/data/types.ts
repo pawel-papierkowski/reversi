@@ -1,4 +1,4 @@
-import { EnDifficulty, EnAiTactic, EnScoringType } from '@/code/data/enums';
+import { EnDifficulty, EnAiTactic, EnScoringType, EnCellState } from '@/code/data/enums';
 
 /** Fundamental project properties. More or less constant. */
 export type ProjectProp = {
@@ -77,4 +77,11 @@ export type WeightCoord = {
   x: number;
   y: number;
   w: number; // weight
+};
+
+export type StateCoord = {
+  x: number;
+  y: number;
+  s: EnCellState; // cell state
+  w: number[]; // weights
 };
