@@ -6,36 +6,25 @@ export type DirCoord = {
   y: number;
 };
 
-export function createDirCoord(dir: EnDir, x: number, y: number): DirCoord {
-  return {
-    dir: dir,
-    x: x,
-    y: y
-  };
-}
+// Lookup table.
+const dx = [ 0,  1, 1, 1, 0, -1, -1, -1]; // Offsets for N, NE, E, SE, S, SW, W, NW
+const dy = [-1, -1, 0, 1, 1,  1,  0, -1];
 
 /**
  * Applies direction to X and Y coordinates.
  * Note YOU are responsible for checking if coordinates went out of bounds.
- * @param dirCoord Original coordinates
- * @returns Updated coordinates.
+ * @param dirCoord Coordinates to modify in-place.
  */
-export function applyDir(dirCoord : DirCoord): DirCoord {
-  let newX = dirCoord.x;
-  let newY = dirCoord.y;
-  if (dirCoord.dir === EnDir.NE || dirCoord.dir === EnDir.E || dirCoord.dir === EnDir.SE)
-    newX += 1;
-  if (dirCoord.dir === EnDir.SW || dirCoord.dir === EnDir.W || dirCoord.dir === EnDir.NW)
-    newX -= 1;
-  if (dirCoord.dir === EnDir.SE || dirCoord.dir === EnDir.S || dirCoord.dir === EnDir.SW)
-    newY += 1;
-  if (dirCoord.dir === EnDir.NW || dirCoord.dir === EnDir.N || dirCoord.dir === EnDir.NE)
-    newY -= 1;
-  return createDirCoord(dirCoord.dir, newX, newY);
+export function applyDir(dirCoord : DirCoord) {
+  dirCoord.x += dx[dirCoord.dir];
+  dirCoord.y += dy[dirCoord.dir];
 }
 
+/**
+ * Gets value of opposing piece.
+ * @param state Piece value.
+ * @returns Piece value for opponent.
+ */
 export function getOppPiece(state: EnCellState): EnCellState {
-  if (state === EnCellState.B) return EnCellState.W;
-  if (state === EnCellState.W) return EnCellState.B;
-  return state;
+  return state === EnCellState.B ? EnCellState.W : EnCellState.B;
 }

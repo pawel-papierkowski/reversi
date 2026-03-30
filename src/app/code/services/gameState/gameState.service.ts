@@ -7,7 +7,7 @@ import type { DifficultyProp, BoardStats, Coordinate, StateCoord } from '@/code/
 import { weights, aiProp } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
 import type { DirCoord } from '@/code/data/dirCoord';
-import { createDirCoord, applyDir, getOppPiece } from '@/code/data/dirCoord';
+import { applyDir, getOppPiece } from '@/code/data/dirCoord';
 import type { GameState, GameSettings, GameAi, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForProd } from "@/code/data/gameState";
 
@@ -365,7 +365,7 @@ export class GameStateService {
    * @param playerPiece Player piece.
    * @param move Move to execute.
    * @param copy If true, make copy of cell instead of changing cell values on spot.
-   * @returns Affected cells as array of coordinates and previous values.
+   * @returns Affected cells as array of coordinates and previous values. Used for restoring state of board in MiniMax algo.
    */
   public executeMoveCustom(cells: Cell[][], playerPiece: EnCellState, move: ReversiMove, copy: boolean): StateCoord[] {
     const affectedCells: StateCoord[] = [];
@@ -415,7 +415,7 @@ export class GameStateService {
    */
   private setCell(cells: Cell[][], x: number, y: number, playerPiece: EnCellState, copy: boolean): StateCoord {
     const cell = cells[x][y];
-    const oldState = { x: x, y: y, s: cell.state, w: cell.weights };
+    const oldState = { x: x, y: y, s: cell.state, w: [...cell.weights] };
     cell.state = playerPiece;
     cell.potentialMove = EnCellState.Empty;
     // Update reference so cell notifiers (like cell field in cell.ts) can register change in cell.
@@ -441,8 +441,8 @@ export class GameStateService {
     // Find out all directions around given cell.
     // Already exclude coordinates out of range or containing something else than piece of opposite color.
     for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
-      let dirCoord : DirCoord = createDirCoord(dir, x, y);
-      dirCoord = applyDir(dirCoord);
+      let dirCoord : DirCoord = { dir: dir, x: x, y: y };
+      applyDir(dirCoord);
       if (this.canUsePotentialMove(cells, dirCoord, oppPlayerPiece)) potentialMoves.push(dirCoord);
     }
     return potentialMoves;
@@ -479,17 +479,16 @@ export class GameStateService {
     const boardSize = cells.length;
     const opposingPieces: DirCoord[] = [];
     // we always are one step away from origin point
-    //if (cells[dirCoord.x][dirCoord.y].state === oppPlayerPiece)
-    opposingPieces.push(structuredClone(dirCoord));
+    opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
 
     do {
-      dirCoord = applyDir(dirCoord); // move coordinates
+      applyDir(dirCoord); // move coordinates
       if (!this.hitEdge(dirCoord, boardSize)) return []; // hit edge of board, can't be valid move
       const cell = cells[dirCoord.x][dirCoord.y];
       if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return []; // can't be legal move!
       if (cell.state === oppPlayerPiece) {
         // found piece of opposite player, add to array and continue
-        opposingPieces.push(structuredClone(dirCoord));
+        opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
         continue;
       }
       if (cell.state === playerPiece) return opposingPieces; // it is legal move!
