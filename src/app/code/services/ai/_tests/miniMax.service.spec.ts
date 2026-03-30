@@ -429,6 +429,34 @@ describe('MiniMaxService', () => {
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
+
+    it('switching between scoring systems', () => {
+      gameStateService.menuSettings().boardSize = 4; // 4x4
+      gameService.startGame();
+      const gameState = gameStateService.gameState();
+      const boardStr = "____"+ // exactly 6 pieces placed
+                       "_WB_"+ // first two moves will use Weighted, last one AvailableMoves
+                       "_BWB"+
+                       "___W";
+      debugService.setBoard(gameState, boardStr);
+
+      const req: MiniMaxReq = {
+        playerIx: 0,
+        piece: EnCellState.B,
+        maxDepth: 2,
+        legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
+        cells: gameState.board.cells,
+        dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: 8}, {type: EnScoringType.AvailableMoves, weight: 1, threshold: 16}],
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [
+        {score: 4, depth: 2, processed: 8, moves: [{x:2, y:3, s:-240}, {x:3, y:1, s:-80}, {x:0, y:0, s:4}]},
+        {score: 1, depth: 2, processed: 10, moves: [{x:0, y:1, s:-240}, {x:3, y:1, s:-180}, {x:2, y:3, s:1}]},
+        {score: 1, depth: 2, processed: 10, moves: [{x:1, y:0, s:-240}, {x:3, y:1, s:-180}, {x:2, y:3, s:1}]},
+      ]};
+      assertMiniMaxResp(actualResponse, expectedResponse);
+    });
   });
 
   describe('other', () => {
