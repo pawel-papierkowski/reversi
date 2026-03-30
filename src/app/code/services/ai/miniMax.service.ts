@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
 import { EnCellState, EnScoringType } from '@/code/data/enums';
-import { BoardStats, ScoringSystem } from '@/code/data/types';
+import type { StateCoord, ScoringSystem } from '@/code/data/types';
 import { aiProp } from '@/code/data/aiConst';
 import { getOppPiece } from '@/code/data/dirCoord';
 import type { Cell, ReversiMove } from "@/code/data/gameState";
@@ -61,7 +61,7 @@ export class MiniMaxService {
   private executeSearch(req: MiniMaxReq, nonEmptyCells: number, legalMove: ReversiMove) : MiniMaxResult {
     // Make move as CURRENT player.
     const updatedCells = structuredClone(req.cells);
-    this.gameStateService.executeMoveCustom(updatedCells, req.piece, legalMove);
+    this.gameStateService.executeMoveCustom(updatedCells, req.piece, legalMove, false);
 
     let score = 0;
     if (req.maxDepth === 0 || this.gameStateService.gameState().debugSettings.evaluateEveryStep) {
@@ -146,7 +146,7 @@ export class MiniMaxService {
       args.moves.push({x: -1, y: -1, s:score}); // Remember pass.
       // Switch players and continue.
       // If we are here, we know next player must have at least one legal move.
-      const newArgs = this.createNewArgs(args, otherPiece, args.cells);
+      const newArgs = this.createNewArgs(args, otherPiece);
       const result = this.recursiveMiniMax(newArgs);
       args.moves.pop(); // Unmake that move.
       return result;
@@ -155,34 +155,44 @@ export class MiniMaxService {
     // Now process all legal moves.
     const results : MiniMaxResult[] = [];
     for (const legalMove of currPlayerMoves) {
-      // We need to clone board, as we cannot easily revert state of cells.
-      const updatedCells = structuredClone(args.cells);
+      // We avoid cloning board: make array of affected cells with old state and weight so we can undo state of board later.
       // Make move as CURRENT player.
-      this.gameStateService.executeMoveCustom(updatedCells, args.piece, legalMove);
+      const affectedCells = this.gameStateService.executeMoveCustom(args.cells, args.piece, legalMove, false);
 
-      const evalArgs: EvaluateArgs = {
-        ...args, // copy relevant properties from MiniMaxArgs
-        cells: updatedCells,
-        moveCount: currPlayerMoves.length,
-      };
-      // score for current board for debug purposes
-      const score = this.gameStateService.gameState().debugSettings.evaluateEveryStep ? this.evaluate(evalArgs) : 0;
+      let score = 0;
+      if (this.gameStateService.gameState().debugSettings.evaluateEveryStep) {
+        const evalArgs: EvaluateArgs = {
+          ...args, // copy relevant properties from MiniMaxArgs
+          moveCount: currPlayerMoves.length,
+        };
+        // score for current board for debug purposes
+        score = this.evaluate(evalArgs);
+      }
 
       // We persist move history, as we can revert these easily.
       args.moves.push({x: legalMove.x, y: legalMove.y, s:score}); // Remember that move.
 
       // Swap to NEXT player and find deeper moves.
-      const newArgs = this.createNewArgs(args, otherPiece, updatedCells);
+      const newArgs = this.createNewArgs(args, otherPiece);
       const result = this.recursiveMiniMax(newArgs);
       results.push(result);
 
-      args.moves.pop(); // Unmake that move.
+      args.moves.pop(); // Undo that move...
+      this.undoBoard(args.cells, affectedCells); // ...and restore state of board.
     }
 
     // Find best result.
     const bestResult = this.findBestResult(results, args.isYou, args.currDepth);
     //console.log("Best (non-terminal) result: ", bestResult);
     return bestResult;
+  }
+
+  private undoBoard(cells: Cell[][], affectedCells: StateCoord[]) {
+    for (const affectedCell of affectedCells) {
+      const cell = cells[affectedCell.x][affectedCell.y];
+      cell.state = affectedCell.s;
+      cell.weights = affectedCell.w;
+    }
   }
 
   /**
@@ -192,7 +202,7 @@ export class MiniMaxService {
    * @param cells Separate clone of board.
    * @returns New args instance.
    */
-  private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState, cells: Cell[][]): MiniMaxArgs {
+  private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState): MiniMaxArgs {
     const nonEmptyCells = args.nonEmptyCells + 1;
     const newArgs: MiniMaxArgs = {
       ...args,
@@ -200,7 +210,6 @@ export class MiniMaxService {
       piece: otherPiece,
       isYou: !args.isYou,
       currDepth: args.currDepth + 1, // we are going even deeper
-      cells: cells,
       nonEmptyCells: nonEmptyCells,
       scoringSystem: this.getCurrScoringSystem(nonEmptyCells, args.scoringSystems),
     }
