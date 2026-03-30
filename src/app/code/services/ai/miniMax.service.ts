@@ -22,6 +22,8 @@ export class MiniMaxService {
   private readonly gameStateService = inject(GameStateService);
   private readonly legalMoveService = inject(LegalMoveService);
 
+  private processed: number = 0;
+
   /**
    * Resolve best moves for current state of board.
    * Note: 0 max depth means we are scoring for every legal move available at this
@@ -83,10 +85,12 @@ export class MiniMaxService {
         score: score,
         depth: 0,
         moves: moves,
+        processed: 1,
       };
     }
 
     // Start going deep for real. This is where recursion starts.
+    this.processed = 1;
     const miniMaxArgs: MiniMaxArgs = {
       playerIx: req.playerIx === 0 ? 1 : 0, // go as NEXT player
       piece: getOppPiece(req.piece),
@@ -135,6 +139,7 @@ export class MiniMaxService {
         score: score,
         depth: args.currDepth,
         moves: [...args.moves],
+        processed: this.processed,
       };
     }
 
@@ -154,6 +159,7 @@ export class MiniMaxService {
       score: args.isYou ? -aiProp.maxScore : aiProp.maxScore,
       depth: args.currDepth,
       moves: [],
+      processed: 0, // we care about it only on terminal state
     };
 
     let alpha = args.alpha;
@@ -163,6 +169,7 @@ export class MiniMaxService {
       // We avoid cloning board: make array of affected cells with old state and weight so we can undo state of board later.
       // Make move as CURRENT player.
       const affectedCells = this.gameStateService.executeMoveCustom(args.cells, args.piece, legalMove, false);
+      this.processed++;
 
       let score = 0;
       if (this.gameStateService.gameState().debugSettings.evaluateEveryStep) {
