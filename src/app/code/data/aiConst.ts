@@ -12,14 +12,14 @@ const difficultyMindless: DifficultyProp = {
 
 const difficultyEasy: DifficultyProp = {
   canMiniMax: true,
-  maxDepth: 5,
+  maxDepth: 3,
   dynamicWeights: false, // no dynamic weights
   scoringSystems: [{type: EnScoringType.Weighted, weight: 10, threshold: -1}], // only weighted
 };
 
 const difficultyMedium: DifficultyProp = {
   canMiniMax: true,
-  maxDepth: 7,
+  maxDepth: 5,
   dynamicWeights: false, // no dynamic weights
   scoringSystems: [
     {type: EnScoringType.AvailableMoves, weight: 2, threshold: -1},
@@ -28,7 +28,7 @@ const difficultyMedium: DifficultyProp = {
 
 const difficultyHard: DifficultyProp = {
   canMiniMax: true,
-  maxDepth: 9,
+  maxDepth: 7,
   dynamicWeights: true, // dynamic weights
   scoringSystems: [
     {type: EnScoringType.AvailableMoves, weight: 2, threshold: -1}, // first phase

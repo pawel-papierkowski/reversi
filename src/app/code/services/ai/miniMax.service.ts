@@ -41,6 +41,7 @@ export class MiniMaxService {
     for (const legalMove of req.legalMoves) {
       const result = this.executeSearch(req, nonEmptyCells, legalMove);
       response.results.push(result);
+      //console.warn(`Legal move x=${result.moves[0].x}, y=${result.moves[0].y}, score=${result.score}, processed=${result.processed}`);
     }
 
     // Sort descending by score. If scores are tied, sort ascending by depth.
