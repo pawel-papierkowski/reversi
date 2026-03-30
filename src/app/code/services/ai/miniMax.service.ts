@@ -146,7 +146,7 @@ export class MiniMaxService {
       args.moves.push({x: -1, y: -1, s:score}); // Remember pass.
       // Switch players and continue.
       // If we are here, we know next player must have at least one legal move.
-      const newArgs = this.createNewArgs(args, otherPiece);
+      const newArgs = this.createNewArgs(args, otherPiece, true);
       const result = this.recursiveMiniMax(newArgs);
       args.moves.pop(); // Unmake that move.
       return result;
@@ -173,7 +173,7 @@ export class MiniMaxService {
       args.moves.push({x: legalMove.x, y: legalMove.y, s:score}); // Remember that move.
 
       // Swap to NEXT player and find deeper moves.
-      const newArgs = this.createNewArgs(args, otherPiece);
+      const newArgs = this.createNewArgs(args, otherPiece, false);
       const result = this.recursiveMiniMax(newArgs);
       results.push(result);
 
@@ -200,10 +200,11 @@ export class MiniMaxService {
    * @param args Current args instance.
    * @param otherPiece Piece for other player.
    * @param cells Separate clone of board.
+   * @param isPass True if it is pass, otherwise false.
    * @returns New args instance.
    */
-  private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState): MiniMaxArgs {
-    const nonEmptyCells = args.nonEmptyCells + 1;
+  private createNewArgs(args: MiniMaxArgs, otherPiece: EnCellState, isPass: boolean): MiniMaxArgs {
+    const nonEmptyCells = isPass ? args.nonEmptyCells+1 : args.nonEmptyCells;
     const newArgs: MiniMaxArgs = {
       ...args,
       playerIx: args.playerIx === 0 ? 1 : 0,
