@@ -1,13 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 
 import { EnGameStatus, EnPlayerType, EnViewMode } from '@/code/data/enums';
-import type { DifficultyProp } from "@/code/data/types";
-import { aiProp } from '@/code/data/aiConst';
 import type { GameHistoryEntry, ReversiMove } from "@/code/data/gameState";
 import type { EvaluateArgs } from "@/code/data/aiState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { MoveService } from '@/code/services/move/move.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 
@@ -18,6 +17,7 @@ import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 export class GameService {
   private readonly gameStorageService = inject(GameStorageService);
   private readonly gameStateService = inject(GameStateService);
+  private readonly moveService = inject(MoveService);
   private readonly legalMoveService = inject(LegalMoveService);
   private readonly miniMaxService = inject(MiniMaxService);
 
@@ -74,7 +74,7 @@ export class GameService {
     const stats = this.gameStateService.calcCellStats(cells);
     const nonEmptyCells = stats.player1Score + stats.player2Score;
     this.gameStateService.gameState().debugData.emptyCells = stats.empty;
-    
+
     const args: EvaluateArgs = {
       playerIx: playerIx,
       piece: piece,
@@ -110,10 +110,8 @@ export class GameService {
     const move = this.legalMoveService.findMove(x, y);
     if (move === null) return; // no legal move found for this cell, abort
 
-    // Legal move found, execute it.
-    this.gameStateService.executeMove(move);
-    // Affect weights if allowed.
-    if (this.gameStateService.gameState().ai.difficulty.dynamicWeights) this.gameStateService.affectWeights(move);
+    // Legal move found, execute it. Note it will also affect weight (if difficulty level allows it).
+    this.moveService.executeMove(move);
 
     // Current state of board as latest entry in history. Notes:
     // - State of board is from PoV of player that made move AFTER making move.
@@ -136,9 +134,9 @@ export class GameService {
    * @returns True if move is allowed, otherwise false.
    */
   private canMakeMove(): boolean {
-    // must be in progress
+    // Game must be in progress.
     if (this.gameStateService.gameState().board.status !== EnGameStatus.InProgress) return false;
-    // cannot make move when reviewing past moves from history
+    // Cannot make move when reviewing past moves from history.
     if (this.gameStateService.gameState().view.viewMode !== EnViewMode.CurrentBoard) return false;
     return true;
   }

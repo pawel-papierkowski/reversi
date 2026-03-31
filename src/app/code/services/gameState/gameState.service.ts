@@ -2,13 +2,11 @@ import { Injectable, inject, signal } from '@angular/core';
 
 import { XORShift128Plus } from 'random-seedable';
 
-import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnDir, EnViewMode } from '@/code/data/enums';
-import type { DifficultyProp, BoardStats, Coordinate, StateCoord } from '@/code/data/types';
+import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnViewMode } from '@/code/data/enums';
+import type { DifficultyProp, BoardStats } from '@/code/data/types';
 import { weights, aiProp } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
-import type { DirCoord } from '@/code/data/dirCoord';
-import { applyDir, getOppPiece } from '@/code/data/dirCoord';
-import type { GameState, GameSettings, GameAi, DebugSettings, Cell, Player, ReversiMove, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
+import type { GameState, GameSettings, GameAi, DebugSettings, Cell, Player, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForProd } from "@/code/data/gameState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
@@ -25,7 +23,7 @@ export class GameStateService {
   public readonly gameState = signal<GameState>(createGameState());
   /** Temporary settings used in main menu options. */
   public readonly menuSettings = signal<GameSettings>(createGameSettings());
-  /** RNG used in game. Also needed for seeding in unit tests. */
+  /** RNG used in game. Moves with same score will be randomly picked. Also needed for seeding in unit tests. */
   public readonly rng = new XORShift128Plus();
 
   constructor() {
@@ -78,6 +76,8 @@ export class GameStateService {
   /** Use temporary settings as actual settings. */
   public applySettings() {
     // Note: This is only place we update/save menu settings, that's intentional.
+    // So if we change settings on main menu screen (without starting game) and refresh page,
+    // these settings will be back to what was before.
     this.gameStorageService.updateMenuSettings(this.menuSettings);
     this.gameStorageService.saveMenuSettings(this.menuSettings);
 
@@ -100,6 +100,11 @@ export class GameStateService {
     statistics.player2Score = stats.player2Score;
   }
 
+  /**
+   * Calculate certain statistics about given board.
+   * @param cells Board data.
+   * @returns Statistics about board.
+   */
   public calcCellStats(cells: Cell[][]): BoardStats {
     const size = cells.length;
     const total = size*size;
@@ -116,14 +121,14 @@ export class GameStateService {
         else if (cell.state == EnCellState.Empty) empty++;
       }
     }
-    return {empty: empty, player1Score: player1Score, player2Score: player2Score, total: total};
+    return { empty: empty, player1Score: player1Score, player2Score: player2Score, total: total };
   }
 
   // //////////////////////////////////////////////////////////////////////////
 
   /**
    * Initializes new game. Must be called after modifying settings, but before actual game starts.
-   * You also need to handle some stuff after initialization like legal moves or history entry.
+   * You also need to handle some stuff after initialization like round-specific things, legal moves or history entry.
    */
   public initializeGame() {
     // Reset game state that needs to be reset for new game.
@@ -143,7 +148,9 @@ export class GameStateService {
    * @returns Game AI data.
    */
   private generateGameAi(): GameAi {
-    const difficulty = this.resolveDifficulty();
+    // Difficulty data will be further modified later, like calculating thresholds, so we need copy.
+    // We do not want to affect aiProp data.
+    const difficulty = structuredClone(this.resolveDifficulty());
     return {
       difficulty: difficulty,
     };
@@ -174,7 +181,7 @@ export class GameStateService {
    */
   public initializeRound() {
     const boardSize = this.gameState().settings.boardSize;
-    const newCells = this.genCells(boardSize);
+    const newCells = this.genCells(boardSize); // same for board and view
 
     this.gameState.update(state => ({ // initialize round
       ...state, // duplicates rest of state
@@ -341,254 +348,5 @@ export class GameStateService {
       foundName = this.rng.choice(names);
     } while (foundName === excludeName);
     return foundName;
-  }
-
-  // //////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Execute move for current state of board. That means changing state of selected cell
-   * and flipping any contiguous line of opposite pieces that touch this piece.
-   * Note: code assumes this move is legal. Check it before calling this function!
-   * @param move Move to execute.
-   */
-  public executeMove(move: ReversiMove) {
-    const cells = this.gameState().board.cells;
-    const playerPiece = this.getCurrPlayer().piece;
-    this.executeMoveCustom(cells, playerPiece, move, true);
-  }
-
-  /**
-   * Execute move for current state of board. That means changing state of selected cell
-   * and flipping any contiguous line of opposite pieces that touch this piece.
-   * Note: code assumes this move is legal. Check it before calling this function!
-   * @param cells State of board.
-   * @param playerPiece Player piece.
-   * @param move Move to execute.
-   * @param copy If true, make copy of cell instead of changing cell values on spot.
-   * @returns Affected cells as array of coordinates and previous values. Used for restoring state of board in MiniMax algo.
-   */
-  public executeMoveCustom(cells: Cell[][], playerPiece: EnCellState, move: ReversiMove, copy: boolean): StateCoord[] {
-    const affectedCells: StateCoord[] = [];
-    const oppPlayerPiece = getOppPiece(playerPiece);
-    const oldCell = this.setCell(cells, move.x, move.y, playerPiece, copy);
-    affectedCells.push(oldCell);
-
-    const potentialMoves = this.resolvePotentialMoves(cells, move.x, move.y, oppPlayerPiece);
-    for (let i=0; i<potentialMoves.length; i++) {
-      const potentialMove = potentialMoves[i];
-      this.tryFlipInDirection(cells, potentialMove, playerPiece, oppPlayerPiece, copy, affectedCells);
-    }
-
-    return affectedCells;
-  }
-
-  /**
-   * Try to flip pieces in given direction for given coordinates.
-   * This is done in two phases:
-   * - First we trace until we hit another your player piece. If that fails, we abort.
-   * - Now we flip all opposing pieces detected in trace.
-   * @param potentialMove Direction and coordinates to use.
-   * @param playerPiece Piece of your player.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @param copy If true, make copy of cell instead of changing cell values on spot.
-   * @param affectedCells Affected cells as array of coordinates and previous values.
-   */
-  private tryFlipInDirection(cells: Cell[][], potentialMove: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState, copy: boolean, affectedCells: StateCoord[]) {
-    const opposingPieces: DirCoord[] = this.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
-    if (opposingPieces.length === 0) return; // nothing to do in this direction
-
-    for (let i=0; i<opposingPieces.length; i++) { // flip them all
-      const opposingPiece = opposingPieces[i];
-      const oldCell = this.setCell(cells, opposingPiece.x, opposingPiece.y, playerPiece, copy); // most important line of code in the game
-      affectedCells.push(oldCell);
-    }
-  }
-
-  /**
-   * Set new cell state for given player.
-   * @param cells State of board.
-   * @param x X coordinate.
-   * @param y Y coordinate.
-   * @param playerPiece Player piece.
-   * @param copy If true, make copy of cell instead of changing cell values on spot.
-   * @return Old state of cell.
-   */
-  private setCell(cells: Cell[][], x: number, y: number, playerPiece: EnCellState, copy: boolean): StateCoord {
-    const cell = cells[x][y];
-    const oldState = { x: x, y: y, s: cell.state, w: [...cell.weights] };
-    cell.state = playerPiece;
-    cell.potentialMove = EnCellState.Empty;
-    // Update reference so cell notifiers (like cell field in cell.ts) can register change in cell.
-    // Note it is not needed for MiniMax algorithm, as it makes only simulated moves, not real ones.
-    // Use copy = true only for moves on actual board.
-    if (copy) cells[x][y] = { ...cell };
-    return oldState;
-  }
-
-  //
-
-  /**
-   * Resolve potential moves around selected cell.
-   * Note you will need to cast trace out of them to ensure this potential move is in fact legal move.
-   * @param cells State of board.
-   * @param x X coordinate of cell.
-   * @param y Y coordinate of cell.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @returns Array of offsets.
-   */
-  public resolvePotentialMoves(cells: Cell[][], x: number, y: number, oppPlayerPiece: EnCellState): DirCoord[] {
-    const potentialMoves : DirCoord[] = [];
-    // Find out all directions around given cell.
-    // Already exclude coordinates out of range or containing something else than piece of opposite color.
-    for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
-      let dirCoord : DirCoord = { dir: dir, x: x, y: y };
-      applyDir(dirCoord);
-      if (this.canUsePotentialMove(cells, dirCoord, oppPlayerPiece)) potentialMoves.push(dirCoord);
-    }
-    return potentialMoves;
-  }
-
-  /**
-   * Check if can use coordinates (starting point for tracing) of potential move. Conditions:
-   * - X and Y cannot be outside range.
-   * - Cell must contain piece for opposing player.
-   * @param cells State of board.
-   * @param dirCoord Coordinates to use.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @returns True if can use given coordinates, otherwise false.
-   */
-  private canUsePotentialMove(cells: Cell[][], dirCoord : DirCoord, oppPlayerPiece: EnCellState) : boolean {
-    const size = cells.length;
-    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
-    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
-    const cell = cells[dirCoord.x][dirCoord.y];
-    return cell.state === oppPlayerPiece;
-  }
-
-  //
-
-  /**
-   * Trace from given coordinates in given direction across board until you hit edge or cell that has
-   * something else than piece of opposing player. If that cell has your piece, bingo. Move is valid.
-   * @param cells State of board.
-   * @param dirCoord Coordinates+direction to use.
-   * @param playerPiece Piece of your player.
-   * @returns Array of coordinates where opposing pieces are present. If empty, this is not legal move.
-   */
-  public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState): DirCoord[] {
-    const boardSize = cells.length;
-    const opposingPieces: DirCoord[] = [];
-    // we always are one step away from origin point
-    opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
-
-    do {
-      applyDir(dirCoord); // move coordinates
-      if (!this.hitEdge(dirCoord, boardSize)) return []; // hit edge of board, can't be valid move
-      const cell = cells[dirCoord.x][dirCoord.y];
-      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return []; // can't be legal move!
-      if (cell.state === oppPlayerPiece) {
-        // found piece of opposite player, add to array and continue
-        opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
-        continue;
-      }
-      if (cell.state === playerPiece) return opposingPieces; // it is legal move!
-    } while (true);
-  }
-
-  /**
-   * Check if we hit edge of board.
-   * @param dirCoord Coordinates.
-   * @param size Size of board.
-   * @returns True if edge was hit, otherwise false.
-   */
-  private hitEdge(dirCoord : DirCoord, size: number): boolean {
-    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
-    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
-    return true;
-  }
-
-  // //////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Affect weights on board.
-   * @param move Move.
-   */
-  public affectWeights(move: ReversiMove) {
-    const cells = this.gameState().board.cells;
-    const playerIx = this.getCurrPlayer().ix;
-    this.affectWeightsCustom(cells, playerIx, move);
-  }
-
-  /**
-   * Affect weights on custom board.
-   * @param cells State of board.
-   * @param playerIx Player index.
-   * @param move Move.
-   */
-  private affectWeightsCustom(cells: Cell[][], playerIx: number, move: ReversiMove) {
-    // Right now, we only change weights for corners.
-    if (this.isCorner(move, cells.length-1)) this.affectCorners(cells, playerIx, move);
-  }
-
-  /**
-   * Check if given move is corner.
-   * @param move Move to check.
-   * @param maxCoord Maximum coordinate value.
-   * @returns True if it is corner, otherwise false.
-   */
-  private isCorner(move: ReversiMove, maxCoord: number): boolean {
-    if ((move.x === 0 || move.x === maxCoord) &&
-        (move.y === 0 || move.y === maxCoord)) return true;
-    return false;
-  }
-
-  /**
-   * Affect weights on corner.
-   * @param cells State of board.
-   * @param playerIx Player index.
-   * @param move Move.
-   */
-  private affectCorners(cells: Cell[][], playerIx: number, move: ReversiMove) {
-    const maxCoord = cells.length-1;
-    const coords: Coordinate[] = [];
-    if (move.x === 0 && move.y === 0) {
-      coords.push({x:1, y:0});
-      coords.push({x:0, y:1});
-      coords.push({x:1, y:1});
-    } else if (move.x === maxCoord && move.y === 0) {
-      coords.push({x:maxCoord-1, y:0});
-      coords.push({x:maxCoord, y:1});
-      coords.push({x:maxCoord-1, y:1});
-    } else if (move.x === 0 && move.y === maxCoord) {
-      coords.push({x:1, y:maxCoord});
-      coords.push({x:0, y:maxCoord-1});
-      coords.push({x:1, y:maxCoord-1});
-    } else if (move.x === maxCoord && move.y === maxCoord) {
-      coords.push({x:maxCoord-1, y:maxCoord});
-      coords.push({x:maxCoord, y:maxCoord-1});
-      coords.push({x:maxCoord-1, y:maxCoord-1});
-    }
-
-    this.affectCellWeights(cells, playerIx, coords, aiProp.weightData.friendlyCorner);
-  }
-
-  /**
-   * Set new weight value to weights in cells indicated by given array of coordinates.
-   * @param cells State of board.
-   * @param playerIx Player index.
-   * @param coords Array of coordinates.
-   * @param newWeightValue New weight value.
-   */
-  private affectCellWeights(cells: Cell[][], playerIx: number, coords: Coordinate[], newWeightValue: number) {
-    for (const coord of coords) {
-      const cell = cells[coord.x][coord.y];
-      // update reference so cell notifiers (like cell field in cell.ts) can register change in cell
-      cells[coord.x][coord.y] = {
-        ...cell,
-        // yes, weights are also copied, otherwise it wont properly update visually in debug mode
-        weights: [...cell.weights]
-      };
-      cells[coord.x][coord.y].weights[playerIx] = newWeightValue;
-    }
   }
 }

@@ -41,6 +41,7 @@ export type MiniMaxArgs = {
   playerIx: number; // Index of current player.
   piece: EnCellState; // Piece of current player.
   isYou: boolean; // If true, this is you (so maximizing). Otherwise it is opponent (so minimizing).
+  dynamicWeights: boolean; // If true, AI edits its weights dynamically.
   currDepth: number; // Current depth of search.
   maxDepth: number; // Maximum depth of search.
   alpha: number; // Best score the maximizer is currently guaranteed.
