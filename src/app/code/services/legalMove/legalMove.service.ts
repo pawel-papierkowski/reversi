@@ -80,22 +80,35 @@ export class LegalMoveService {
   private resolveMove(cells: Cell[][], x: number, y: number, playerPiece: EnCellState): ReversiMove | null {
     const cell = cells[x][y]; // First, chosen cell must be empty.
     if (cell.state !== EnCellState.Empty) return null;
-
     const oppPlayerPiece = this.moveService.getOppPiece(playerPiece);
-    const potentialMoves = this.moveService.resolvePotentialMoves(cells, x, y, oppPlayerPiece);
-    if (potentialMoves.length === 0) return null; // no eligible potential moves found
 
-    // Now for all these directions cast traces to check if it ends in cell containing piece of your color.
-    // Only then it is legal move.
     const alteredPieces: DirCoord[] = [];
-    for (let i=0; i<potentialMoves.length; i++) {
-      // We need to process all directions, as path in response will be used to change state of board.
-      const potentialMove = potentialMoves[i];
-      this.moveService.trace(cells, potentialMove, playerPiece, oppPlayerPiece, alteredPieces);
+    for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
+      let dirCoord : DirCoord = { dir: dir, x: x, y: y };
+      this.moveService.applyDir(dirCoord); // move dirCoord in given direction by one cell
+      if (!this.canUsePotentialMove(cells, dirCoord, oppPlayerPiece)) continue;
+      this.moveService.trace(cells, dirCoord, playerPiece, oppPlayerPiece, alteredPieces);
     }
+
     if (alteredPieces.length === 0) return null; // no legal move found
     alteredPieces.push({ dir:EnDir.N, x:x, y:y }); // origin point
-    return { x: x, y: y, path: alteredPieces };
+    return { x: x, y: y, path: alteredPieces, score: 0 };
+  }
+
+  /**
+   * Check if can use coordinates (starting point for tracing) of potential move. Conditions:
+   * - X and Y cannot be outside range.
+   * - Cell must contain piece for opposing player.
+   * @param cells State of board.
+   * @param dirCoord Coordinates to use.
+   * @param oppPlayerPiece Piece of opposing player.
+   * @returns True if can use given coordinates, otherwise false.
+   */
+  private canUsePotentialMove(cells: Cell[][], dirCoord : DirCoord, oppPlayerPiece: EnCellState) : boolean {
+    const size = cells.length;
+    if (!this.moveService.isInsideBoard(dirCoord, size)) return false;
+    const cell = cells[dirCoord.x][dirCoord.y];
+    return cell.state === oppPlayerPiece;
   }
 
   // //////////////////////////////////////////////////////////////////////////
