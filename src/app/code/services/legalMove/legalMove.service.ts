@@ -2,9 +2,9 @@ import { Injectable, inject } from '@angular/core';
 
 import { EnCellState } from '@/code/data/enums';
 import type { ReversiMove, Cell } from '@/code/data/gameState';
-import { getOppPiece } from '@/code/data/dirCoord';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { MoveService } from '@/code/services/move/move.service';
 
 /**
  * Legal move service.
@@ -13,6 +13,7 @@ import { GameStateService } from '@/code/services/gameState/gameState.service';
 @Injectable({providedIn: 'root'})
 export class LegalMoveService {
   private readonly gameStateService = inject(GameStateService);
+  private readonly moveService = inject(MoveService);
 
   /**
    * Find move for matching coordinates.
@@ -41,7 +42,7 @@ export class LegalMoveService {
 
     // detect double pass
     if (currPlayerMoves.length === 0) {
-      const oppPlayerPiece = getOppPiece(playerPiece);
+      const oppPlayerPiece = this.moveService.getOppPiece(playerPiece);
       const nextPlayerMoves = this.resolveMovesCustom(cells, oppPlayerPiece);
       if (nextPlayerMoves.length === 0) this.gameStateService.gameState().board.doublePass = true;
     }
@@ -79,15 +80,15 @@ export class LegalMoveService {
     const cell = cells[x][y]; // First, chosen cell must be empty.
     if (cell.state !== EnCellState.Empty) return null;
 
-    const oppPlayerPiece = getOppPiece(playerPiece);
-    const potentialMoves = this.gameStateService.resolvePotentialMoves(cells, x, y, oppPlayerPiece);
+    const oppPlayerPiece = this.moveService.getOppPiece(playerPiece);
+    const potentialMoves = this.moveService.resolvePotentialMoves(cells, x, y, oppPlayerPiece);
     if (potentialMoves.length === 0) return null; // no eligible potential moves found
 
     // Now for all these direction cast traces to check if it ends in cell containing piece of your color.
     // Only then it is legal move.
     for (let i=0; i<potentialMoves.length; i++) {
       const potentialMove = potentialMoves[i];
-      const opposingPieces = this.gameStateService.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
+      const opposingPieces = this.moveService.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
       if (opposingPieces.length > 0) return { x: x, y: y };
     }
 

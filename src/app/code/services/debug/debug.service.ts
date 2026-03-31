@@ -43,12 +43,13 @@ export class DebugService {
     startGameState.board.cells[ix][ix+1].state = EnCellState.B;
     startGameState.board.cells[ix+1][ix+1].state = EnCellState.W;
 
-    // manually set potential legal moves for black where needed
+    // manually set potential moves for black where needed
     startGameState.board.cells[ix-1][ix].potentialMove = EnCellState.B;
     startGameState.board.cells[ix][ix-1].potentialMove = EnCellState.B;
     startGameState.board.cells[ix+1][ix+2].potentialMove = EnCellState.B;
     startGameState.board.cells[ix+2][ix+1].potentialMove = EnCellState.B;
 
+    // manually set legal moves for this board
     startGameState.board.legalMoves = [
       { x:ix-1, y:ix },
       { x:ix, y:ix-1 },
@@ -56,7 +57,7 @@ export class DebugService {
       { x:ix+2, y:ix+1 },
     ];
 
-    // scoring
+    // manually set statistics
     startGameState.statistics.emptyCells = boardSize*boardSize - 4;
     startGameState.statistics.player1Score = 2;
     startGameState.statistics.player2Score = 2;

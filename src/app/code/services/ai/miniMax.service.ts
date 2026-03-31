@@ -3,12 +3,12 @@ import { Injectable, inject } from '@angular/core';
 import { EnCellState, EnScoringType } from '@/code/data/enums';
 import type { StateCoord, ScoringSystem } from '@/code/data/types';
 import { aiProp } from '@/code/data/aiConst';
-import { getOppPiece } from '@/code/data/dirCoord';
 import type { Cell, ReversiMove } from "@/code/data/gameState";
 
 import type { MiniMaxReq, MiniMaxResp, MiniMaxResult, MiniMaxArgs, EvaluateArgs } from "@/code/data/aiState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
+import { MoveService } from '@/code/services/move/move.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 
 /**
@@ -20,14 +20,14 @@ import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 @Injectable({providedIn: 'root'})
 export class MiniMaxService {
   private readonly gameStateService = inject(GameStateService);
+  private readonly moveService = inject(MoveService);
   private readonly legalMoveService = inject(LegalMoveService);
 
   private processed: number = 0;
 
   /**
    * Resolve best moves for current state of board.
-   * Note: 0 max depth means we are scoring for every legal move available at this
-   * time without going deeper.
+   * Note: 0 max depth means we are scoring for every legal move available at this time without going deeper.
    * @param req Request.
    * @returns Response: list of minimax results.
    */
@@ -37,7 +37,7 @@ export class MiniMaxService {
     const stats = this.gameStateService.calcCellStats(req.cells);
     const nonEmptyCells = stats.player1Score + stats.player2Score;
 
-    // Resolve for each legal move separately, AI service will pick one from them.
+    // Resolve for each legal move separately, later AI service will pick one from them.
     for (const legalMove of req.legalMoves) {
       const startTime = performance.now();
 
@@ -68,7 +68,7 @@ export class MiniMaxService {
   private executeSearch(req: MiniMaxReq, nonEmptyCells: number, legalMove: ReversiMove) : MiniMaxResult {
     // Make move as CURRENT player.
     const updatedCells = structuredClone(req.cells);
-    this.gameStateService.executeMoveCustom(updatedCells, req.piece, legalMove, false);
+    this.moveService.executeMoveCustom(updatedCells, req.playerIx, req.piece, legalMove, false, req.dynamicWeights);
     nonEmptyCells++; // we made a move
 
     let score = 0;
@@ -98,8 +98,9 @@ export class MiniMaxService {
     this.processed = 1;
     const miniMaxArgs: MiniMaxArgs = {
       playerIx: req.playerIx === 0 ? 1 : 0, // go as NEXT player
-      piece: getOppPiece(req.piece),
+      piece: this.moveService.getOppPiece(req.piece),
       isYou: false,
+      dynamicWeights: req.dynamicWeights,
       currDepth: 0, // yes, that's correct value
       maxDepth: req.maxDepth,
       alpha: -aiProp.maxScore,
@@ -119,7 +120,7 @@ export class MiniMaxService {
    * @returns Result.
    */
   private recursiveMiniMax(args: MiniMaxArgs) : MiniMaxResult {
-    const otherPiece = getOppPiece(args.piece);
+    const otherPiece = this.moveService.getOppPiece(args.piece);
 
     // Find out legal moves for both players available for current state of board.
     const currPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, args.piece);
@@ -173,7 +174,7 @@ export class MiniMaxService {
     for (const legalMove of currPlayerMoves) {
       // We avoid cloning board: make array of affected cells with old state and weight so we can undo state of board later.
       // Make move as CURRENT player.
-      const affectedCells = this.gameStateService.executeMoveCustom(args.cells, args.piece, legalMove, false);
+      const affectedCells = this.moveService.executeMoveCustom(args.cells, args.playerIx, args.piece, legalMove, false, args.dynamicWeights);
       this.processed++;
 
       let score = 0;
@@ -339,7 +340,7 @@ export class MiniMaxService {
   private findCellMultiplier(cell: Cell, args: EvaluateArgs): number {
     if (cell.state === EnCellState.Empty) return 0;
     // Find out your piece.
-    const youPiece = args.isYou ? args.piece : getOppPiece(args.piece);
+    const youPiece = args.isYou ? args.piece : this.moveService.getOppPiece(args.piece);
     return cell.state === youPiece ? 1 : -1;
   }
 

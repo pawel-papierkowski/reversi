@@ -1,4 +1,4 @@
-import { EnDifficulty, EnAiTactic, EnScoringType, EnCellState } from '@/code/data/enums';
+import { EnDir, EnDifficulty, EnAiTactic, EnScoringType, EnCellState } from '@/code/data/enums';
 
 /** Fundamental project properties. More or less constant. */
 export type ProjectProp = {
@@ -63,6 +63,12 @@ export type DifficultyProp = {
 // OTHER
 
 export type Coordinate = {
+  x: number;
+  y: number;
+};
+
+export type DirCoord = {
+  dir: EnDir,
   x: number;
   y: number;
 };
