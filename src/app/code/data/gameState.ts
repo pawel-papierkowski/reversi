@@ -167,7 +167,7 @@ export function createGameAi(): GameAi {
 
 export type Cell = {
   state: EnCellState;
-  potentialMove: EnCellState; // Used only when defDebugShowMove === true.
+  potentialMove: EnCellState; // Used only when game allows showing hints.
   weights: number[]; // Weight of cell for player AI.
 }
 

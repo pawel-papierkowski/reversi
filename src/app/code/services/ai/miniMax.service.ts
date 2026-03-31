@@ -66,8 +66,12 @@ export class MiniMaxService {
    * @returns MiniMax result.
    */
   private executeSearch(req: MiniMaxReq, nonEmptyCells: number, legalMove: ReversiMove) : MiniMaxResult {
+    // Copy board.
+    const updatedCells = req.cells.map(row => row.map(cell => ({
+      ...cell,
+      weights: [...cell.weights]
+    })) );
     // Make move as CURRENT player.
-    const updatedCells = structuredClone(req.cells);
     this.moveService.executeMoveCustom(updatedCells, req.playerIx, req.piece, legalMove, false, req.dynamicWeights);
     nonEmptyCells++; // we made a move
 
@@ -96,9 +100,10 @@ export class MiniMaxService {
 
     // Start going deep for real. This is where recursion starts.
     this.processed = 1;
+    const oppPiece = this.moveService.getOppPiece(req.piece);
     const miniMaxArgs: MiniMaxArgs = {
       playerIx: req.playerIx === 0 ? 1 : 0, // go as NEXT player
-      piece: this.moveService.getOppPiece(req.piece),
+      piece: oppPiece,
       isYou: false,
       dynamicWeights: req.dynamicWeights,
       currDepth: 0, // yes, that's correct value
@@ -110,6 +115,7 @@ export class MiniMaxService {
       moves: moves,
       scoringSystems: req.scoringSystems,
       scoringSystem: this.getCurrScoringSystem(nonEmptyCells, req.scoringSystems),
+      //potentialMoves: this.legalMoveService.resolveMovesCustom(updatedCells, oppPiece),
     };
     return this.recursiveMiniMax(miniMaxArgs);
   }
@@ -122,34 +128,21 @@ export class MiniMaxService {
   private recursiveMiniMax(args: MiniMaxArgs) : MiniMaxResult {
     const otherPiece = this.moveService.getOppPiece(args.piece);
 
-    // Find out legal moves for both players available for current state of board.
+    // Find out legal moves for current player.
     const currPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, args.piece);
-    const nextPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, otherPiece);
 
-    // First check states that stops recursive call (terminal state):
+    // First, check max depth.
+    if (args.currDepth === args.maxDepth) return this.returnTerminalResult(args, currPlayerMoves.length);
+
+    // Second, check end game state:
     // - Neither player can make legal moves for current state of board (double pass).
     //   Happens also when board is completely filled, so we do not have to check for it separately.
-    // - We also stop if we hit max depth.
-    if ((currPlayerMoves.length === 0 && nextPlayerMoves.length === 0) ||
-        (args.currDepth === args.maxDepth)) {
-      // TERMINAL RESULT - only place where evaluation is actually needed.
-      let score = args.moves[args.moves.length-1].s; // will be filled only if debug option evaluateEveryStep is set
-      if (!this.gameStateService.gameState().debugSettings.evaluateEveryStep) {
-        const evalArgs: EvaluateArgs = {
-          ...args, // copy relevant properties from MiniMaxArgs
-          moveCount: currPlayerMoves.length,
-        };
-        score = this.evaluate(evalArgs);
-      }
-      return {
-        score: score,
-        depth: args.currDepth,
-        moves: [...args.moves],
-        processed: this.processed,
-      };
-    }
+    if (currPlayerMoves.length === 0) {
+      // If current player has no moves, we MUST check if next player also has no moves to detect double pass.
+      const nextPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, otherPiece);
+      if (nextPlayerMoves.length === 0) return this.returnTerminalResult(args, 0);
 
-    if (currPlayerMoves.length === 0) { // Handle skip case here.
+      // Current player must pass.
       const score = args.moves[args.moves.length-1].s;
       args.moves.push({x: -1, y: -1, s:score}); // Remember pass.
       // Switch players and continue.
@@ -191,6 +184,7 @@ export class MiniMaxService {
       args.moves.push({x: legalMove.x, y: legalMove.y, s:score}); // Remember that move.
 
       // Swap to NEXT player and find deeper moves.
+      // We don't pre-calculate nextPlayerMoves here because board has changed.
       const newArgs = this.createNewArgs(args, otherPiece, true);
       newArgs.alpha = alpha;
       newArgs.beta = beta;
@@ -210,6 +204,30 @@ export class MiniMaxService {
     }
 
     return bestResult;
+  }
+
+  /**
+   * Create terminal result. This is where evaluation is needed for real.
+   * @param args Arguments.
+   * @param moveCount Move count.
+   * @returns Terminal result.
+   */
+  private returnTerminalResult(args: MiniMaxArgs, moveCount: number): MiniMaxResult {
+    // TERMINAL RESULT - only place where evaluation is actually needed.
+    let score = args.moves[args.moves.length-1].s; // will be filled only if debug option evaluateEveryStep is set
+    if (!this.gameStateService.gameState().debugSettings.evaluateEveryStep) {
+      const evalArgs: EvaluateArgs = {
+        ...args, // copy relevant properties from MiniMaxArgs
+        moveCount: moveCount,
+      };
+      score = this.evaluate(evalArgs);
+    }
+    return {
+      score: score,
+      depth: args.currDepth,
+      moves: [...args.moves],
+      processed: this.processed,
+    };
   }
 
   private undoBoard(cells: Cell[][], affectedCells: StateCoord[]) {

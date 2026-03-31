@@ -140,7 +140,7 @@ export class LegalMoveService {
    * @param cells State of board.
    */
   public clearPotentialMoves(cells: Cell[][])  {
-    const boardSize = this.gameStateService.gameState().settings.boardSize;
+    const boardSize = cells.length;
     for (let x=0; x<boardSize; x++) {
       for (let y=0; y<boardSize; y++) {
         cells[x][y].potentialMove = EnCellState.Empty;

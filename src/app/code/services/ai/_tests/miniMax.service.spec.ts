@@ -196,6 +196,29 @@ describe('MiniMaxService', () => {
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
     });
+
+    it('7 depth, 6x6 board', () => {
+      gameStateService.menuSettings().boardSize = 6; // 6x6
+      gameService.startGame();
+
+      const req: MiniMaxReq = {
+        playerIx: 0,
+        piece: EnCellState.B,
+        maxDepth: 7,
+        legalMoves: gameStateService.gameState().board.legalMoves,
+        cells: gameStateService.gameState().board.cells,
+        dynamicWeights: false,
+        scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
+      }
+      const actualResponse = miniMaxService.resolve(req);
+      const expectedResponse: MiniMaxResp = { results: [
+        {score: -2, depth: 7, processed: 6238, moves: [{x:1, y:2, s:-4},{x:3, y:1, s:0},{x:4, y:3, s:-4},{x:3, y:4, s:0},{x:2, y:1, s:-4},{x:1, y:3, s:2},{x:0, y:3, s:4},{x:5, y:2, s:-2}]},
+        {score: -2, depth: 7, processed: 5416, moves: [{x:2, y:1, s:-4},{x:3, y:1, s:0},{x:4, y:2, s:-4},{x:1, y:3, s:2},{x:2, y:0, s:8},{x:3, y:0, s:4},{x:4, y:0, s:4},{x:5, y:3, s:-2}]},
+        {score: -2, depth: 7, processed: 4705, moves: [{x:3, y:4, s:-4},{x:4, y:4, s:48},{x:1, y:2, s:44},{x:1, y:3, s:48},{x:0, y:4, s:24},{x:2, y:1, s:28},{x:1, y:0, s:4},{x:3, y:5, s:-2}]},
+        {score: -2, depth: 7, processed: 4123, moves: [{x:4, y:3, s:-4},{x:4, y:2, s:0},{x:2, y:1, s:-6},{x:1, y:2, s:0},{x:3, y:1, s:-4},{x:3, y:4, s:0},{x:0, y:2, s:4},{x:5, y:2, s:-2}]},
+      ]};
+      assertMiniMaxResp(actualResponse, expectedResponse);
+    }, 50000);
   });
 
   //
