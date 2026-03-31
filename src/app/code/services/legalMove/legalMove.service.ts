@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
-import { EnCellState } from '@/code/data/enums';
+import { EnCellState, EnDir } from '@/code/data/enums';
+import type { DirCoord } from '@/code/data/types';
 import type { ReversiMove, Cell } from '@/code/data/gameState';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
@@ -74,7 +75,7 @@ export class LegalMoveService {
    * @param x X coordinate of cell.
    * @param y Y coordinate of cell.
    * @param playerPiece Piece of your player.
-   * @returns Legal move or null if player cannot make move on this cell.
+   * @returns Legal move or null if player cannot make move at this cell.
    */
   private resolveMove(cells: Cell[][], x: number, y: number, playerPiece: EnCellState): ReversiMove | null {
     const cell = cells[x][y]; // First, chosen cell must be empty.
@@ -84,20 +85,21 @@ export class LegalMoveService {
     const potentialMoves = this.moveService.resolvePotentialMoves(cells, x, y, oppPlayerPiece);
     if (potentialMoves.length === 0) return null; // no eligible potential moves found
 
-    // Now for all these direction cast traces to check if it ends in cell containing piece of your color.
+    // Now for all these directions cast traces to check if it ends in cell containing piece of your color.
     // Only then it is legal move.
+    const alteredPieces: DirCoord[] = [];
     for (let i=0; i<potentialMoves.length; i++) {
+      // We need to process all directions, as path in response will be used to change state of board.
       const potentialMove = potentialMoves[i];
-      const opposingPieces = this.moveService.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
-      if (opposingPieces.length > 0) return { x: x, y: y };
+      this.moveService.trace(cells, potentialMove, playerPiece, oppPlayerPiece, alteredPieces);
     }
-
-    return null; // no legal move found
+    if (alteredPieces.length === 0) return null; // no legal move found
+    alteredPieces.push({ dir:EnDir.N, x:x, y:y }); // origin point
+    return { x: x, y: y, path: alteredPieces };
   }
 
   // //////////////////////////////////////////////////////////////////////////
-
-  // DEBUG
+  // HINTS
 
   /**
    * Show potential legal moves on board for current game state.

@@ -34,52 +34,25 @@ export class MoveService {
    * Execute move for current state of board. That means changing state of selected cell
    * and flipping any contiguous line of opposite pieces that touch this piece.
    * It also will affect weights if allowed.
-   * Note: code assumes this move is legal. Check it before calling this function!
+   * Note: code assumes this move is legal and valid.
    * @param cells State of board.
    * @param playerIx Player index.
    * @param playerPiece Player piece.
-   * @param move Move to execute.
+   * @param legalMove Legal move to execute. Note it contains path.
    * @param copy If true, make copy of cell instead of changing cell values on spot.
    * @param canDynamicWeights If true, affect weights on board.
    * @returns Affected cells as array of coordinates and previous values. Used for restoring state of board in MiniMax algo.
    */
-  public executeMoveCustom(cells: Cell[][], playerIx: number, playerPiece: EnCellState, move: ReversiMove, copy: boolean, canDynamicWeights: boolean): StateCoord[] {
+  public executeMoveCustom(cells: Cell[][], playerIx: number, playerPiece: EnCellState, legalMove: ReversiMove, copy: boolean, canDynamicWeights: boolean): StateCoord[] {
     const affectedCells: StateCoord[] = [];
-    const oppPlayerPiece = this.getOppPiece(playerPiece);
-    const oldCell = this.setCell(cells, move.x, move.y, playerPiece, copy);
-    affectedCells.push(oldCell);
-
-    const potentialMoves = this.resolvePotentialMoves(cells, move.x, move.y, oppPlayerPiece);
-    for (let i=0; i<potentialMoves.length; i++) {
-      const potentialMove = potentialMoves[i];
-      this.tryFlipInDirection(cells, potentialMove, playerPiece, oppPlayerPiece, copy, affectedCells);
-    }
-
-    if (canDynamicWeights) this.affectWeightsCustom(cells, playerIx, move, copy, affectedCells);
-    return affectedCells;
-  }
-
-  /**
-   * Try to flip pieces in given direction for given coordinates.
-   * This is done in two phases:
-   * - First we trace until we hit another your player piece. If that fails, we abort.
-   * - Now we flip all opposing pieces detected in trace.
-   * @param cells State of board.
-   * @param potentialMove Direction and coordinates to use.
-   * @param playerPiece Piece of your player.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @param copy If true, make copy of cell instead of changing cell values on spot.
-   * @param affectedCells Affected cells as array of coordinates and previous values.
-   */
-  private tryFlipInDirection(cells: Cell[][], potentialMove: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState, copy: boolean, affectedCells: StateCoord[]) {
-    const opposingPieces: DirCoord[] = this.trace(cells, potentialMove, playerPiece, oppPlayerPiece);
-    if (opposingPieces.length === 0) return; // nothing to do in this direction
-
-    for (let i=0; i<opposingPieces.length; i++) { // flip them all
-      const opposingPiece = opposingPieces[i];
-      const oldCell = this.setCell(cells, opposingPiece.x, opposingPiece.y, playerPiece, copy); // most important line of code in the game
+    // Note legalMove contains path, so we do not have to re-trace. Just use data present in legalMove.path.
+    for (const pathEntry of legalMove.path) {
+      const oldCell = this.setCell(cells, pathEntry.x, pathEntry.y, playerPiece, copy); // most important line of code in the game
       affectedCells.push(oldCell);
     }
+
+    if (canDynamicWeights) this.affectWeightsCustom(cells, playerIx, legalMove, copy, affectedCells);
+    return affectedCells;
   }
 
   /**
@@ -88,12 +61,12 @@ export class MoveService {
    * @param x X coordinate.
    * @param y Y coordinate.
    * @param playerPiece Player piece.
-   * @param copy If true, make copy of cell instead of changing cell values on spot.
+   * @param copy If true, make copy of cell instead of changing cell values in-place.
    * @return Old state of cell.
    */
   private setCell(cells: Cell[][], x: number, y: number, playerPiece: EnCellState, copy: boolean): StateCoord {
     const cell = cells[x][y];
-    const oldState = { x: x, y: y, s: cell.state, w: [...cell.weights] };
+    const oldState = { x: x, y: y, s: cell.state, w1: cell.weight1, w2: cell.weight2 };
     cell.state = playerPiece;
     cell.potentialMove = EnCellState.Empty;
     // Update reference so cell notifiers (like cell field in cell.ts) can register change in cell.
@@ -103,7 +76,7 @@ export class MoveService {
     return oldState;
   }
 
-  //
+  // //////////////////////////////////////////////////////////////////////////
 
   /**
    * Resolve potential moves around selected cell.
@@ -151,25 +124,31 @@ export class MoveService {
    * @param dirCoord Coordinates+direction to use.
    * @param playerPiece Piece of your player.
    * @param oppPlayerPiece Piece of opposing player.
-   * @returns Array of coordinates where opposing pieces are present. If empty, this is not legal move.
+   * @param path Array of coordinates to fill.
+   * @returns True if legal move, otherwise false.
    */
-  public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState): DirCoord[] {
+  public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState, path: DirCoord[]): boolean {
     const boardSize = cells.length;
     const opposingPieces: DirCoord[] = [];
-    // we always are one step away from origin point
+    // We always are one step away from origin point, so add it already.
+    // NOTE: origin point is NOT included!
     opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
 
     do {
       this.applyDir(dirCoord); // move coordinates
-      if (!this.isInsideBoard(dirCoord, boardSize)) return []; // hit edge of board, can't be valid move
+      if (!this.isInsideBoard(dirCoord, boardSize)) return false; // outside board, can't be valid move
       const cell = cells[dirCoord.x][dirCoord.y];
-      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return []; // can't be legal move!
+      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return false // can't be legal move!
       if (cell.state === oppPlayerPiece) {
-        // found piece of opposite player, add to array and continue
+        // Found piece of opposite player, add to array and continue.
+        // This is piece that would be flipped.
         opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
         continue;
       }
-      if (cell.state === playerPiece) return opposingPieces; // it is legal move!
+      if (cell.state === playerPiece) {
+        path.push(...opposingPieces);
+        return true; // it is legal move!
+      }
     } while (true);
   }
 
@@ -216,50 +195,50 @@ export class MoveService {
    * Affect weights on custom board.
    * @param cells State of board.
    * @param playerIx Player index.
-   * @param move Move.
+   * @param legalMove Legal move.
    * @param copy If true, make copy of cell instead of changing cell values on spot.
    * @param affectedCells Affected cells as array of coordinates and previous values.
    */
-  private affectWeightsCustom(cells: Cell[][], playerIx: number, move: ReversiMove, copy: boolean, affectedCells: StateCoord[]) {
+  private affectWeightsCustom(cells: Cell[][], playerIx: number, legalMove: ReversiMove, copy: boolean, affectedCells: StateCoord[]) {
     // Right now, we only change weights for corners.
-    if (this.isCorner(move, cells.length-1)) this.affectCorners(cells, playerIx, move, copy, affectedCells);
+    if (this.isCorner(legalMove, cells.length-1)) this.affectCorners(cells, playerIx, legalMove, copy, affectedCells);
   }
 
   /**
    * Check if given move is corner.
-   * @param move Move to check.
+   * @param legalMove Move to check.
    * @param maxCoord Maximum coordinate value.
    * @returns True if it is corner, otherwise false.
    */
-  private isCorner(move: ReversiMove, maxCoord: number): boolean {
-    return (move.x === 0 || move.x === maxCoord) &&
-           (move.y === 0 || move.y === maxCoord);
+  private isCorner(legalMove: ReversiMove, maxCoord: number): boolean {
+    return (legalMove.x === 0 || legalMove.x === maxCoord) &&
+           (legalMove.y === 0 || legalMove.y === maxCoord);
   }
 
   /**
    * Affect weights on corner.
    * @param cells State of board.
    * @param playerIx Player index.
-   * @param move Move.
+   * @param legalMove Move.
    * @param copy If true, make copy of cell instead of changing cell values on spot.
    * @param affectedCells Affected cells as array of coordinates and previous values.
    */
-  private affectCorners(cells: Cell[][], playerIx: number, move: ReversiMove, copy: boolean, affectedCells: StateCoord[]) {
+  private affectCorners(cells: Cell[][], playerIx: number, legalMove: ReversiMove, copy: boolean, affectedCells: StateCoord[]) {
     const maxCoord = cells.length-1;
     const coords: Coordinate[] = [];
-    if (move.x === 0 && move.y === 0) {
+    if (legalMove.x === 0 && legalMove.y === 0) {
       coords.push({x:1, y:0});
       coords.push({x:0, y:1});
       coords.push({x:1, y:1});
-    } else if (move.x === maxCoord && move.y === 0) {
+    } else if (legalMove.x === maxCoord && legalMove.y === 0) {
       coords.push({x:maxCoord-1, y:0});
       coords.push({x:maxCoord, y:1});
       coords.push({x:maxCoord-1, y:1});
-    } else if (move.x === 0 && move.y === maxCoord) {
+    } else if (legalMove.x === 0 && legalMove.y === maxCoord) {
       coords.push({x:1, y:maxCoord});
       coords.push({x:0, y:maxCoord-1});
       coords.push({x:1, y:maxCoord-1});
-    } else if (move.x === maxCoord && move.y === maxCoord) {
+    } else if (legalMove.x === maxCoord && legalMove.y === maxCoord) {
       coords.push({x:maxCoord-1, y:maxCoord});
       coords.push({x:maxCoord, y:maxCoord-1});
       coords.push({x:maxCoord-1, y:maxCoord-1});
@@ -280,18 +259,14 @@ export class MoveService {
   private affectCellWeights(cells: Cell[][], playerIx: number, coords: Coordinate[], newWeightValue: number, copy: boolean, affectedCells: StateCoord[]) {
     for (const coord of coords) {
       const cell = cells[coord.x][coord.y];
-      const oldState = { x: coord.x, y: coord.y, s: cell.state, w: [...cell.weights] };
+      const oldState = { x: coord.x, y: coord.y, s: cell.state, w1: cell.weight1, w2: cell.weight2 };
       affectedCells.push(oldState);
 
       // update reference so cell notifiers (like cell field in cell.ts) can register change in cell
-      if (copy) {
-        cells[coord.x][coord.y] = {
-          ...cell,
-          // yes, weights are also copied, otherwise it wont properly update visually in debug mode
-          weights: [...cell.weights]
-        };
-      }
-      cells[coord.x][coord.y].weights[playerIx] = newWeightValue;
+      if (copy) cells[coord.x][coord.y] = { ...cell };
+
+      if (playerIx === 0) cells[coord.x][coord.y].weight1 = newWeightValue;
+      else cells[coord.x][coord.y].weight2 = newWeightValue;
     }
   }
 }

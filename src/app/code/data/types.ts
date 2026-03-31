@@ -89,5 +89,6 @@ export type StateCoord = {
   x: number;
   y: number;
   s: EnCellState; // cell state
-  w: number[]; // weights
+  w1: number; // Weight of cell for first player.
+  w2: number; // Weight of cell for second player
 };
