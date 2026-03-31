@@ -79,45 +79,6 @@ export class MoveService {
   // //////////////////////////////////////////////////////////////////////////
 
   /**
-   * Resolve potential moves around selected cell.
-   * Note you will need to cast trace out of them to ensure this potential move is in fact legal move.
-   * @param cells State of board.
-   * @param x X coordinate of cell.
-   * @param y Y coordinate of cell.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @returns Array of offsets.
-   */
-  public resolvePotentialMoves(cells: Cell[][], x: number, y: number, oppPlayerPiece: EnCellState): DirCoord[] {
-    const potentialMoves : DirCoord[] = [];
-    // Find out all directions around given cell.
-    // Already exclude coordinates out of range or containing something else than piece of opposite color.
-    for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
-      let dirCoord : DirCoord = { dir: dir, x: x, y: y };
-      this.applyDir(dirCoord); // move dirCoord in given direction by one cell
-      if (this.canUsePotentialMove(cells, dirCoord, oppPlayerPiece)) potentialMoves.push(dirCoord);
-    }
-    return potentialMoves;
-  }
-
-  /**
-   * Check if can use coordinates (starting point for tracing) of potential move. Conditions:
-   * - X and Y cannot be outside range.
-   * - Cell must contain piece for opposing player.
-   * @param cells State of board.
-   * @param dirCoord Coordinates to use.
-   * @param oppPlayerPiece Piece of opposing player.
-   * @returns True if can use given coordinates, otherwise false.
-   */
-  private canUsePotentialMove(cells: Cell[][], dirCoord : DirCoord, oppPlayerPiece: EnCellState) : boolean {
-    const size = cells.length;
-    if (!this.isInsideBoard(dirCoord, size)) return false;
-    const cell = cells[dirCoord.x][dirCoord.y];
-    return cell.state === oppPlayerPiece;
-  }
-
-  //
-
-  /**
    * Trace from given coordinates in given direction across board until you hit edge or cell that has
    * something else than piece of opposing player. If that cell has your piece, bingo. Move is valid.
    * @param cells State of board.
@@ -133,18 +94,24 @@ export class MoveService {
     // We always are one step away from origin point, so add it already.
     // NOTE: origin point is NOT included!
     opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
+    // Take advantage of fact single trace always goes in same direction.
+    const offX = this.dx[dirCoord.dir];
+    const offY = this.dy[dirCoord.dir];
 
     do {
-      this.applyDir(dirCoord); // move coordinates
+      dirCoord.x += offX; // move coordinates
+      dirCoord.y += offY;
+
       if (!this.isInsideBoard(dirCoord, boardSize)) return false; // outside board, can't be valid move
       const cell = cells[dirCoord.x][dirCoord.y];
-      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return false // can't be legal move!
+      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return false; // can't be legal move!
       if (cell.state === oppPlayerPiece) {
         // Found piece of opposite player, add to array and continue.
         // This is piece that would be flipped.
         opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
         continue;
       }
+
       if (cell.state === playerPiece) {
         path.push(...opposingPieces);
         return true; // it is legal move!
@@ -158,7 +125,7 @@ export class MoveService {
    * @param size Size of board.
    * @returns True if inside board, otherwise false.
    */
-  private isInsideBoard(dirCoord : DirCoord, size: number): boolean {
+  public isInsideBoard(dirCoord : DirCoord, size: number): boolean {
     if (dirCoord.x < 0 || dirCoord.x >= size) return false;
     if (dirCoord.y < 0 || dirCoord.y >= size) return false;
     return true;
@@ -175,7 +142,7 @@ export class MoveService {
    * Note YOU are responsible for checking if coordinates went out of bounds.
    * @param dirCoord Coordinates to modify in-place.
    */
-  private applyDir(dirCoord : DirCoord) {
+  public applyDir(dirCoord : DirCoord) {
     dirCoord.x += this.dx[dirCoord.dir];
     dirCoord.y += this.dy[dirCoord.dir];
   }

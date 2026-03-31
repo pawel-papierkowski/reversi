@@ -219,9 +219,10 @@ function createGameHistory(): GameHistory {
 //
 
 export type ReversiMove = {
-  x: number;
-  y: number;
-  path: DirCoord[];
+  x: number; // X coordinate.
+  y: number; // Y coordinate.
+  path: DirCoord[]; // Path to use.
+  score: number; // How good that move is.
 };
 
 //
