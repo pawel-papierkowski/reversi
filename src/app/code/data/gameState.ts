@@ -1,6 +1,6 @@
 import { EnMode, EnPlayerType, EnDifficulty, EnGameStatus, EnCellState, EnViewMode } from '@/code/data/enums';
 
-import type { DifficultyProp } from '@/code/data/types';
+import type { DifficultyProp, Coordinate, DirCoord } from '@/code/data/types';
 
 import { defDebugMode, defDebugPanel, defDebugHint } from '@/code/data/gameConst';
 
@@ -168,15 +168,10 @@ export function createGameAi(): GameAi {
 export type Cell = {
   state: EnCellState;
   potentialMove: EnCellState; // Used only when game allows showing hints.
-  weights: number[]; // Weight of cell for player AI.
-}
 
-export function createCell(weights: number[]): Cell {
-  return {
-    state: EnCellState.Empty,
-    potentialMove: EnCellState.Empty,
-    weights: weights,
-  };
+  // faster than using array, and we know there are always only two players in Reversi
+  weight1: number; // Weight of cell for first player.
+  weight2: number; // Weight of cell for second player.
 }
 
 //
@@ -207,7 +202,7 @@ export type GameHistoryEntry = {
   ix: number; // For tracking.
   num: number; // Move number.
   playerIx: number; // Which player did that move.
-  move: ReversiMove | null; // Move itself. Null indicates no move (initial state of board or pass).
+  move: Coordinate | null; // Move itself. Null indicates no move (initial state of board or pass).
   cells: Cell[][]; // Board state as copy of main board at that moment.
 };
 
@@ -226,6 +221,7 @@ function createGameHistory(): GameHistory {
 export type ReversiMove = {
   x: number;
   y: number;
+  path: DirCoord[];
 };
 
 //

@@ -67,10 +67,7 @@ export class MiniMaxService {
    */
   private executeSearch(req: MiniMaxReq, nonEmptyCells: number, legalMove: ReversiMove) : MiniMaxResult {
     // Copy board.
-    const updatedCells = req.cells.map(row => row.map(cell => ({
-      ...cell,
-      weights: [...cell.weights]
-    })) );
+    const updatedCells = req.cells.map(row => row.map(cell => ({ ...cell, })) );
     // Make move as CURRENT player.
     this.moveService.executeMoveCustom(updatedCells, req.playerIx, req.piece, legalMove, false, req.dynamicWeights);
     nonEmptyCells++; // we made a move
@@ -234,7 +231,8 @@ export class MiniMaxService {
     for (const affectedCell of affectedCells) {
       const cell = cells[affectedCell.x][affectedCell.y];
       cell.state = affectedCell.s;
-      cell.weights = affectedCell.w;
+      cell.weight1 = affectedCell.w1;
+      cell.weight2 = affectedCell.w2;
     }
   }
 
@@ -335,7 +333,8 @@ export class MiniMaxService {
    */
   private evaluateScoringWeighted(cell: Cell, args: EvaluateArgs): number {
     const mul = this.findCellMultiplier(cell, args);
-    return cell.weights[args.playerIx] * mul;
+    if (args.playerIx === 0) return cell.weight1 * mul;
+    return cell.weight2 * mul;
   }
 
   /**

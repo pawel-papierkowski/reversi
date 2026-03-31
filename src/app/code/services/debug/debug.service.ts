@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { EnCellState, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
+import { EnCellState, EnDir, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
 import type { Coordinate, WeightCoord } from "@/code/data/types";
 import type { GameState, Cell, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState } from "@/code/data/gameState";
@@ -51,10 +51,10 @@ export class DebugService {
 
     // manually set legal moves for this board
     startGameState.board.legalMoves = [
-      { x:ix-1, y:ix },
-      { x:ix, y:ix-1 },
-      { x:ix+1, y:ix+2 },
-      { x:ix+2, y:ix+1 },
+      { x:ix-1, y:ix,   path: [{dir:EnDir.E, x: ix, y: ix},    {dir:EnDir.N, x:ix-1, y:ix}] },
+      { x:ix,   y:ix-1, path: [{dir:EnDir.S, x: ix, y: ix},    {dir:EnDir.N, x:ix, y:ix-1}] },
+      { x:ix+1, y:ix+2, path: [{dir:EnDir.N, x: ix+1, y: ix+1},{dir:EnDir.N, x:ix+1, y:ix+2}] },
+      { x:ix+2, y:ix+1, path: [{dir:EnDir.W, x: ix+1, y: ix+1},{dir:EnDir.N, x:ix+2, y:ix+1}] },
     ];
 
     // manually set statistics
@@ -223,7 +223,9 @@ export class DebugService {
     if (weightChanges.length > 0) { // change weights
       for (let i=0; i<weightChanges.length; i++) {
         const weightChange = weightChanges[i];
-        gameState.board.cells[weightChange.x][weightChange.y].weights[playerIx] = weightChange.w;
+        const cell = gameState.board.cells[weightChange.x][weightChange.y];
+        if (playerIx == 0) cell.weight1 = weightChange.w;
+        else cell.weight2 = weightChange.w;
       }
     }
 
@@ -233,7 +235,7 @@ export class DebugService {
       ix: 0,
       num: nextMoveNum,
       playerIx: playerIx,
-      move: moves.length === 0 ? null : {x:moves[0].x, y:moves[0].y},
+      move: moves.length === 0 ? null : { x: moves[0].x, y: moves[0].y },
       cells: structuredClone(gameState.board.cells)
     };
     this.clearPotentialMoves(gameState, historyEntry.cells);

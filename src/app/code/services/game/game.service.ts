@@ -148,11 +148,12 @@ export class GameService {
    */
   private addToHistory(playerIx: number, move: ReversiMove | null) {
     const nextNo = this.gameStateService.gameState().board.history.moves.length;
+    const historyMove = move === null ? null : { x: move.x, y: move.y };
     const moveEntry: GameHistoryEntry = {
       ix: 0,
       num: nextNo,
       playerIx: playerIx,
-      move: move,
+      move: historyMove,
       cells: structuredClone(this.gameStateService.gameState().board.cells),
     };
     this.legalMoveService.clearPotentialMoves(moveEntry.cells);

@@ -7,7 +7,7 @@ import type { DifficultyProp, BoardStats } from '@/code/data/types';
 import { weights, aiProp } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
 import type { GameState, GameSettings, GameAi, DebugSettings, Cell, Player, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
-import { createGameState, createGameSettings, createGameStatistics, createCell, createDebugSettingsForProd } from "@/code/data/gameState";
+import { createGameState, createGameSettings, createGameStatistics, createDebugSettingsForProd } from "@/code/data/gameState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
 
@@ -237,7 +237,12 @@ export class GameStateService {
       Array.from({ length: boardSize }, (_, y) => {
         // Lookup the predefined weight, falling back to 0 if the size isn't mapped.
         const weightVal = currentWeights ? currentWeights[x][y] : 0;
-        return createCell([weightVal, weightVal]);
+        return {
+          state: EnCellState.Empty,
+          potentialMove: EnCellState.Empty,
+          weight1: weightVal,
+          weight2: weightVal,
+        };
       })
     );
     return cells;

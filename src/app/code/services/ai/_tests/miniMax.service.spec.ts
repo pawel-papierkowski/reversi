@@ -218,7 +218,7 @@ describe('MiniMaxService', () => {
         {score: -2, depth: 7, processed: 4123, moves: [{x:4, y:3, s:-4},{x:4, y:2, s:0},{x:2, y:1, s:-6},{x:1, y:2, s:0},{x:3, y:1, s:-4},{x:3, y:4, s:0},{x:0, y:2, s:4},{x:5, y:2, s:-2}]},
       ]};
       assertMiniMaxResp(actualResponse, expectedResponse);
-    }, 50000);
+    }, 10000);
   });
 
   //

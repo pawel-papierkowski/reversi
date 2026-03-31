@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EnCellState } from '@/code/data/enums';
+import { EnCellState, EnDir } from '@/code/data/enums';
 import type { ReversiMove, GameState } from '@/code/data/gameState';
 
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
@@ -27,10 +27,10 @@ describe('LegalMoveService', () => {
       const gameState = debugService.genStartState(8);
 
       const expectedLegalMoves : ReversiMove[] = [
-        { x:2, y:3 },
-        { x:3, y:2 },
-        { x:4, y:5 },
-        { x:5, y:4 },
+        { x:2, y:3, path: [{dir:EnDir.E, x:3, y:3},{dir:EnDir.N, x:2, y:3}] },
+        { x:3, y:2, path: [{dir:EnDir.S, x:3, y:3},{dir:EnDir.N, x:3, y:2}] },
+        { x:4, y:5, path: [{dir:EnDir.N, x:4, y:4},{dir:EnDir.N, x:4, y:5}] },
+        { x:5, y:4, path: [{dir:EnDir.W, x:4, y:4},{dir:EnDir.N, x:5, y:4}] },
       ];
       assertLegalMoves(gameState, expectedLegalMoves, EnCellState.B);
     });
@@ -44,7 +44,7 @@ describe('LegalMoveService', () => {
       debugService.setBoard(gameState, boardStr);
 
       const expectedLegalMoves : ReversiMove[] = [
-        { x:0, y:0 },
+        { x:0, y:0, path: [{dir:EnDir.SE, x:1, y:1},{dir:EnDir.SE, x:2, y:2},{dir:EnDir.N, x:0, y:0}] },
       ];
       assertLegalMoves(gameState, expectedLegalMoves, EnCellState.W);
     });
@@ -57,8 +57,8 @@ describe('LegalMoveService', () => {
       cells[0][1].state = EnCellState.W;
 
       const expectedLegalMoves : ReversiMove[] = [
-        { x:0, y:2 },
-        { x:2, y:0 },
+        { x:0, y:2, path: [{dir:EnDir.N, x: 0, y: 1},{dir:EnDir.N, x:0, y:2}] },
+        { x:2, y:0, path: [{dir:EnDir.W, x: 1, y: 0},{dir:EnDir.N, x:2, y:0}] },
       ];
       assertLegalMoves(gameState, expectedLegalMoves, EnCellState.B);
     });
@@ -91,8 +91,24 @@ describe('LegalMoveService', () => {
   });
 
   describe('find legal move(s) on specific board state', () => {
+    it('when there are multiple traces', () => {
+      const gameState = debugService.genEmptyState(4);
+      const boardStr = "W__W"+
+                       "_B_B"+
+                       "__BB"+
+                       "WBB_";
+      debugService.setBoard(gameState, boardStr);
+
+      const expectedLegalMoves : ReversiMove[] = [
+        { x:3, y:3, path: [{dir:EnDir.N, x:3, y:2},{dir:EnDir.N, x:3, y:1}, // all three traces
+                           {dir:EnDir.W, x:2, y:3},{dir:EnDir.W, x:1, y:3},
+                           {dir:EnDir.NW, x:2, y:2},{dir:EnDir.NW, x:1, y:1},
+                           {dir:EnDir.N, x:3, y:3}] }, // origin point
+      ];
+      assertLegalMoves(gameState, expectedLegalMoves, EnCellState.W);
+    });
+
     it('when there are disjointed areas', () => {
-      // Won't happen naturally, but we like to test it anyway.
       const gameState = debugService.genEmptyState(6);
       const boardStr = "WB____"+
                        "______"+
@@ -103,8 +119,8 @@ describe('LegalMoveService', () => {
       debugService.setBoard(gameState, boardStr);
 
       const expectedLegalMoves : ReversiMove[] = [
-        { x:2, y:0 },
-        { x:5, y:3 },
+        { x:2, y:0, path: [{dir:EnDir.W, x:1, y:0},{dir:EnDir.N, x:2, y:0}] },
+        { x:5, y:3, path: [{dir:EnDir.W, x:4, y:3},{dir:EnDir.W, x:3, y:3},{dir:EnDir.W, x:2, y:3},{dir:EnDir.W, x:1, y:3},{dir:EnDir.N, x:5, y:3}] },
       ];
       assertLegalMoves(gameState, expectedLegalMoves, EnCellState.W);
     });
