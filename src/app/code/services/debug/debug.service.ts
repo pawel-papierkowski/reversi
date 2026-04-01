@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { EnCellState, EnDir, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/enums';
 import type { Coordinate, WeightCoord } from "@/code/data/types";
+import { weights } from '@/code/data/aiConst';
 import type { GameState, Cell, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState } from "@/code/data/gameState";
 
@@ -50,11 +51,12 @@ export class DebugService {
     startGameState.board.cells[ix+2][ix+1].potentialMove = EnCellState.B;
 
     // manually set legal moves for this board
+    const currWeights = weights[boardSize];
     startGameState.board.legalMoves = [
-      { x:ix-1, y:ix,   score: 0, path: [{dir:EnDir.E, x: ix, y: ix},    {dir:EnDir.N, x:ix-1, y:ix}] },
-      { x:ix,   y:ix-1, score: 0, path: [{dir:EnDir.S, x: ix, y: ix},    {dir:EnDir.N, x:ix, y:ix-1}] },
-      { x:ix+1, y:ix+2, score: 0, path: [{dir:EnDir.N, x: ix+1, y: ix+1},{dir:EnDir.N, x:ix+1, y:ix+2}] },
-      { x:ix+2, y:ix+1, score: 0, path: [{dir:EnDir.W, x: ix+1, y: ix+1},{dir:EnDir.N, x:ix+2, y:ix+1}] },
+      { x:ix-1, y:ix,   score: currWeights[ix-1][ix],   path: [{dir:EnDir.E, x: ix, y: ix},    {dir:EnDir.N, x:ix-1, y:ix}] },
+      { x:ix,   y:ix-1, score: currWeights[ix][ix-1],   path: [{dir:EnDir.S, x: ix, y: ix},    {dir:EnDir.N, x:ix, y:ix-1}] },
+      { x:ix+1, y:ix+2, score: currWeights[ix+1][ix+2], path: [{dir:EnDir.N, x: ix+1, y: ix+1},{dir:EnDir.N, x:ix+1, y:ix+2}] },
+      { x:ix+2, y:ix+1, score: currWeights[ix+2][ix+1], path: [{dir:EnDir.W, x: ix+1, y: ix+1},{dir:EnDir.N, x:ix+2, y:ix+1}] },
     ];
 
     // manually set statistics

@@ -66,6 +66,9 @@ export class LegalMoveService {
         if (move !== null) foundMoves.push(move);
       }
     }
+
+    // Sort moves descending by score. This will make Alpha-Beta pruning more likely to trigger early.
+    foundMoves.sort((a, b) => b.score - a.score);
     return foundMoves;
   }
 
@@ -92,7 +95,10 @@ export class LegalMoveService {
 
     if (alteredPieces.length === 0) return null; // no legal move found
     alteredPieces.push({ dir:EnDir.N, x:x, y:y }); // origin point
-    return { x: x, y: y, path: alteredPieces, score: 0 };
+
+    // Score move based on cell weight.
+    const score = (playerPiece === EnCellState.B) ? cell.weight1 : cell.weight2;
+    return { x: x, y: y, path: alteredPieces, score: score };
   }
 
   /**

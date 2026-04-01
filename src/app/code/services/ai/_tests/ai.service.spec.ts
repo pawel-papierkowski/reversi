@@ -404,7 +404,7 @@ describe('AiService', () => {
       const resolveSpy = vi.spyOn(miniMaxService, 'resolve'); // to understand what happened
 
       // Evaluation will be impacted by changed weights.
-      // White have four potential moves here: a3, b4, d2 or d4. It chooses d2 at this moment.
+      // White have four potential moves here: a3, b4, d2 or d4. It chooses a3 at this moment.
       await aiService.maybeMakeMove(); // move 4, white
 
       expect(resolveSpy).toHaveBeenCalled();
@@ -418,8 +418,7 @@ describe('AiService', () => {
       debugService.addToHistory(expectedGameState, 0, "a2 b2");
       debugService.addToHistory(expectedGameState, 1, "a1 b2", [{x:1, y:1, w:30}, {x:1, y:0, w:30}, {x:0, y:1, w:30}]); // weight change happens here
       debugService.addToHistory(expectedGameState, 0, "d3 c3");
-      debugService.addToHistory(expectedGameState, 1, "d2 c2"); // AI move
-      //debugService.addToHistory(expectedGameState, 1, "a3 a2"); // AI move
+      debugService.addToHistory(expectedGameState, 1, "a3 a2"); // AI move
 
       // Check game state.
       expectedGameState.statistics.moveCount = 4;
