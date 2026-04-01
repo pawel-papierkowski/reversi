@@ -5,7 +5,6 @@ import { EnDifficulty, EnGameStatus, EnMode, EnPlayerType } from '@/code/data/en
 import { aiProp } from '@/code/data/aiConst';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
-import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { DebugService } from '@/code/services/debug/debug.service';
 
 import { setupTestBedTranslate, startGame, clickOnCell, clickOnPass, assertPassButton, assertDomBoard, waitForAi } from './app.test-setup';
@@ -18,7 +17,6 @@ describe('App (AI)', () => {
   let fixture: ComponentFixture<App>;
   let router: Router;
   let gameStateService: GameStateService;
-  let legalMoveService: LegalMoveService;
   let debugService: DebugService;
 
   beforeEach(async () => {
@@ -27,7 +25,6 @@ describe('App (AI)', () => {
     fixture = await setupTestBedTranslate([]);
     router = TestBed.inject(Router);
     gameStateService = TestBed.inject(GameStateService);
-    legalMoveService = TestBed.inject(LegalMoveService);
     debugService = TestBed.inject(DebugService);
 
     // set up all needed properties

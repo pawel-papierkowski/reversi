@@ -6,7 +6,7 @@ import type { EvaluateArgs } from "@/code/data/aiState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
 import { GameStateService } from '@/code/services/gameState/gameState.service';
-import { MoveService } from '@/code/services/move/move.service';
+import { MoveService } from '@/code/services/legalMove/move.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 import { MiniMaxService } from '@/code/services/ai/miniMax.service';
 

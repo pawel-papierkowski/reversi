@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { EnCellState, EnDir } from '@/code/data/enums';
+import { EnCellState } from '@/code/data/enums';
 import type { Coordinate, DirCoord, StateCoord } from '@/code/data/types';
 import { aiProp } from '@/code/data/aiConst';
 import type { Cell, ReversiMove } from "@/code/data/gameState";
@@ -52,6 +52,7 @@ export class MoveService {
     }
 
     if (canDynamicWeights) this.affectWeightsCustom(cells, playerIx, legalMove, copy, affectedCells);
+    this.updateFrontierAdd(cells, legalMove);
     return affectedCells;
   }
 
@@ -157,6 +158,7 @@ export class MoveService {
   }
 
   // //////////////////////////////////////////////////////////////////////////
+  // WEIGHTS
 
   /**
    * Affect weights on custom board.
@@ -235,5 +237,28 @@ export class MoveService {
       if (playerIx === 0) cells[coord.x][coord.y].weight1 = newWeightValue;
       else cells[coord.x][coord.y].weight2 = newWeightValue;
     }
+  }
+
+  // //////////////////////////////////////////////////////////////////////////
+  // FRONTIER
+
+  /**
+   * Update frontier data: after addition of piece.
+   * @param cells Board state.
+   * @param legalMove Legal move.
+   */
+  public updateFrontierAdd(cells: Cell[][], legalMove: ReversiMove) {
+    // TODO We need to remove one frontier entry and add neccessary entries.
+
+  }
+
+  /**
+   * Update frontier data: after removal of piece. Used in MiniMax as part of reverting of board state.
+   * @param cells Board state.
+   * @param legalMove Legal move.
+   */
+  public updateFrontierDel(cells: Cell[][], legalMove: ReversiMove) {
+    // TODO We need to add one frontier entry where piece was and remove unneccessary entries.
+
   }
 }

@@ -8,7 +8,7 @@ import type { Cell, ReversiMove } from "@/code/data/gameState";
 import type { MiniMaxReq, MiniMaxResp, MiniMaxResult, MiniMaxArgs, EvaluateArgs } from "@/code/data/aiState";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
-import { MoveService } from '@/code/services/move/move.service';
+import { MoveService } from '@/code/services/legalMove/move.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
 
 /**
@@ -195,7 +195,8 @@ export class MiniMaxService {
       }
 
       args.moves.pop(); // Undo that move...
-      this.undoBoard(args.cells, affectedCells); // ...and restore state of board.
+      this.moveService.updateFrontierDel(args.cells, legalMove); // ...revert frontier state...
+      this.undoBoard(args.cells, affectedCells); // ... and restore state of board.
 
       if (alpha >= beta) break; // Alpha-Beta Pruning.
     }
@@ -227,6 +228,11 @@ export class MiniMaxService {
     };
   }
 
+  /**
+   * Revert state of board using affected cells.
+   * @param cells Board state.
+   * @param affectedCells Cells to set.
+   */
   private undoBoard(cells: Cell[][], affectedCells: StateCoord[]) {
     for (const affectedCell of affectedCells) {
       const cell = cells[affectedCell.x][affectedCell.y];
