@@ -5,7 +5,7 @@ import type { DirCoord } from '@/code/data/types';
 import type { ReversiMove, Cell } from '@/code/data/gameState';
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
-import { MoveService } from '@/code/services/move/move.service';
+import { MoveService } from '@/code/services/legalMove/move.service';
 
 /**
  * Legal move service.
@@ -86,8 +86,11 @@ export class LegalMoveService {
     const oppPlayerPiece = this.moveService.getOppPiece(playerPiece);
 
     const alteredPieces: DirCoord[] = [];
+    let dirCoord : DirCoord = { dir: EnDir.N, x: x, y: y }; // create object only once, we will reuse it
     for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
-      let dirCoord : DirCoord = { dir: dir, x: x, y: y };
+      dirCoord.dir = dir;
+      dirCoord.x = x;
+      dirCoord.y = y;
       this.moveService.applyDir(dirCoord); // move dirCoord in given direction by one cell
       if (!this.canUsePotentialMove(cells, dirCoord, oppPlayerPiece)) continue;
       this.moveService.trace(cells, dirCoord, playerPiece, oppPlayerPiece, alteredPieces);

@@ -16,8 +16,8 @@ export function assertGameState(actualGameState: GameState, expectedGameState: G
   adjustExpectedGameState(actualGameState, expectedGameState);
 
   expect(actualGameState.settings, 'Settings should be same').toEqual(expectedGameState.settings);
-  expect(actualGameState.statistics, 'Statistics should be same').toEqual(expectedGameState.statistics);
   expect(actualGameState.players, 'Players should be same').toEqual(expectedGameState.players);
+  expect(actualGameState.statistics, 'Statistics should be same').toEqual(expectedGameState.statistics);
   assertGameBoard(actualGameState.board, expectedGameState.board);
   expect(actualGameState.view, 'View should be same').toEqual(expectedGameState.view);
   expect(actualGameState.debugSettings, 'Debug settings should be same').toEqual(expectedGameState.debugSettings);
@@ -37,6 +37,7 @@ function assertGameBoard(actualBoard: ReversiBoard, expectedBoard: ReversiBoard)
   expect(actualBoard.currPlayerIx, 'Board currPlayerIx should be same').toEqual(expectedBoard.currPlayerIx);
   assertGameHistory(actualBoard.history, expectedBoard.history);
   assertCells(actualBoard.cells, expectedBoard.cells, 'Board cells should be same');
+  expect(actualBoard.frontier, 'Board frontier should be same').toEqual(expectedBoard.frontier);
   expect(actualBoard.legalMoves, 'Board legalMoves should be same').toEqual(expectedBoard.legalMoves);
   expect(actualBoard.doublePass, 'Board doublePass should be same').toEqual(expectedBoard.doublePass);
 }
@@ -64,6 +65,8 @@ function assertGameHistory(actualHistory: GameHistory, expectedHistory: GameHist
  * @param ix Index of history entry.
  */
 function assertGameHistoryEntry(actualHistoryEntry: GameHistoryEntry, expectedHistoryEntry: GameHistoryEntry, ix: number) {
+  expect(actualHistoryEntry.ix, `History entry [${ix}] ix should be same`).toEqual(expectedHistoryEntry.ix);
+  expect(actualHistoryEntry.num, `History entry [${ix}] num should be same`).toEqual(expectedHistoryEntry.num);
   expect(actualHistoryEntry.playerIx, `History entry [${ix}] playerIx should be same`).toEqual(expectedHistoryEntry.playerIx);
   expect(actualHistoryEntry.move, `History entry [${ix}] move should be same`).toEqual(expectedHistoryEntry.move);
   assertCells(actualHistoryEntry.cells, expectedHistoryEntry.cells, `History entry [${ix}] cells should be same`);
@@ -74,7 +77,7 @@ function assertGameHistoryEntry(actualHistoryEntry: GameHistoryEntry, expectedHi
  * @param actualCells Actual 2d array of cells.
  * @param expectedCells Expected 2d array of cells.
  */
-function assertCells(actualCells: Cell[][], expectedCells: Cell[][], comment: string) {
+export function assertCells(actualCells: Cell[][], expectedCells: Cell[][], comment: string) {
   //expect(actualCells, `${comment}`).toEqual(expectedCells);
   expect(actualCells.length, `${comment}. Array should have same size`).toEqual(expectedCells.length);
   const size = actualCells.length;

@@ -3,10 +3,10 @@ import { Injectable, inject, signal } from '@angular/core';
 import { XORShift128Plus } from 'random-seedable';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnViewMode } from '@/code/data/enums';
-import type { DifficultyProp, BoardStats } from '@/code/data/types';
+import type { DifficultyProp, BoardStats, Coordinate } from '@/code/data/types';
 import { weights, aiProp } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
-import type { GameState, GameSettings, GameAi, DebugSettings, Cell, Player, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
+import type { GameState, GameSettings, GameAi, GameStatistics, DebugSettings, Cell, Player, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createGameSettings, createGameStatistics, createDebugSettingsForProd } from "@/code/data/gameState";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
@@ -91,9 +91,15 @@ export class GameStateService {
    * Recalculate score for current board state.
    */
   public recalcScoring() {
-    const statistics = this.gameState().statistics;
     const cells = this.gameState().board.cells;
+    const statistics = this.gameState().statistics;
+    this.recalcScoringCustom(cells, statistics);
+  }
 
+  /**
+   * Recalculate score for current board state.
+   */
+  public recalcScoringCustom(cells: Cell[][], statistics: GameStatistics) {
     const stats = this.calcCellStats(cells);
     statistics.emptyCells = stats.empty;
     statistics.player1Score = stats.player1Score;
@@ -116,9 +122,9 @@ export class GameStateService {
     for (let x=0; x<size; x++) {
       for (let y=0; y<size; y++) {
         const cell = cells[x][y];
-        if (cell.state == EnCellState.B) player1Score++;
-        else if (cell.state == EnCellState.W) player2Score++;
-        else if (cell.state == EnCellState.Empty) empty++;
+        if (cell.state === EnCellState.B) player1Score++;
+        else if (cell.state === EnCellState.W) player2Score++;
+        else if (cell.state === EnCellState.Empty) empty++;
       }
     }
     return { empty: empty, player1Score: player1Score, player2Score: player2Score, total: total };
@@ -181,13 +187,16 @@ export class GameStateService {
    */
   public initializeRound() {
     const boardSize = this.gameState().settings.boardSize;
-    const newCells = this.genCells(boardSize); // same for board and view
+    const ix = boardSize/2 - 1; // for size 8 it will be 3
+    const newCells = this.genCellsInitial(ix, boardSize); // same for board and view
+    const frontier = this.genFrontierInitial(ix);
 
     this.gameState.update(state => ({ // initialize round
       ...state, // duplicates rest of state
       board: {
         status: EnGameStatus.InProgress,
         cells: newCells, // yes, common reference
+        frontier: frontier,
         legalMoves: [],
         doublePass: false,
         currPlayerIx: 0,
@@ -214,14 +223,13 @@ export class GameStateService {
    * @param boardSize Size of board.
    * @returns Initial board state.
    */
-  private genCells(boardSize: number) : Cell[][] {
+  private genCellsInitial(ix: number, boardSize: number) : Cell[][] {
     const cells = this.genCellsEmpty(boardSize);
     // Now put starting pieces in middle of board, like in Othello.
-    const startIx = boardSize/2 - 1;
-    cells[startIx][startIx].state = EnCellState.W;
-    cells[startIx+1][startIx].state = EnCellState.B;
-    cells[startIx][startIx+1].state = EnCellState.B;
-    cells[startIx+1][startIx+1].state = EnCellState.W;
+    cells[ix][ix].state = EnCellState.W;
+    cells[ix+1][ix].state = EnCellState.B;
+    cells[ix][ix+1].state = EnCellState.B;
+    cells[ix+1][ix+1].state = EnCellState.W;
     return cells;
   }
 
@@ -248,6 +256,32 @@ export class GameStateService {
     return cells;
   }
 
+  //
+
+  /**
+   * Generate frontier for initial state of board.
+   * @param cells Board state.
+   * @returns Generated frontier entries.
+   */
+  private genFrontierInitial(ix: number): Coordinate[] {
+    const frontier: Coordinate[] = [
+      {x:ix-1, y:ix-1}, // top left corner
+      {x:ix,   y:ix-1},
+      {x:ix-1, y:ix},
+      {x:ix+1, y:ix-1}, // top right corner
+      {x:ix+2, y:ix-1},
+      {x:ix+2, y:ix},
+      {x:ix-1, y:ix+1}, // bottom left corner
+      {x:ix-1, y:ix+2},
+      {x:ix,   y:ix+2},
+      {x:ix+2, y:ix+2}, // bottom right corner
+      {x:ix+2, y:ix+1},
+      {x:ix+1, y:ix+2}];
+    return frontier;
+  }
+
+  //
+
   /**
    * Generates empty history.
    * @returns History.
@@ -259,7 +293,7 @@ export class GameStateService {
     };
   }
 
-  //
+  // //////////////////////////////////////////////////////////////////////////
 
   private usedName : string = '';
 

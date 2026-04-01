@@ -24,12 +24,12 @@ export class PlayerBoxCmp {
   public readonly currPlayer = computed<boolean>(() => {
     const status = this.gameStateService.gameState().board.status;
     if (status !== EnGameStatus.InProgress) return false;
-    return this.gameStateService.getCurrPlayer().ix == this.playerIx();
+    return this.gameStateService.getCurrPlayer().ix === this.playerIx();
   });
   public readonly winningPlayer = computed<boolean>(() => {
     const status = this.gameStateService.gameState().board.status;
     if (status === EnGameStatus.InProgress) return false;
-    return this.gameStateService.getWinningPlayer().ix == this.playerIx();
+    return this.gameStateService.getWinningPlayer().ix === this.playerIx();
   });
 
   public getClasses(): string[] {

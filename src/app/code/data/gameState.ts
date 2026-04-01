@@ -103,7 +103,7 @@ export function createDebugData(): DebugData {
 // Game statistics.
 // ////////////////
 
-type GameStatistics = {
+export type GameStatistics = {
   round: number;
   moveCount: number;
   emptyCells: number;
@@ -230,6 +230,7 @@ export type ReversiMove = {
 export type ReversiBoard = {
   status: EnGameStatus;
   cells: Cell[][]; // Current state of board.
+  frontier: Coordinate[]; // List of empty cells that neighbors filled cells.
   legalMoves: ReversiMove[]; // List of available legal moves for this board state and current player.
   doublePass: boolean; // If true, both current and next player has no legal moves.
   currPlayerIx: number; // index for gameState.players
@@ -240,6 +241,7 @@ export function createGameBoard(): ReversiBoard {
   return {
     status: EnGameStatus.Pending,
     cells: [], // actually filled later, as we need to know settings like board size
+    frontier: [], // filled and modified incrementally
     legalMoves: [],
     doublePass: false,
     currPlayerIx: 0,
