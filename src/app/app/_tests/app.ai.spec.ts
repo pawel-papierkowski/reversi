@@ -119,9 +119,9 @@ describe('App (AI)', () => {
       await waitForAi(fixture, gameStateService.gameState(), 13);
 
       const boardStr = "WWWB"+ // Expected board state.
-                       "WWBB"+
-                       "WBWW"+
-                       "BBWW";
+                       "WWWB"+
+                       "WBBB"+
+                       "BBBB";
       assertDomBoard(fixture, boardStr, true); // Check state of board in browser.
 
       // Check game state.
@@ -131,23 +131,24 @@ describe('App (AI)', () => {
       debugService.addToHistory(expectedGameState, 1, "a1 b2");
       debugService.addToHistory(expectedGameState, 0, "a2 b2");
       debugService.addToHistory(expectedGameState, 1, "a3 a2 b3");
-      debugService.addToHistory(expectedGameState, 0, "b4 b3");
-      debugService.addToHistory(expectedGameState, 1, "c1 b1 b2 c2");
-      debugService.addToHistory(expectedGameState, 0, "d1 c2");
+      debugService.addToHistory(expectedGameState, 0, "d4 c3");
+      debugService.addToHistory(expectedGameState, 1, "c1 b1 b2");
+      debugService.addToHistory(expectedGameState, 0, "a4 b3");
+      debugService.addToHistory(expectedGameState, 1, "c4 c2 c3 b3");
+      debugService.addToHistory(expectedGameState, 0, "b4 c4");
+      debugService.addToHistory(expectedGameState, 1, "");
+      debugService.addToHistory(expectedGameState, 0, "d1 c2 b3");
       debugService.addToHistory(expectedGameState, 1, "d3 c2");
-      debugService.addToHistory(expectedGameState, 0, "d2 c3");
-      debugService.addToHistory(expectedGameState, 1, "d4 c3");
-      debugService.addToHistory(expectedGameState, 0, "");
-      debugService.addToHistory(expectedGameState, 1, "c4 b3");
-      debugService.addToHistory(expectedGameState, 0, "a4 b3 c2");
+
+      debugService.addToHistory(expectedGameState, 0, "d2 c3 d3");
 
       expectedGameState.statistics.aiTrigger = 13;
       expectedGameState.statistics.moveCount = 13;
       expectedGameState.statistics.emptyCells = 0;
-      expectedGameState.statistics.player1Score = 6;
-      expectedGameState.statistics.player2Score = 10;
-      expectedGameState.statistics.player2Win = 1;
-      expectedGameState.statistics.player2WinInRow = 1;
+      expectedGameState.statistics.player1Score = 9;
+      expectedGameState.statistics.player1Win = 1;
+      expectedGameState.statistics.player1WinInRow = 1;
+      expectedGameState.statistics.player2Score = 7;
       expectedGameState.board.currPlayerIx = 1;
       expectedGameState.board.status = EnGameStatus.PlayerWon;
       expectedGameState.board.doublePass = true;
