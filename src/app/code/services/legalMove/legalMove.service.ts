@@ -53,6 +53,7 @@ export class LegalMoveService {
   /**
    * Finds out all legal moves for given board state and player.
    * @param cells State of board.
+   * @param frontier Frontier as set of encoded x/y coordinates.
    * @param playerPiece Player piece.
    * @returns Array of legal moves. Can be empty if no legal moves available.
    */
@@ -60,16 +61,24 @@ export class LegalMoveService {
     const foundMoves: ReversiMove[] = [];
     const boardSize = cells.length;
 
-    // Go over entire board and check every cell for legal move.
-    for (let x=0; x<boardSize; x++) {
-      for (let y=0; y<boardSize; y++) {
-        const move = this.resolveMove(cells, x, y, playerPiece);
-        if (move !== null) foundMoves.push(move);
-      }
+    // Check frontier instead of entire board.
+    for (const coords of frontier) {
+      // Value in coords encodes x and y, let's decode it.
+      const x = Math.floor(coords/boardSize); // fractions are truncated, so value=12 with boardSize=8 will return x = 1
+      const y = coords - x*boardSize; // value=12 with boardSize=8 will return y = 4
+      const move = this.resolveMove(cells, x, y, playerPiece);
+      if (move !== null) foundMoves.push(move);
     }
 
     // Sort moves descending by score. This will make Alpha-Beta pruning more likely to trigger early.
-    foundMoves.sort((a, b) => b.score - a.score);
+    // To ensure consistency, if score is same, sort by x and then by y.
+    foundMoves.sort((a, b) => {
+      if (a.score === b.score) {
+        if (a.x === b.x) return a.y - b.y;
+        return a.x - b.x;
+      }
+      return b.score - a.score;
+    });
     return foundMoves;
   }
 

@@ -187,15 +187,14 @@ describe('DebugService', () => {
       expectedGameState.board.cells[4][5].state = EnCellState.W;
       expectedGameState.board.cells[5][5].state = EnCellState.W;
       expectedGameState.board.history.moves[0].cells = structuredClone(expectedGameState.board.cells);
-
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.B);
-      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
-
       expectedGameState.board.frontier = new Set([
         genCoordNum(1,1,8),genCoordNum(1,2,8),genCoordNum(1,3,8),genCoordNum(1,4,8),genCoordNum(1,5,8),genCoordNum(1,6,8), // top of square
         genCoordNum(2,1,8),genCoordNum(2,6,8),genCoordNum(3,1,8),genCoordNum(3,6,8),genCoordNum(4,1,8),genCoordNum(4,6,8),genCoordNum(5,1,8),genCoordNum(5,6,8), // both sides of square
         genCoordNum(6,1,8),genCoordNum(6,2,8),genCoordNum(6,3,8),genCoordNum(6,4,8),genCoordNum(6,5,8),genCoordNum(6,6,8), // bottom of square
       ]);
+
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.B);
+      legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);

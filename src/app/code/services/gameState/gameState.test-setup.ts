@@ -35,12 +35,14 @@ export function assertGameState(actualGameState: GameState, expectedGameState: G
 function assertGameBoard(actualBoard: ReversiBoard, expectedBoard: ReversiBoard) {
   expect(actualBoard.status, 'Board status should be same').toEqual(expectedBoard.status);
   expect(actualBoard.currPlayerIx, 'Board currPlayerIx should be same').toEqual(expectedBoard.currPlayerIx);
-  assertGameHistory(actualBoard.history, expectedBoard.history);
-  assertCells(actualBoard.cells, expectedBoard.cells, 'Board cells should be same');
+  expect(actualBoard.doublePass, 'Board doublePass should be same').toEqual(expectedBoard.doublePass);
+
   expect(areSetsEqual(actualBoard.frontier, expectedBoard.frontier), 'Board frontier should be same').toEqual(true);
   //expect(actualBoard.frontier, 'Board frontier should be same').toEqual(expectedBoard.frontier);
   expect(actualBoard.legalMoves, 'Board legalMoves should be same').toEqual(expectedBoard.legalMoves);
-  expect(actualBoard.doublePass, 'Board doublePass should be same').toEqual(expectedBoard.doublePass);
+
+  assertGameHistory(actualBoard.history, expectedBoard.history);
+  assertCells(actualBoard.cells, expectedBoard.cells, 'Board cells should be same');
 }
 
 /**
