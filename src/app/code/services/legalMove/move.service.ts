@@ -88,26 +88,27 @@ export class MoveService {
    * Trace from given coordinates in given direction across board until you hit edge or cell that has
    * something else than piece of opposing player. If that cell has your piece, bingo. Move is valid.
    * @param cells State of board.
-   * @param dirCoord Coordinates+direction to use.
+   * @param x X coordinate of cell.
+   * @param y Y coordinate of cell.
+   * @param dir Direction of trace.
    * @param playerPiece Piece of your player.
    * @param oppPlayerPiece Piece of opposing player.
    * @param path Array of coordinates to fill.
    * @returns True if legal move, otherwise false.
    */
-  public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState, path: DirCoord[]): boolean {
+  public trace(cells: Cell[][], x: number, y: number, dir: EnDir, playerPiece: EnCellState, oppPlayerPiece: EnCellState, path: DirCoord[]): boolean {
     const boardSize = cells.length;
     const startIdx = path.length;
 
-    const dir = dirCoord.dir;
-    const offX = this.dx[dirCoord.dir]; // Take advantage of fact single trace always goes in same direction.
-    const offY = this.dy[dirCoord.dir];
+    const offX = this.dx[dir]; // Take advantage of fact single trace always goes in same direction.
+    const offY = this.dy[dir];
 
     // The starting piece is already an opposing piece (checked before calling trace).
     // NOTE: origin point is NOT included in trace, it is added after everything at end.
-    path.push({ x: dirCoord.x, y: dirCoord.y, dir: dir });
+    path.push({ x: x, y: y, dir: dir });
 
-    let nx = dirCoord.x;
-    let ny = dirCoord.y;
+    let nx = x;
+    let ny = y;
 
     while (true) {
       nx += offX;
@@ -134,18 +135,6 @@ export class MoveService {
       // This is piece that would be flipped.
       path.push({ x: nx, y: ny, dir: dir });
     }
-  }
-
-  /**
-   * Check if given coordinates are inside board.
-   * @param dirCoord Coordinates.
-   * @param size Size of board.
-   * @returns True if inside board, otherwise false.
-   */
-  public isInsideBoard(dirCoord: DirCoord, size: number): boolean {
-    if (dirCoord.x < 0 || dirCoord.x >= size) return false;
-    if (dirCoord.y < 0 || dirCoord.y >= size) return false;
-    return true;
   }
 
   // //////////////////////////////////////////////////////////////////////////
