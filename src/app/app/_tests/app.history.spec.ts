@@ -118,7 +118,7 @@ describe('App (history)', () => {
     expectedGameState.view.viewMove = 3;
     expectedGameState.view.cells = expectedGameState.board.history.moves[3].cells;
 
-    expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
+    expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.W);
     legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
 
     const actualGameStateHist = gameStateService.gameState();
@@ -144,7 +144,7 @@ describe('App (history)', () => {
     expectedGameState.view.viewMove = -1;
     expectedGameState.view.cells = expectedGameState.board.cells;
 
-    expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.W);
+    expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.W);
     legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.W, expectedGameState.board.legalMoves);
 
     const actualGameState = gameStateService.gameState();

@@ -275,7 +275,7 @@ export class DebugService {
     gameState.view.cells = gameState.board.cells;
 
     const piece = gameState.board.currPlayerIx === 0 ? EnCellState.B : EnCellState.W;
-    gameState.board.legalMoves = this.legalMoveService.resolveMovesCustom(gameState.board.cells, piece);
+    gameState.board.legalMoves = this.legalMoveService.resolveMovesCustom(gameState.board.cells, gameState.board.frontier, piece);
     this.legalMoveService.showHintsCustom(gameState.board.cells, piece, gameState.board.legalMoves);
   }
 
@@ -304,7 +304,7 @@ export class DebugService {
 
     if (resolvePotentialMoves) {
       const piece = gameState.players[gameState.board.currPlayerIx].piece;
-      gameState.board.legalMoves = this.legalMoveService.resolveMovesCustom(gameState.board.cells, piece);
+      gameState.board.legalMoves = this.legalMoveService.resolveMovesCustom(gameState.board.cells, gameState.board.frontier, piece);
       this.legalMoveService.showHintsCustom(gameState.board.cells, piece, gameState.board.legalMoves);
     }
   }

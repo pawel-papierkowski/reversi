@@ -40,7 +40,7 @@ describe('MiniMax evaluation', () => {
       isYou: isYou,
       cells: gameState.board.cells,
       scoringSystem: scoringSystem,
-      moveCount: legalMoveService.resolveMovesCustom(gameState.board.cells, piece).length,
+      moveCount: legalMoveService.resolveMovesCustom(gameState.board.cells, gameState.board.frontier, piece).length,
     }
   }
 

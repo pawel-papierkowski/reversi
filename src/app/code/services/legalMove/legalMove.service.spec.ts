@@ -16,7 +16,7 @@ describe('LegalMoveService', () => {
   });
 
   function assertLegalMoves(gameState: GameState, expectedLegalMoves : ReversiMove[], playerPiece: EnCellState) {
-    const actualLegalMoves = legalMoveService.resolveMovesCustom(gameState.board.cells, playerPiece);
+    const actualLegalMoves = legalMoveService.resolveMovesCustom(gameState.board.cells, gameState.board.frontier, playerPiece);
     expect(actualLegalMoves).toEqual(expectedLegalMoves);
   }
 

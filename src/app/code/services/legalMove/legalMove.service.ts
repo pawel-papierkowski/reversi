@@ -37,14 +37,15 @@ export class LegalMoveService {
    */
   public resolveMoves() {
     const cells = this.gameStateService.gameState().board.cells;
+    const frontier = this.gameStateService.gameState().board.frontier;
     const playerPiece = this.gameStateService.getCurrPlayer().piece;
-    const currPlayerMoves = this.resolveMovesCustom(cells, playerPiece);
+    const currPlayerMoves = this.resolveMovesCustom(cells, frontier, playerPiece);
     this.gameStateService.gameState().board.legalMoves = currPlayerMoves;
 
     // detect double pass
     if (currPlayerMoves.length === 0) {
       const oppPlayerPiece = this.moveService.getOppPiece(playerPiece);
-      const nextPlayerMoves = this.resolveMovesCustom(cells, oppPlayerPiece);
+      const nextPlayerMoves = this.resolveMovesCustom(cells, frontier, oppPlayerPiece);
       if (nextPlayerMoves.length === 0) this.gameStateService.gameState().board.doublePass = true;
     }
   }
@@ -55,7 +56,7 @@ export class LegalMoveService {
    * @param playerPiece Player piece.
    * @returns Array of legal moves. Can be empty if no legal moves available.
    */
-  public resolveMovesCustom(cells: Cell[][], playerPiece: EnCellState) : ReversiMove[] {
+  public resolveMovesCustom(cells: Cell[][], frontier: Set<number>, playerPiece: EnCellState) : ReversiMove[] {
     const foundMoves: ReversiMove[] = [];
     const boardSize = cells.length;
 
