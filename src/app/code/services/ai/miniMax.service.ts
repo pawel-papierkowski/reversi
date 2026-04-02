@@ -128,7 +128,7 @@ export class MiniMaxService {
     const otherPiece = this.moveService.getOppPiece(args.piece);
 
     // Find out legal moves for current player.
-    const currPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, args.piece);
+    const currPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, args.frontier, args.piece);
 
     // First, check max depth.
     if (args.currDepth === args.maxDepth) return this.returnTerminalResult(args, currPlayerMoves.length);
@@ -138,7 +138,7 @@ export class MiniMaxService {
     //   Happens also when board is completely filled, so we do not have to check for it separately.
     if (currPlayerMoves.length === 0) {
       // If current player has no moves, we MUST check if next player also has no moves to detect double pass.
-      const nextPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, otherPiece);
+      const nextPlayerMoves = this.legalMoveService.resolveMovesCustom(args.cells, args.frontier, otherPiece);
       if (nextPlayerMoves.length === 0) return this.returnTerminalResult(args, 0);
 
       // Current player must pass.

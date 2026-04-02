@@ -51,7 +51,7 @@ describe('MoveService', () => {
       debugService.setBoard(actualGameState, boardStr, true, false);
       const expectedGameState = structuredClone(actualGameState);
 
-      const legalMoves = legalMoveService.resolveMovesCustom(actualGameState.board.cells, EnCellState.B);
+      const legalMoves = legalMoveService.resolveMovesCustom(actualGameState.board.cells, actualGameState.board.frontier, EnCellState.B);
       const actualUndoData = moveService.executeMoveCustom(actualGameState.board.cells, actualGameState.board.frontier, 0, EnCellState.B, legalMoves[0], false, true);
       const expectedUndoData = {
         affectedCells: [
@@ -91,7 +91,7 @@ describe('MoveService', () => {
       debugService.setBoard(actualGameState, boardStr, true, false);
       const expectedGameState = structuredClone(actualGameState);
 
-      const legalMoves = legalMoveService.resolveMovesCustom(actualGameState.board.cells, EnCellState.B);
+      const legalMoves = legalMoveService.resolveMovesCustom(actualGameState.board.cells, actualGameState.board.frontier, EnCellState.B);
       const actualUndoData = moveService.executeMoveCustom(actualGameState.board.cells, actualGameState.board.frontier, 0, EnCellState.B, legalMoves[0], false, true);
       const expectedUndoData = {
         affectedCells: [

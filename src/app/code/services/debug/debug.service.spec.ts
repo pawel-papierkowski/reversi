@@ -61,7 +61,7 @@ describe('DebugService', () => {
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.cells[3][3].state = EnCellState.B;
 
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       const actualGameState = gameStateService.gameState();
@@ -79,7 +79,7 @@ describe('DebugService', () => {
       expectedGameState.board.cells[3][3].state = EnCellState.Empty;
 
       // This particular change does affect available legal moves.
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       const actualGameState = gameStateService.gameState();
@@ -96,7 +96,7 @@ describe('DebugService', () => {
       expectedGameState.statistics.player2Score = 2;
       expectedGameState.board.cells[2][3].state = EnCellState.B;
 
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       const actualGameState = gameStateService.gameState();
@@ -113,7 +113,7 @@ describe('DebugService', () => {
       expectedGameState.statistics.player2Score = 3;
       expectedGameState.board.cells[4][3].state = EnCellState.W;
 
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       const actualGameState = gameStateService.gameState();
@@ -130,7 +130,7 @@ describe('DebugService', () => {
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.cells[4][4].state = EnCellState.Empty;
 
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       const actualGameState = gameStateService.gameState();
@@ -188,7 +188,7 @@ describe('DebugService', () => {
       expectedGameState.board.cells[5][5].state = EnCellState.W;
       expectedGameState.board.history.moves[0].cells = structuredClone(expectedGameState.board.cells);
 
-      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
+      expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, expectedGameState.board.frontier, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
       expectedGameState.board.frontier = new Set([
