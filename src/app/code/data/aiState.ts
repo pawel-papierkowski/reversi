@@ -1,5 +1,5 @@
 import { EnCellState } from '@/code/data/enums';
-import type { Coordinate, ScoreCoord, ScoringSystem } from "@/code/data/types";
+import type { ScoreCoord, ScoringSystem } from "@/code/data/types";
 import type { Cell, ReversiMove } from "@/code/data/gameState";
 
 // ////////////////////////////////////////////////////////////////////////////

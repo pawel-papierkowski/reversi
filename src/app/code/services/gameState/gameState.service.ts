@@ -290,9 +290,7 @@ export class GameStateService {
    */
   private generateEmptyHistory(): GameHistory {
     const moves: GameHistoryEntry[] = [];
-    return {
-      moves: moves,
-    };
+    return { moves: moves };
   }
 
   // //////////////////////////////////////////////////////////////////////////
