@@ -256,7 +256,7 @@ export class DebugService {
    */
   private isNeighborFrontier(cells: Cell[][], dirCoord : DirCoord): boolean {
     const size = cells.length;
-    if (!this.moveService.isInsideBoard(dirCoord, size)) return false;
+    if (dirCoord.x < 0 || dirCoord.x >= size || dirCoord.y < 0 || dirCoord.y >= size) return false; // must be inside board
     // That cell must be neighbor of at least one black or white piece.
     const cell = cells[dirCoord.x][dirCoord.y];
     return cell.state === EnCellState.B || cell.state === EnCellState.W;
