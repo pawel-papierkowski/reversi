@@ -121,7 +121,7 @@ describe('MiniMax evaluation', () => {
                        "WWWWWW__"+
                        "__B_WBW_"+
                        "________";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -139,7 +139,7 @@ describe('MiniMax evaluation', () => {
                        "_BWBWBWW"+
                        "BBWWBB__"+
                        "_WWBBBB_";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -157,7 +157,7 @@ describe('MiniMax evaluation', () => {
                        "BWWWWWBB"+
                        "WBWWWBBB"+
                        "BWWWWWWW";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true);
       const actualScore = miniMaxService.evaluate(args);
@@ -238,7 +238,7 @@ describe('MiniMax evaluation', () => {
                        "_BBW"+
                        "WBB_"+
                        "_WW_";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.Straight, weight: 1, threshold: -1 });
       const actualScore = miniMaxService.evaluate(args);
@@ -252,7 +252,7 @@ describe('MiniMax evaluation', () => {
                        "_BBW"+
                        "WBB_"+
                        "_WW_";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const args = setEvaluateArgs(gameState, 1, EnCellState.W, true, { type: EnScoringType.Straight, weight: 1, threshold: -1 });
       const actualScore = miniMaxService.evaluate(args);
@@ -277,7 +277,7 @@ describe('MiniMax evaluation', () => {
                        "BWB_"+
                        "_BB_"+
                        "____";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, true, { type: EnScoringType.AvailableMoves, weight: 1, threshold: -1 });
       const actualScore = miniMaxService.evaluate(args);
@@ -291,7 +291,7 @@ describe('MiniMax evaluation', () => {
                        "BWB_"+
                        "_BB_"+
                        "____";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const args = setEvaluateArgs(gameState, 0, EnCellState.B, false, { type: EnScoringType.AvailableMoves, weight: 1, threshold: -1 });
       const actualScore = miniMaxService.evaluate(args);

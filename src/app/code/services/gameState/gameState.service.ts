@@ -3,11 +3,12 @@ import { Injectable, inject, signal } from '@angular/core';
 import { XORShift128Plus } from 'random-seedable';
 
 import { EnCellState, EnGameStatus, EnMode, EnPlayerType, EnViewMode } from '@/code/data/enums';
-import type { DifficultyProp, BoardStats, Coordinate } from '@/code/data/types';
+import type { DifficultyProp, BoardStats } from '@/code/data/types';
 import { weights, aiProp } from '@/code/data/aiConst';
 import { playerNames, projectProp } from '@/code/data/gameConst';
 import type { GameState, GameSettings, GameAi, GameStatistics, DebugSettings, Cell, Player, GameHistory, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState, createGameSettings, createGameStatistics, createDebugSettingsForProd } from "@/code/data/gameState";
+import { genCoordNum } from "@/code/common/utils";
 
 import { GameStorageService } from '@/code/services/gameStorage/gameStorage.service';
 
@@ -189,7 +190,7 @@ export class GameStateService {
     const boardSize = this.gameState().settings.boardSize;
     const ix = boardSize/2 - 1; // for size 8 it will be 3
     const newCells = this.genCellsInitial(ix, boardSize); // same for board and view
-    const frontier = this.genFrontierInitial(ix);
+    const frontier = this.genFrontierInitial(ix, boardSize);
 
     this.gameState.update(state => ({ // initialize round
       ...state, // duplicates rest of state
@@ -260,23 +261,24 @@ export class GameStateService {
 
   /**
    * Generate frontier for initial state of board.
-   * @param cells Board state.
+   * @param ix Index of top left corner of center 2x2 box.
+   * @param boardSize Size of board.
    * @returns Generated frontier entries.
    */
-  private genFrontierInitial(ix: number): Coordinate[] {
-    const frontier: Coordinate[] = [
-      {x:ix-1, y:ix-1}, // top left corner
-      {x:ix,   y:ix-1},
-      {x:ix-1, y:ix},
-      {x:ix+1, y:ix-1}, // top right corner
-      {x:ix+2, y:ix-1},
-      {x:ix+2, y:ix},
-      {x:ix-1, y:ix+1}, // bottom left corner
-      {x:ix-1, y:ix+2},
-      {x:ix,   y:ix+2},
-      {x:ix+2, y:ix+2}, // bottom right corner
-      {x:ix+2, y:ix+1},
-      {x:ix+1, y:ix+2}];
+  private genFrontierInitial(ix: number, boardSize: number): Set<number> {
+    const frontier: Set<number> = new Set([
+      genCoordNum(ix-1, ix-1, boardSize), // top left corner
+      genCoordNum(ix,   ix-1, boardSize),
+      genCoordNum(ix-1, ix, boardSize),
+      genCoordNum(ix+1, ix-1, boardSize), // top right corner
+      genCoordNum(ix+2, ix-1, boardSize),
+      genCoordNum(ix+2, ix, boardSize),
+      genCoordNum(ix-1, ix+1, boardSize), // bottom left corner
+      genCoordNum(ix-1, ix+2, boardSize),
+      genCoordNum(ix,   ix+2, boardSize),
+      genCoordNum(ix+2, ix+2, boardSize), // bottom right corner
+      genCoordNum(ix+2, ix+1, boardSize),
+      genCoordNum(ix+1, ix+2, boardSize)]);
     return frontier;
   }
 

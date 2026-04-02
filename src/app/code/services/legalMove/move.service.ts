@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 
-import { EnCellState } from '@/code/data/enums';
+import { EnCellState, EnDir } from '@/code/data/enums';
 import type { Coordinate, DirCoord, StateCoord } from '@/code/data/types';
 import { aiProp } from '@/code/data/aiConst';
 import type { Cell, ReversiMove } from "@/code/data/gameState";
+import { genCoordNum } from "@/code/common/utils";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 
@@ -16,18 +17,19 @@ export class MoveService {
   private readonly gameStateService = inject(GameStateService);
 
   /**
-   * Execute move for current state of board. That means changing state of selected cell
+   * Execute move for current game state. That means changing state of selected cell
    * and flipping any contiguous line of opposite pieces that touch this piece.
-   * It also will affect weights if chosen difficulty allows it.
-   * Note: code assumes this move is legal. Check it before calling this function!
+   * Frontier will be updated too. It also will affect weights if chosen difficulty allows it.
+   * Note: code assumes this move is legal and valid.
    * @param move Move to execute.
    */
   public executeMove(move: ReversiMove) {
     const cells = this.gameStateService.gameState().board.cells;
+    const frontier = this.gameStateService.gameState().board.frontier;
     const playerIx = this.gameStateService.getCurrPlayer().ix;
     const playerPiece = this.gameStateService.getCurrPlayer().piece;
     const dynamicWeights = this.gameStateService.gameState().ai.difficulty.dynamicWeights;
-    this.executeMoveCustom(cells, playerIx, playerPiece, move, true, dynamicWeights);
+    this.executeMoveCustom(cells, frontier, playerIx, playerPiece, move, true, dynamicWeights);
   }
 
   /**
@@ -36,14 +38,16 @@ export class MoveService {
    * It also will affect weights if allowed.
    * Note: code assumes this move is legal and valid.
    * @param cells State of board.
+   * @param frontier Frontier data.
    * @param playerIx Player index.
    * @param playerPiece Player piece.
    * @param legalMove Legal move to execute. Note it contains path.
    * @param copy If true, make copy of cell instead of changing cell values on spot.
    * @param canDynamicWeights If true, affect weights on board.
-   * @returns Affected cells as array of coordinates and previous values. Used for restoring state of board in MiniMax algo.
+   * @returns Affected cells and affected frontier entries. Used for restoring state of board in MiniMax algo.
    */
-  public executeMoveCustom(cells: Cell[][], playerIx: number, playerPiece: EnCellState, legalMove: ReversiMove, copy: boolean, canDynamicWeights: boolean): StateCoord[] {
+  public executeMoveCustom(cells: Cell[][], frontier: Set<number>, playerIx: number, playerPiece: EnCellState, legalMove: ReversiMove, copy: boolean, canDynamicWeights: boolean):
+    { affectedCells: StateCoord[], affectedFrontierEntries: number[] } {
     const affectedCells: StateCoord[] = [];
     // Note legalMove contains path, so we do not have to re-trace. Just use data present in legalMove.path.
     for (const pathEntry of legalMove.path) {
@@ -52,8 +56,8 @@ export class MoveService {
     }
 
     if (canDynamicWeights) this.affectWeightsCustom(cells, playerIx, legalMove, copy, affectedCells);
-    this.updateFrontierAdd(cells, legalMove);
-    return affectedCells;
+    const affectedFrontierEntries = this.updateFrontierAdd(cells, frontier, legalMove.x, legalMove.y);
+    return { affectedCells: affectedCells, affectedFrontierEntries: affectedFrontierEntries };
   }
 
   /**
@@ -245,20 +249,52 @@ export class MoveService {
   /**
    * Update frontier data: after addition of piece.
    * @param cells Board state.
-   * @param legalMove Legal move.
+   * @param frontier Frontier data.
+   * @param x X coordinate of added piece.
+   * @param y Y coordinate of added piece.
+   * @returns Affected frontier entries.
    */
-  public updateFrontierAdd(cells: Cell[][], legalMove: ReversiMove) {
-    // TODO We need to remove one frontier entry and add neccessary entries.
+  public updateFrontierAdd(cells: Cell[][], frontier: Set<number>, x: number, y: number): number[] {
+    const boardSize = cells.length;
+    const affectedFrontierEntries: number[] = [];
 
+    // First, we remove frontier entry where new piece was placed.
+    frontier.delete(genCoordNum(x, y, boardSize));
+
+    // Now we need to add neccessary entries around newly placed piece.
+    let dirCoord : DirCoord = { dir: EnDir.N, x: x, y: y }; // create object only once, we will reuse it
+    for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
+      dirCoord.dir = dir;
+      dirCoord.x = x;
+      dirCoord.y = y;
+      this.applyDir(dirCoord); // move dirCoord in given direction by one cell
+
+      if (!this.isInsideBoard(dirCoord, boardSize)) continue; // must be inside board
+      if (cells[dirCoord.x][dirCoord.y].state !== EnCellState.Empty) continue; // must be empty cell
+      const newFrontierEntry = genCoordNum(dirCoord.x, dirCoord.y, boardSize);
+      if (frontier.has(newFrontierEntry)) continue; // cannot be already present in frontier data
+
+      frontier.add(newFrontierEntry);
+      affectedFrontierEntries.push(newFrontierEntry);
+    }
+
+    return affectedFrontierEntries; // remember affected frontier entries for reversal in updateFrontierDel()
   }
 
   /**
    * Update frontier data: after removal of piece. Used in MiniMax as part of reverting of board state.
-   * @param cells Board state.
+   * @param boardSize Board size.
+   * @param frontier Frontier data.
+   * @param affectedFrontierEntries Affected frontier entries.
    * @param legalMove Legal move.
    */
-  public updateFrontierDel(cells: Cell[][], legalMove: ReversiMove) {
-    // TODO We need to add one frontier entry where piece was and remove unneccessary entries.
+  public updateFrontierDel(boardSize: number, frontier: Set<number>, affectedFrontierEntries: number[], legalMove: ReversiMove) {
+    // First, we add frontier entry where new piece was removed.
+    frontier.add(genCoordNum(legalMove.x, legalMove.y, boardSize));
 
+    // Now we need to remove unneccessary entries.
+    for (const entry of affectedFrontierEntries) {
+      frontier.delete(entry);
+    }
   }
 }

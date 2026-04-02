@@ -68,8 +68,10 @@ export class MiniMaxService {
   private executeSearch(req: MiniMaxReq, nonEmptyCells: number, legalMove: ReversiMove) : MiniMaxResult {
     // Copy board.
     const updatedCells = req.cells.map(row => row.map(cell => ({ ...cell, })) );
+    // Copy frontier. Note shallow copy of set is enough for our purposes.
+    const updatedFrontier = new Set(req.frontier);
     // Make move as CURRENT player.
-    this.moveService.executeMoveCustom(updatedCells, req.playerIx, req.piece, legalMove, false, req.dynamicWeights);
+    this.moveService.executeMoveCustom(updatedCells, updatedFrontier, req.playerIx, req.piece, legalMove, false, req.dynamicWeights);
     nonEmptyCells++; // we made a move
 
     let score = 0;
@@ -108,11 +110,11 @@ export class MiniMaxService {
       alpha: -aiProp.maxScore,
       beta: aiProp.maxScore,
       cells: updatedCells,
+      frontier: updatedFrontier,
       nonEmptyCells: nonEmptyCells,
       moves: moves,
       scoringSystems: req.scoringSystems,
       scoringSystem: this.getCurrScoringSystem(nonEmptyCells, req.scoringSystems),
-      //potentialMoves: this.legalMoveService.resolveMovesCustom(updatedCells, oppPiece),
     };
     return this.recursiveMiniMax(miniMaxArgs);
   }
@@ -162,9 +164,9 @@ export class MiniMaxService {
     let beta = args.beta;
 
     for (const legalMove of currPlayerMoves) {
-      // We avoid cloning board: make array of affected cells with old state and weight so we can undo state of board later.
+      // We avoid cloning board: executeMoveCustom returns all data needed for undoing state of board later.
       // Make move as CURRENT player.
-      const affectedCells = this.moveService.executeMoveCustom(args.cells, args.playerIx, args.piece, legalMove, false, args.dynamicWeights);
+      const undoData = this.moveService.executeMoveCustom(args.cells, args.frontier, args.playerIx, args.piece, legalMove, false, args.dynamicWeights);
       this.processed++;
 
       let score = 0;
@@ -195,8 +197,8 @@ export class MiniMaxService {
       }
 
       args.moves.pop(); // Undo that move...
-      this.moveService.updateFrontierDel(args.cells, legalMove); // ...revert frontier state...
-      this.undoBoard(args.cells, affectedCells); // ... and restore state of board.
+      this.moveService.updateFrontierDel(args.cells.length, args.frontier, undoData.affectedFrontierEntries, legalMove); // ...revert frontier state...
+      this.undoBoard(args.cells, undoData.affectedCells); // ... and restore state of board.
 
       if (alpha >= beta) break; // Alpha-Beta Pruning.
     }

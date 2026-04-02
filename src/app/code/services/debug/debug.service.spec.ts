@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { EnCellState, EnMode, EnPlayerType } from '@/code/data/enums';
+import { genCoordNum } from "@/code/common/utils";
 
 import { assertGameState } from '@/code/services/gameState/gameState.test-setup';
 
@@ -145,7 +146,7 @@ describe('DebugService', () => {
                        "____"+
                        "____"+
                        "____";
-      debugService.setBoard(gameStateService.gameState(), boardStr, true);
+      debugService.setBoard(gameStateService.gameState(), boardStr, true, true);
 
       const expectedGameState = debugService.genEmptyState(4, EnPlayerType.Human, EnMode.HumanVsAi);
       const actualGameState = gameStateService.gameState();
@@ -162,7 +163,7 @@ describe('DebugService', () => {
                        "__WWWW__"+
                        "________"+
                        "________";
-      debugService.setBoard(gameStateService.gameState(), boardStr, true);
+      debugService.setBoard(gameStateService.gameState(), boardStr, true, true);
 
       const expectedGameState = debugService.genEmptyState(8, EnPlayerType.Human, EnMode.HumanVsAi);
       expectedGameState.statistics.emptyCells = 48;
@@ -190,44 +191,77 @@ describe('DebugService', () => {
       expectedGameState.board.legalMoves = legalMoveService.resolveMovesCustom(expectedGameState.board.cells, EnCellState.B);
       legalMoveService.showHintsCustom(expectedGameState.board.cells, EnCellState.B, expectedGameState.board.legalMoves);
 
-      expectedGameState.board.frontier = [
-        {x:1,y:1},{x:1,y:2},{x:1,y:3},{x:1,y:4},{x:1,y:5},{x:1,y:6}, // top of square
-        {x:2,y:1},{x:2,y:6},{x:3,y:1},{x:3,y:6},{x:4,y:1},{x:4,y:6},{x:5,y:1},{x:5,y:6}, // both sides of square
-        {x:6,y:1},{x:6,y:2},{x:6,y:3},{x:6,y:4},{x:6,y:5},{x:6,y:6}, // bottom of square
-      ];
+      expectedGameState.board.frontier = new Set([
+        genCoordNum(1,1,8),genCoordNum(1,2,8),genCoordNum(1,3,8),genCoordNum(1,4,8),genCoordNum(1,5,8),genCoordNum(1,6,8), // top of square
+        genCoordNum(2,1,8),genCoordNum(2,6,8),genCoordNum(3,1,8),genCoordNum(3,6,8),genCoordNum(4,1,8),genCoordNum(4,6,8),genCoordNum(5,1,8),genCoordNum(5,6,8), // both sides of square
+        genCoordNum(6,1,8),genCoordNum(6,2,8),genCoordNum(6,3,8),genCoordNum(6,4,8),genCoordNum(6,5,8),genCoordNum(6,6,8), // bottom of square
+      ]);
 
       const actualGameState = gameStateService.gameState();
       assertGameState(actualGameState, expectedGameState);
     });
 
-    it('custom', () => {
+    it('custom vertical', () => {
+      gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
+      gameStateService.menuSettings().boardSize = 6; // 6x6
+      gameService.startGame();
+      const boardStr = 'BW_WWB' +
+                       '__W___' +
+                       '__W___' +
+                       '__W___' +
+                       '__W___' +
+                       '__B___';
+      debugService.setBoard(gameStateService.gameState(), boardStr, true, true);
+
+      const expectedGameState = debugService.genEmptyState(6);
+      debugService.setHistory(expectedGameState, 0, boardStr);
+
+      // Check game state.
+      expectedGameState.statistics.moveCount = 0;
+      expectedGameState.statistics.emptyCells = 26;
+      expectedGameState.statistics.player1Score = 3;
+      expectedGameState.statistics.player2Score = 7;
+      expectedGameState.board.currPlayerIx = 0;
+      expectedGameState.board.frontier = new Set([
+        genCoordNum(2,0,6),
+        genCoordNum(0,1,6),genCoordNum(1,1,6),genCoordNum(3,1,6),genCoordNum(4,1,6),genCoordNum(5,1,6),
+        genCoordNum(1,2,6),genCoordNum(1,3,6),genCoordNum(1,4,6),genCoordNum(1,5,6),
+        genCoordNum(3,2,6),genCoordNum(3,3,6),genCoordNum(3,4,6),genCoordNum(3,5,6),
+      ]);
+      debugService.fillGameState(expectedGameState);
+
+      const actualGameState = gameStateService.gameState();
+      assertGameState(actualGameState, expectedGameState);
+    });
+
+    it('custom horizontal', () => {
       gameStateService.menuSettings().mode = EnMode.HumanVsHuman;
       gameService.startGame();
       const boardStr = "________"+
-                        "________"+
-                        "________"+
-                        "_WWWWWWB"+ // b4 - h4
-                        "___BW___"+ // d5, e5
-                        "________"+
-                        "________"+
-                        "________";
-      debugService.setBoard(gameStateService.gameState(), boardStr, true);
+                       "________"+
+                       "________"+
+                       "_WWWWWWB"+ // b4 - h4
+                       "___BW___"+ // d5, e5
+                       "________"+
+                       "________"+
+                       "________";
+      debugService.setBoard(gameStateService.gameState(), boardStr, true, true);
 
       const expectedGameState = debugService.genEmptyState(8);
       debugService.setHistory(expectedGameState, 0, boardStr);
 
       // Check game state.
-      expectedGameState.statistics.moveCount = 0; //1;
-      expectedGameState.statistics.emptyCells = 55; //54;
-      expectedGameState.statistics.player1Score = 2; //9;
-      expectedGameState.statistics.player2Score = 7; //1;
-      expectedGameState.board.currPlayerIx = 0; //1;
-      expectedGameState.board.frontier = [
-        {x:0,y:2},{x:0,y:3},{x:0,y:4}, //{x:0,y:2},{x:0,y:4},
-        {x:1,y:2},{x:1,y:4},{x:2,y:2},{x:2,y:4},{x:2,y:5},
-        {x:3,y:2},{x:3,y:5},{x:4,y:2},{x:4,y:5},{x:5,y:2},{x:5,y:4},{x:5,y:5},
-        {x:6,y:2},{x:6,y:4},{x:7,y:2},{x:7,y:4},
-      ];
+      expectedGameState.statistics.moveCount = 0;
+      expectedGameState.statistics.emptyCells = 55;
+      expectedGameState.statistics.player1Score = 2;
+      expectedGameState.statistics.player2Score = 7;
+      expectedGameState.board.currPlayerIx = 0;
+      expectedGameState.board.frontier = new Set([
+        genCoordNum(0,2,8),genCoordNum(0,3,8),genCoordNum(0,4,8),
+        genCoordNum(1,2,8),genCoordNum(1,4,8),genCoordNum(2,2,8),genCoordNum(2,4,8),genCoordNum(2,5,8),
+        genCoordNum(3,2,8),genCoordNum(3,5,8),genCoordNum(4,2,8),genCoordNum(4,5,8),genCoordNum(5,2,8),genCoordNum(5,4,8),genCoordNum(5,5,8),
+        genCoordNum(6,2,8),genCoordNum(6,4,8),genCoordNum(7,2,8),genCoordNum(7,4,8),
+      ]);
       debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();

@@ -41,7 +41,7 @@ describe('LegalMoveService', () => {
                        "_BB_"+
                        "_BB_"+
                        "___W";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const expectedLegalMoves : ReversiMove[] = [
         { x:0, y:0, score: 100, path: [{dir:EnDir.SE, x:1, y:1},{dir:EnDir.SE, x:2, y:2},{dir:EnDir.N, x:0, y:0}] },
@@ -57,7 +57,7 @@ describe('LegalMoveService', () => {
                        "______"+
                        "______"+
                        "______";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const expectedLegalMoves : ReversiMove[] = [
         { x:0, y:2, score: 10, path: [{dir:EnDir.N, x: 0, y: 1},{dir:EnDir.N, x:0, y:2}] },
@@ -72,7 +72,7 @@ describe('LegalMoveService', () => {
                        "____"+
                        "BW_W"+
                        "___B";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const expectedLegalMoves : ReversiMove[] = [
         { x:0, y:0, score: 100, path: [{dir:EnDir.E, x: 1, y: 0},{dir:EnDir.N, x:0, y:0}] },
@@ -90,7 +90,7 @@ describe('LegalMoveService', () => {
                        "_BB_"+
                        "_BB_"+
                        "____";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const expectedLegalMoves : ReversiMove[] = [];
       assertLegalMoves(gameState, expectedLegalMoves, EnCellState.B);
@@ -102,7 +102,7 @@ describe('LegalMoveService', () => {
                        "B_W_"+ // B_WB is NOT correct move
                        "____"+
                        "____";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const expectedLegalMoves : ReversiMove[] = [];
       assertLegalMoves(gameState, expectedLegalMoves, EnCellState.B);
@@ -116,7 +116,7 @@ describe('LegalMoveService', () => {
                        "_B_B"+
                        "__BB"+
                        "WBB_";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const expectedLegalMoves : ReversiMove[] = [
         { x:3, y:3, score: 100, path: [{dir:EnDir.N, x:3, y:2},{dir:EnDir.N, x:3, y:1}, // all three traces
@@ -135,7 +135,7 @@ describe('LegalMoveService', () => {
                        "WBBBB_"+
                        "______"+
                        "______";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const expectedLegalMoves : ReversiMove[] = [
         { x:2, y:0, score: 10, path: [{dir:EnDir.W, x:1, y:0},{dir:EnDir.N, x:2, y:0}] },
