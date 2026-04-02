@@ -163,7 +163,8 @@ export class MiniMaxService {
     let alpha = args.alpha;
     let beta = args.beta;
 
-    for (const legalMove of currPlayerMoves) {
+    for (let i=0; i<currPlayerMoves.length; i++) {
+      const legalMove = currPlayerMoves[i];
       // We avoid cloning board: executeMoveCustom returns all data needed for undoing state of board later.
       // Make move as CURRENT player.
       const undoData = this.moveService.executeMoveCustom(args.cells, args.frontier, args.playerIx, args.piece, legalMove, false, args.dynamicWeights);
@@ -236,7 +237,8 @@ export class MiniMaxService {
    * @param affectedCells Cells to set.
    */
   private undoBoard(cells: Cell[][], affectedCells: StateCoord[]) {
-    for (const affectedCell of affectedCells) {
+    for (let i=0; i<affectedCells.length; i++) {
+      const affectedCell = affectedCells[i];
       const cell = cells[affectedCell.x][affectedCell.y];
       cell.state = affectedCell.s;
       cell.weight1 = affectedCell.w1;

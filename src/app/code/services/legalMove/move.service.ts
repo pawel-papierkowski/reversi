@@ -50,7 +50,8 @@ export class MoveService {
     { affectedCells: StateCoord[], affectedFrontierEntries: number[] } {
     const affectedCells: StateCoord[] = [];
     // Note legalMove contains path, so we do not have to re-trace. Just use data present in legalMove.path.
-    for (const pathEntry of legalMove.path) {
+    for (let i = 0; i < legalMove.path.length; i++) {
+      const pathEntry = legalMove.path[i];
       const oldCell = this.setCell(cells, pathEntry.x, pathEntry.y, playerPiece, copy); // most important line of code in the game
       affectedCells.push(oldCell);
     }
@@ -95,33 +96,44 @@ export class MoveService {
    */
   public trace(cells: Cell[][], dirCoord: DirCoord, playerPiece: EnCellState, oppPlayerPiece: EnCellState, path: DirCoord[]): boolean {
     const boardSize = cells.length;
-    const opposingPieces: DirCoord[] = [];
-    // We always are one step away from origin point, so add it already.
-    // NOTE: origin point is NOT included!
-    opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
-    // Take advantage of fact single trace always goes in same direction.
-    const offX = this.dx[dirCoord.dir];
+    const startIdx = path.length;
+
+    const dir = dirCoord.dir;
+    const offX = this.dx[dirCoord.dir]; // Take advantage of fact single trace always goes in same direction.
     const offY = this.dy[dirCoord.dir];
 
-    do {
-      dirCoord.x += offX; // move coordinates
-      dirCoord.y += offY;
+    // The starting piece is already an opposing piece (checked before calling trace).
+    // NOTE: origin point is NOT included in trace, it is added after everything at end.
+    path.push({ x: dirCoord.x, y: dirCoord.y, dir: dir });
 
-      if (!this.isInsideBoard(dirCoord, boardSize)) return false; // outside board, can't be valid move
-      const cell = cells[dirCoord.x][dirCoord.y];
-      if (cell.state !== playerPiece && cell.state !== oppPlayerPiece) return false; // can't be legal move!
-      if (cell.state === oppPlayerPiece) {
-        // Found piece of opposite player, add to array and continue.
-        // This is piece that would be flipped.
-        opposingPieces.push({ x: dirCoord.x, y: dirCoord.y, dir: dirCoord.dir });
-        continue;
+    let nx = dirCoord.x;
+    let ny = dirCoord.y;
+
+    while (true) {
+      nx += offX;
+      ny += offY;
+
+      if (nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize) { // not inside board
+        path.length = startIdx; // revert path
+        return false;
       }
 
+      const cell = cells[nx][ny];
       if (cell.state === playerPiece) {
-        path.push(...opposingPieces);
-        return true; // it is legal move!
+        // Found piece of current player, that ends flipping and makes it legal move.
+        return true;
       }
-    } while (true);
+
+      if (cell.state !== oppPlayerPiece) {
+        // Hit empty cell, that makes this trace invalid.
+        path.length = startIdx; // revert path
+        return false;
+      }
+
+      // Found piece of opposite player, add to array and continue.
+      // This is piece that would be flipped.
+      path.push({ x: nx, y: ny, dir: dir });
+    }
   }
 
   /**
@@ -130,7 +142,7 @@ export class MoveService {
    * @param size Size of board.
    * @returns True if inside board, otherwise false.
    */
-  public isInsideBoard(dirCoord : DirCoord, size: number): boolean {
+  public isInsideBoard(dirCoord: DirCoord, size: number): boolean {
     if (dirCoord.x < 0 || dirCoord.x >= size) return false;
     if (dirCoord.y < 0 || dirCoord.y >= size) return false;
     return true;
@@ -139,15 +151,15 @@ export class MoveService {
   // //////////////////////////////////////////////////////////////////////////
 
   // Lookup table.
-  private readonly dx = [ 0,  1, 1, 1, 0, -1, -1, -1]; // Offsets for N, NE, E, SE, S, SW, W, NW
-  private readonly dy = [-1, -1, 0, 1, 1,  1,  0, -1];
+  public readonly dx = [ 0,  1, 1, 1, 0, -1, -1, -1]; // Offsets for N, NE, E, SE, S, SW, W, NW
+  public readonly dy = [-1, -1, 0, 1, 1,  1,  0, -1];
 
   /**
    * Applies direction to X and Y coordinates.
    * Note YOU are responsible for checking if coordinates went out of bounds.
    * @param dirCoord Coordinates to modify in-place.
    */
-  public applyDir(dirCoord : DirCoord) {
+  public applyDir(dirCoord: DirCoord) {
     dirCoord.x += this.dx[dirCoord.dir];
     dirCoord.y += this.dy[dirCoord.dir];
   }
@@ -174,7 +186,7 @@ export class MoveService {
    */
   private affectWeightsCustom(cells: Cell[][], playerIx: number, legalMove: ReversiMove, copy: boolean, affectedCells: StateCoord[]) {
     // Right now, we only change weights for corners.
-    if (this.isCorner(legalMove, cells.length-1)) this.affectCorners(cells, playerIx, legalMove, copy, affectedCells);
+    if (this.isCorner(legalMove, cells.length - 1)) this.affectCorners(cells, playerIx, legalMove, copy, affectedCells);
   }
 
   /**
@@ -197,24 +209,24 @@ export class MoveService {
    * @param affectedCells Affected cells as array of coordinates and previous values.
    */
   private affectCorners(cells: Cell[][], playerIx: number, legalMove: ReversiMove, copy: boolean, affectedCells: StateCoord[]) {
-    const maxCoord = cells.length-1;
+    const maxCoord = cells.length - 1;
     const coords: Coordinate[] = [];
     if (legalMove.x === 0 && legalMove.y === 0) {
-      coords.push({x:1, y:0});
-      coords.push({x:0, y:1});
-      coords.push({x:1, y:1});
+      coords.push({ x: 1, y: 0 });
+      coords.push({ x: 0, y: 1 });
+      coords.push({ x: 1, y: 1 });
     } else if (legalMove.x === maxCoord && legalMove.y === 0) {
-      coords.push({x:maxCoord-1, y:0});
-      coords.push({x:maxCoord, y:1});
-      coords.push({x:maxCoord-1, y:1});
+      coords.push({ x: maxCoord - 1, y: 0 });
+      coords.push({ x: maxCoord, y: 1 });
+      coords.push({ x: maxCoord - 1, y: 1 });
     } else if (legalMove.x === 0 && legalMove.y === maxCoord) {
-      coords.push({x:1, y:maxCoord});
-      coords.push({x:0, y:maxCoord-1});
-      coords.push({x:1, y:maxCoord-1});
+      coords.push({ x: 1, y: maxCoord });
+      coords.push({ x: 0, y: maxCoord - 1 });
+      coords.push({ x: 1, y: maxCoord - 1 });
     } else if (legalMove.x === maxCoord && legalMove.y === maxCoord) {
-      coords.push({x:maxCoord-1, y:maxCoord});
-      coords.push({x:maxCoord, y:maxCoord-1});
-      coords.push({x:maxCoord-1, y:maxCoord-1});
+      coords.push({ x: maxCoord - 1, y: maxCoord });
+      coords.push({ x: maxCoord, y: maxCoord - 1 });
+      coords.push({ x: maxCoord - 1, y: maxCoord - 1 });
     }
 
     this.affectCellWeights(cells, playerIx, coords, aiProp.weightData.friendlyCorner, copy, affectedCells);
@@ -230,7 +242,8 @@ export class MoveService {
    * @param affectedCells Affected cells as array of coordinates and previous values.
    */
   private affectCellWeights(cells: Cell[][], playerIx: number, coords: Coordinate[], newWeightValue: number, copy: boolean, affectedCells: StateCoord[]) {
-    for (const coord of coords) {
+    for (let i = 0; i < coords.length; i++) {
+      const coord = coords[i];
       const cell = cells[coord.x][coord.y];
       const oldState = { x: coord.x, y: coord.y, s: cell.state, w1: cell.weight1, w2: cell.weight2 };
       affectedCells.push(oldState);
@@ -259,19 +272,16 @@ export class MoveService {
     const affectedFrontierEntries: number[] = [];
 
     // First, we remove frontier entry where new piece was placed.
-    frontier.delete(genCoordNum(x, y, boardSize));
+    frontier.delete(x * boardSize + y);
 
     // Now we need to add neccessary entries around newly placed piece.
-    let dirCoord : DirCoord = { dir: EnDir.N, x: x, y: y }; // create object only once, we will reuse it
-    for (let dir = EnDir.N; dir <= EnDir.NW; dir++) {
-      dirCoord.dir = dir;
-      dirCoord.x = x;
-      dirCoord.y = y;
-      this.applyDir(dirCoord); // move dirCoord in given direction by one cell
+    for (let dir = 0; dir < 8; dir++) { // EnDir.N to EnDir.NW
+      const nx = x + this.dx[dir];
+      const ny = y + this.dy[dir];
 
-      if (!this.isInsideBoard(dirCoord, boardSize)) continue; // must be inside board
-      if (cells[dirCoord.x][dirCoord.y].state !== EnCellState.Empty) continue; // must be empty cell
-      const newFrontierEntry = genCoordNum(dirCoord.x, dirCoord.y, boardSize);
+      if (nx < 0 || nx >= boardSize || ny < 0 || ny >= boardSize) continue; // not inside board
+      if (cells[nx][ny].state !== EnCellState.Empty) continue; // must be empty cell
+      const newFrontierEntry = nx * boardSize + ny;
       if (frontier.has(newFrontierEntry)) continue; // cannot be already present in frontier data
 
       frontier.add(newFrontierEntry);

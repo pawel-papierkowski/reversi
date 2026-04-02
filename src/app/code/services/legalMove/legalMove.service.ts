@@ -9,7 +9,7 @@ import { MoveService } from '@/code/services/legalMove/move.service';
 
 /**
  * Legal move service.
- * Finds out all legal moves for given board state and current player.
+ * Finds out all legal moves for given board state and current player for Reversi.
  */
 @Injectable({providedIn: 'root'})
 export class LegalMoveService {
