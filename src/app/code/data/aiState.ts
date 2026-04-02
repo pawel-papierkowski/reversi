@@ -1,5 +1,5 @@
 import { EnCellState } from '@/code/data/enums';
-import type { ScoreCoord, ScoringSystem } from "@/code/data/types";
+import type { Coordinate, ScoreCoord, ScoringSystem } from "@/code/data/types";
 import type { Cell, ReversiMove } from "@/code/data/gameState";
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@ export type MiniMaxReq = {
   piece: EnCellState; // Start with this piece.
   legalMoves: ReversiMove[]; // Available legal moves.
   cells: Cell[][]; // Cells from Reversi board.
+  frontier: Set<number>; // Frontier data.
   maxDepth: number; // Maximum depth of search.
   dynamicWeights: boolean; // If true, AI edits its weights dynamically.
   scoringSystems: ScoringSystem[]; // Available scoring systems.
@@ -47,6 +48,7 @@ export type MiniMaxArgs = {
   alpha: number; // Best score the maximizer is currently guaranteed.
   beta: number; // Best score the minimizer is currently guaranteed.
   cells: Cell[][]; // Current board state.
+  frontier: Set<number>; // Frontier data.
   nonEmptyCells: number; // Count of non-empty cells.
   moves: ScoreCoord[]; // Moves made so far.
   scoringSystems: ScoringSystem[]; // Available scoring systems.

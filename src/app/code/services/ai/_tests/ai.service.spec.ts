@@ -387,7 +387,7 @@ describe('AiService', () => {
 
   describe('MiniMax with dynamic weighting', () => {
     it('corner changes weight', async () => {
-      // NOTE: this unit test likes to fail when you change code for some reason. Proceed with caution.
+      // NOTE: this unit test often fail when you change code. Proceed with caution.
       // We need to make situation where weight change actually changes evaluation and picked move.
       aiProp.customDifficulty = { canMiniMax: true, maxDepth: 9, dynamicWeights: true,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}] };

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { EnMode, EnScoringType } from '@/code/data/enums';
 import { aiProp } from '@/code/data/aiConst';
+import { genCoordNum } from "@/code/common/utils";
 
 import { assertGameState } from '@/code/services/gameState/gameState.test-setup';
 
@@ -59,7 +60,7 @@ describe('GameService', () => {
                        "________"+
                        "________"+
                        "________";
-      debugService.setBoard(gameStateService.gameState(), boardStr, true);
+      debugService.setBoard(gameStateService.gameState(), boardStr, true, true);
       const expectedGameState = structuredClone(gameStateService.gameState());
       gameService.makeMove(0, 3);
 
@@ -71,12 +72,6 @@ describe('GameService', () => {
       expectedGameState.statistics.player1Score = 9;
       expectedGameState.statistics.player2Score = 1;
       expectedGameState.board.currPlayerIx = 1;
-      expectedGameState.board.frontier = [
-        {x:0,y:2},{x:0,y:3},{x:0,y:4}, //{x:0,y:2},{x:0,y:4},
-        {x:1,y:2},{x:1,y:4},{x:2,y:2},{x:2,y:4},{x:2,y:5},
-        {x:3,y:2},{x:3,y:5},{x:4,y:2},{x:4,y:5},{x:5,y:2},{x:5,y:4},{x:5,y:5},
-        {x:6,y:2},{x:6,y:4},{x:7,y:2},{x:7,y:4},
-      ];
       debugService.fillGameState(expectedGameState);
 
       const actualGameState = gameStateService.gameState();

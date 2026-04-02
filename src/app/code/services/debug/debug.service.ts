@@ -5,11 +5,13 @@ import type { Coordinate, WeightCoord, DirCoord } from "@/code/data/types";
 import { weights } from '@/code/data/aiConst';
 import type { GameState, Cell, GameHistoryEntry } from "@/code/data/gameState";
 import { createGameState } from "@/code/data/gameState";
+import { genCoordNum } from "@/code/common/utils";
 
 import { GameStateService } from '@/code/services/gameState/gameState.service';
 import { GameService } from '@/code/services/game/game.service';
 import { MoveService } from '@/code/services/legalMove/move.service';
 import { LegalMoveService } from '@/code/services/legalMove/legalMove.service';
+import { _ } from '@ngx-translate/core';
 
 /**
  * Debug service. Used for debug and unit tests only.
@@ -50,7 +52,7 @@ export class DebugService {
 
     const ix = boardSize/2 - 1; // for size 8 it will be 3
     this.genStartPieces(startGameState, ix);
-    this.genStartFrontier(startGameState, ix);
+    this.genStartFrontier(startGameState, ix, boardSize);
     this.genStartMoves(startGameState, ix, boardSize);
     this.genStatistics(startGameState, boardSize, false);
 
@@ -78,20 +80,20 @@ export class DebugService {
    * Manually set frontier entries.
    * @param cells Board state.
    */
-  private genStartFrontier(gameState: GameState, ix: number) {
-    const frontier: Coordinate[] = [
-      {x:ix-1, y:ix-1}, // top left corner
-      {x:ix,   y:ix-1},
-      {x:ix-1, y:ix},
-      {x:ix+1, y:ix-1}, // top right corner
-      {x:ix+2, y:ix-1},
-      {x:ix+2, y:ix},
-      {x:ix-1, y:ix+1}, // bottom left corner
-      {x:ix-1, y:ix+2},
-      {x:ix,   y:ix+2},
-      {x:ix+2, y:ix+2}, // bottom right corner
-      {x:ix+2, y:ix+1},
-      {x:ix+1, y:ix+2}];
+  private genStartFrontier(gameState: GameState, ix: number, boardSize: number) {
+    const frontier: Set<number> = new Set([
+      genCoordNum(ix-1, ix-1, boardSize), // top left corner
+      genCoordNum(ix,   ix-1, boardSize),
+      genCoordNum(ix-1, ix,   boardSize),
+      genCoordNum(ix+1, ix-1, boardSize), // top right corner
+      genCoordNum(ix+2, ix-1, boardSize),
+      genCoordNum(ix+2, ix,   boardSize),
+      genCoordNum(ix-1, ix+1, boardSize), // bottom left corner
+      genCoordNum(ix-1, ix+2, boardSize),
+      genCoordNum(ix,   ix+2, boardSize),
+      genCoordNum(ix+2, ix+2, boardSize), // bottom right corner
+      genCoordNum(ix+2, ix+1, boardSize),
+      genCoordNum(ix+1, ix+2, boardSize)]);
     gameState.board.frontier = frontier;
   }
 
@@ -171,7 +173,7 @@ export class DebugService {
       move: null,
       cells: structuredClone(gameState.board.cells),
     };
-    this.clearPotentialMoves(historyEntry.cells);
+    this.legalMoveService.clearPotentialMoves(historyEntry.cells);
     gameState.board.history.moves.push(historyEntry);
   }
 
@@ -203,19 +205,6 @@ export class DebugService {
     }
   }
 
-  /**
-   * Clear potential moves.
-   * @param cells Board state to modify.
-   */
-  private clearPotentialMoves(cells: Cell[][])  {
-    const boardSize = cells.length;
-    for (let x=0; x<boardSize; x++) {
-      for (let y=0; y<boardSize; y++) {
-        cells[x][y].potentialMove = EnCellState.Empty;
-      }
-    }
-  }
-
   //
 
   /**
@@ -223,13 +212,15 @@ export class DebugService {
    * @param cells Board state.
    * @returns Generated frontier entries.
    */
-  public genFrontier(cells: Cell[][]): Coordinate[] {
-    const frontier: Coordinate[] = [];
+  public genFrontier(cells: Cell[][]): Set<number> {
+    const frontier: Set<number> = new Set();
     const boardSize = cells.length;
 
     for (let x=0; x<boardSize; x++) {
       for (let y=0; y<boardSize; y++) {
-        if (this.canBeFrontierCell(cells, x, y)) frontier.push({x:x, y:y});
+        if (!this.canBeFrontierCell(cells, x, y)) continue;
+        const frontierNumber = genCoordNum(x, y, boardSize);
+        frontier.add(frontierNumber);
       }
     }
 
@@ -300,13 +291,14 @@ export class DebugService {
    * This will allow you verify changes to board correctly.
    * @param gameState Game state.
    * @param boardStr Board as string. B is black, W is white, _ is empty cell.
+   * @param resolveFrontier If true, resolve frontier for this board.
    * @param resolvePotentialMoves If true, resolve potential moves for this board.
    */
-  public setBoard(gameState: GameState, boardStr:string, resolvePotentialMoves: boolean=false) {
+  public setBoard(gameState: GameState, boardStr:string, resolveFrontier: boolean, resolvePotentialMoves: boolean) {
     const cells = gameState.board.cells;
     this.setCellsFromStr(cells, boardStr);
 
-    gameState.board.frontier = this.genFrontier(cells);
+    if (resolveFrontier) gameState.board.frontier = this.genFrontier(cells);
     this.gameStateService.recalcScoringCustom(cells, gameState.statistics);
     this.genInitialHistoryEntry(gameState);
 
@@ -339,6 +331,9 @@ export class DebugService {
         const move = moves[i];
         gameState.board.cells[move.x][move.y].state = piece;
       }
+
+      // change frontier (we test frontier changes separately)
+      this.moveService.updateFrontierAdd(gameState.board.cells, gameState.board.frontier, moves[0].x, moves[0].y);
     }
 
     if (weightChanges.length > 0) { // change weights
@@ -359,7 +354,7 @@ export class DebugService {
       move: moves.length === 0 ? null : { x: moves[0].x, y: moves[0].y },
       cells: structuredClone(gameState.board.cells)
     };
-    this.clearPotentialMoves(historyEntry.cells);
+    this.legalMoveService.clearPotentialMoves(historyEntry.cells);
     // ensure latest history entry is first on list
     gameState.board.history.moves.unshift(historyEntry);
     // update rest of history to reflect correct index

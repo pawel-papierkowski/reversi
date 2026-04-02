@@ -37,7 +37,8 @@ function assertGameBoard(actualBoard: ReversiBoard, expectedBoard: ReversiBoard)
   expect(actualBoard.currPlayerIx, 'Board currPlayerIx should be same').toEqual(expectedBoard.currPlayerIx);
   assertGameHistory(actualBoard.history, expectedBoard.history);
   assertCells(actualBoard.cells, expectedBoard.cells, 'Board cells should be same');
-  expect(actualBoard.frontier, 'Board frontier should be same').toEqual(expectedBoard.frontier);
+  expect(areSetsEqual(actualBoard.frontier, expectedBoard.frontier), 'Board frontier should be same').toEqual(true);
+  //expect(actualBoard.frontier, 'Board frontier should be same').toEqual(expectedBoard.frontier);
   expect(actualBoard.legalMoves, 'Board legalMoves should be same').toEqual(expectedBoard.legalMoves);
   expect(actualBoard.doublePass, 'Board doublePass should be same').toEqual(expectedBoard.doublePass);
 }
@@ -104,4 +105,24 @@ function adjustExpectedGameState(actualGameState: GameState, expectedGameState: 
   // Player names are random, so we test them separately.
   expectedGameState.players[0].name = actualGameState.players[0].name;
   expectedGameState.players[1].name = actualGameState.players[1].name;
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+// HELPERS
+
+/**
+ * Compare sets. Order of primitives do not matter.
+ * @param setA First set.
+ * @param setB Second set.
+ * @returns True if sets are equal (order does not matter), otherwise false
+ */
+function areSetsEqual(setA: Set<any>, setB: Set<any>) {
+  // If sizes differ, they cannot be equal.
+  if (setA.size !== setB.size) return false;
+
+  // Check if every item in setA exists in setB.
+  for (const item of setA) {
+    if (!setB.has(item)) return false;
+  }
+  return true;
 }

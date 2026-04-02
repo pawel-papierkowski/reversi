@@ -42,6 +42,7 @@ describe('MiniMaxService', () => {
         maxDepth: 0,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        frontier: gameStateService.gameState().board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -67,6 +68,7 @@ describe('MiniMaxService', () => {
         maxDepth: 1,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        frontier: gameStateService.gameState().board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -92,6 +94,7 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        frontier: gameStateService.gameState().board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -115,6 +118,7 @@ describe('MiniMaxService', () => {
         maxDepth: 3,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        frontier: gameStateService.gameState().board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -138,6 +142,7 @@ describe('MiniMaxService', () => {
         maxDepth: 4,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        frontier: gameStateService.gameState().board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -161,6 +166,7 @@ describe('MiniMaxService', () => {
         maxDepth: 5,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        frontier: gameStateService.gameState().board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -184,6 +190,7 @@ describe('MiniMaxService', () => {
         maxDepth: 6,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        frontier: gameStateService.gameState().board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -207,6 +214,7 @@ describe('MiniMaxService', () => {
         maxDepth: 7,
         legalMoves: gameStateService.gameState().board.legalMoves,
         cells: gameStateService.gameState().board.cells,
+        frontier: gameStateService.gameState().board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -234,7 +242,7 @@ describe('MiniMaxService', () => {
                        "BBBBB_"+
                        "____W_"+
                        "____BW";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -242,6 +250,7 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -263,7 +272,7 @@ describe('MiniMaxService', () => {
                        "_BB_"+
                        "_BBB"+
                        "____";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -271,6 +280,7 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -291,7 +301,7 @@ describe('MiniMaxService', () => {
                        "WWBW"+
                        "_WWW"+
                        "BWWW";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -299,6 +309,7 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -318,7 +329,7 @@ describe('MiniMaxService', () => {
                        "WWBB"+
                        "WBWB"+
                        "B_WB";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -326,6 +337,7 @@ describe('MiniMaxService', () => {
         maxDepth: 5,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }
@@ -350,7 +362,7 @@ describe('MiniMaxService', () => {
                        "WBBBB_"+ // second will flip 4 pieces at once
                        "______"+
                        "______";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -358,6 +370,7 @@ describe('MiniMaxService', () => {
         maxDepth: 0,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}], // use weighted scoring
       }
@@ -380,7 +393,7 @@ describe('MiniMaxService', () => {
                        "WBBBB_"+ // second will flip 4 pieces at once
                        "______"+
                        "______";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const req: MiniMaxReq = {
         playerIx: 1,
@@ -388,6 +401,7 @@ describe('MiniMaxService', () => {
         maxDepth: 0,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.W),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Straight, weight: 1, threshold: -1}],
       }
@@ -410,6 +424,7 @@ describe('MiniMaxService', () => {
         maxDepth: 3,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1, threshold: -1}],
       }
@@ -433,7 +448,7 @@ describe('MiniMaxService', () => {
                        "__WW__"+
                        "__WW__"+
                        "___B__";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
       // two moves available on this board for black: d1 (flips a lot of pieces in way that provides a lot of potential moves) and b4
 
       const req: MiniMaxReq = {
@@ -442,6 +457,7 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.AvailableMoves, weight: 1, threshold: -1}],
       }
@@ -461,7 +477,7 @@ describe('MiniMaxService', () => {
                        "_WB_"+ // first two moves will use Weighted, last one AvailableMoves
                        "_BWB"+
                        "___W";
-      debugService.setBoard(gameState, boardStr);
+      debugService.setBoard(gameState, boardStr, true, false);
 
       const req: MiniMaxReq = {
         playerIx: 0,
@@ -469,6 +485,7 @@ describe('MiniMaxService', () => {
         maxDepth: 2,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: 8}, {type: EnScoringType.AvailableMoves, weight: 1, threshold: 16}],
       }
@@ -495,6 +512,7 @@ describe('MiniMaxService', () => {
         maxDepth: 3,
         legalMoves: legalMoveService.resolveMovesCustom(gameState.board.cells, EnCellState.B),
         cells: gameState.board.cells,
+        frontier: gameState.board.frontier,
         dynamicWeights: false,
         scoringSystems: [{type: EnScoringType.Weighted, weight: 1, threshold: -1}],
       }

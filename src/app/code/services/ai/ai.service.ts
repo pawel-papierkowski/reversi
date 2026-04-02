@@ -95,6 +95,7 @@ export class AiService {
       piece: this.gameStateService.getCurrPlayer().piece,
       legalMoves: this.gameStateService.gameState().board.legalMoves,
       cells: this.gameStateService.gameState().board.cells,
+      frontier: this.gameStateService.gameState().board.frontier,
       maxDepth: diffProp.maxDepth,
       dynamicWeights: diffProp.dynamicWeights,
       scoringSystems: diffProp.scoringSystems,
