@@ -20,6 +20,12 @@ AI features:
 - Uses different scoring depending on phase of game (moves/weighted/straight) on high difficulty.
 - Uses dynamic weights.
 
+## Basic info
+
+Author: Paweł Papierkowski
+
+Date: April 2026
+
 Link to webpage: https://pawel-papierkowski.github.io/reversi
 
 ## Used
